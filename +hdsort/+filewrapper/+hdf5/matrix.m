@@ -112,7 +112,7 @@ classdef matrix < handle
         %------------------------------------------------------------------
         function X = getData(self, varargin)
             sz = self.size;
-            [bb relIdx] = mysort.h5.getBoundingBoxFromIndexing(sz, varargin{:});
+            [bb relIdx] = hdsort.filewrapper.hdf5.getBoundingBoxFromIndexing(sz, varargin{:});
             if nargin == 2
                 % if only one index was requested, only ask for one
                 % dimension
@@ -125,7 +125,7 @@ classdef matrix < handle
             offset = bb(1,:) - 1;
             % read outer bounding box of requested data, this is usually faster
             % than reading individual rows or indices
-            X = mysort.h5.read_dset(self.datasetID, block, offset);
+            X = hdsort.filewrapper.hdf5.read_dset(self.datasetID, block, offset);
             % select actually requested data
             if ~isempty(relIdx)
                 X = X(relIdx{:});
@@ -183,7 +183,7 @@ classdef matrix < handle
  
         %------------------------------------------------------------------
         function setData(self, X, varargin)
-            [bb relIdx] = mysort.h5.getBoundingBoxFromIndexing(self.dims, varargin{:});
+            [bb relIdx] = hdsort.filewrapper.hdf5.getBoundingBoxFromIndexing(self.dims, varargin{:});
             assert(isempty(relIdx), 'Currently only consecutive blocks can be written in an h5.matrix!');
             if nargin == 3
                 bb = bb(:,1);
@@ -205,7 +205,7 @@ classdef matrix < handle
             % check if dataset needs to be extended
             self.check_extend(dBlock+offset);
             
-            mysort.h5.write_dset(self.datasetID, X, offset);
+            hdsort.filewrapper.hdf5.write_dset(self.datasetID, X, offset);
         end 
         
         %------------------------------------------------------------------
@@ -244,7 +244,7 @@ classdef matrix < handle
             try
                 self.datasetID = H5D.open(self.fileID, self.h5path);
             catch
-                str = mysort.util.buildLastErrString();
+                str = hdsort.util.buildLastErrString();
                 disp(str);
                 error('Could not find H5 Variable %s!', self.h5path);
             end
@@ -260,7 +260,7 @@ classdef matrix < handle
             plist = H5D.get_create_plist(self.datasetID);
             self.layout = H5P.get_layout(plist);
             self.nProps = H5P.get_nprops(plist);
-            self.propInfo = mysort.h5.h5propinfo(plist);
+            self.propInfo = hdsort.filewrapper.hdf5.h5propinfo(plist);
         end
         
         %------------------------------------------------------------------
