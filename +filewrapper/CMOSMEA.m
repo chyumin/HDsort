@@ -127,14 +127,14 @@ classdef CMOSMEA < filewrapper.MultiSessionInterface
             t2 = min(self.size_(1, P.session), max(timepoints)+cutright);
             X = self.getData(t1:t2, P.channels, P.session)';
             epochs = [timepoints-cutleft timepoints+cutright]-t1 + 1;
-%             eL = mysort.epoch.length(epochs);
+%             eL = epoch.length(epochs);
 %             cL = [0; cumsum(eL)];
 %             IDX = zeros(1, cL(end));            
 %             for i=1:size(epochs,1)
 %                 IDX(cL(i)+1:cL(i+1)) = epochs(i,1):epochs(i,2);
 %             end
 %             Xs = X(:,IDX);
-            W = mysort.epoch.extractWaveform(X, epochs);
+            W = epoch.extractWaveform(X, epochs);
         end
   
         %------------------------------------------------------------------

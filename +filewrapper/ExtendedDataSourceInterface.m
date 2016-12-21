@@ -32,10 +32,10 @@ classdef ExtendedDataSourceInterface < filewrapper.DataSourceInterface
             fprintf('Calculating Covest, that may take a while...\n');
             [times pks] = self.detectSpikes();
             times = double(cell2mat(times))';
-            spikeEpochs = mysort.epoch.merge([times(:)-50 times(:)+50]);
-            noiseEpochs = mysort.epoch.flip(spikeEpochs, size(self,1));
+            spikeEpochs = epoch.merge([times(:)-50 times(:)+50]);
+            noiseEpochs = epoch.flip(spikeEpochs, size(self,1));
             t1 = tic;
-            Cest = mysort.noise.Covest2(self, 'maxLag', maxlag, ...
+            Cest = noise.Covest2(self, 'maxLag', maxlag, ...
                 'maxSamples', maxsamples, 'noiseEpochs', noiseEpochs,...
                 'maxDist', maxdist, 'forceMethod', forceMethod);
             t2 = toc(t1);
@@ -83,7 +83,7 @@ classdef ExtendedDataSourceInterface < filewrapper.DataSourceInterface
                 fullcidx = fullChanIdx(cidx);
                 disp('Computing noise std...'); tic
                 smadL = min(Len, P.maxLen);
-                smad = mysort.noise.estimateSigma(...
+                smad = noise.estimateSigma(...
                         self.getData(1:smadL, cidx), P.Tf, P.thr);
                 self.memoryBufferNoiseSmad(fullcidx) = smad;
                 disp('Done.'); toc        
@@ -143,7 +143,7 @@ classdef ExtendedDataSourceInterface < filewrapper.DataSourceInterface
         function allspikes = getMergedSingleElectrodeDetectedSpikes(self, mergeSpikesMaxDist, varargin)
             [times pks] = self.detectSpikes(varargin{:});
             allspikes = sortrows([cell2mat(times)   cell2mat(pks)], 1);
-            allspikes  = mysort.spiketrain.mergeSingleElectrodeDetectedSpikes(allspikes, mergeSpikesMaxDist);
+            allspikes  = spiketrain.mergeSingleElectrodeDetectedSpikes(allspikes, mergeSpikesMaxDist);
         end        
     end
 end

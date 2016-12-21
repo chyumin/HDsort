@@ -48,7 +48,7 @@ classdef MultiElectrode < handle
         %------------------------------------------------------------------
         function save2File(self, fname, h5path)
             S = self.toStruct();
-            mysort.h5.recursiveSave(fname, S, h5path);
+            filewrapper.hdf5.recursiveSave(fname, S, h5path);
         end
         %------------------------------------------------------------------
         function cp = copy(self)
@@ -300,10 +300,10 @@ classdef MultiElectrode < handle
             ah = axes();
             plot(self.electrodePositions(:,1), self.electrodePositions(:,2), 'ok');
             hold on
-            for i=1:length(groupsidx)
-                x = self.electrodePositions(groupsidx{i},1);
-                y = self.electrodePositions(groupsidx{i},2);
-                plot(ah, x+1+2*rand, y+2*rand, 'x', 'color', mysort.plot.vectorColor(i), 'markersize', 14, 'linewidth', 2);
+            for ii=1:length(groupsidx)
+                x = self.electrodePositions(groupsidx{ii},1);
+                y = self.electrodePositions(groupsidx{ii},2);
+                plot(ah, x+1+2*rand, y+2*rand, 'x', 'color', plot.PlotInterface.vectorColor(ii), 'markersize', 14, 'linewidth', 2);
                 hold on
             end
             set(ah,'YDir','reverse');

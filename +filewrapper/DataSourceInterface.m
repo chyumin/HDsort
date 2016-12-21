@@ -215,7 +215,7 @@ classdef DataSourceInterface < filewrapper.WaveformDataSourceInterface
             % sorting
             if self.bReturnSortingResiduals && self.hasSpikeSorting()
                 S = self.getActiveSpikeSorting();
-                if ~isempty(S) && isa(S, 'mysort.spiketrain.SpikeSortingContainer')
+                if ~isempty(S) && isa(S, 'spiketrain.SpikeSortingContainer')
                     gdf = S.getGdf(timeindex(1), timeindex(end));
                     if ~isempty(gdf)
                         %                         unitNames = unique(gdf(:,1));
