@@ -224,8 +224,8 @@ classdef SortJob < hdsort.grid.GridJob
         %
         %                     units = unique( res.gdf_merged(:,1) );
         %                     nUnits = length(units);
-        %                     %[dir_exists,mess,messid] = mkdir(self.folders.main, 'qchdsort.plot.');
-        %                     %self.folders.qchdsort.plot. = fullfile( self.folders.main, 'qchdsort.plot.');
+        %                     %[dir_exists,mess,messid] = mkdir(self.folders.main, 'qcplot');
+        %                     %self.folders.qcplot = fullfile( self.folders.main, 'qcplot');
         %
         %                     %DSFull = hdsort.filewrapper.CMOSMEA(self.files.data);%, 'useFilter', self.sortJobP.useFilter, 'name', self.jobName);
         %                     %MES = DSFull.MultiElectrode.toStruct();
@@ -244,8 +244,8 @@ classdef SortJob < hdsort.grid.GridJob
             try
                 res = load(self.destinationlocation.files.results)
                 
-                [dir_exists,mess,messid] = mkdir(self.folders.main, 'qchdsort.plot.');
-                self.folders.qchdsort.plot. = fullfile( self.folders.main, 'qchdsort.plot.');
+                [dir_exists,mess,messid] = mkdir(self.folders.main, 'qcplot');
+                self.folders.qcplot = fullfile( self.folders.main, 'qcplot');
                 
                 DSFull = hdsort.filewrapper.CMOSMEA(self.files.data);%, 'useFilter', self.sortJobP.useFilter, 'name', self.jobName);
                 MES = DSFull.MultiElectrode.toStruct();
@@ -258,14 +258,14 @@ classdef SortJob < hdsort.grid.GridJob
             figures = struct;
             
             %% ISIH:
-            self.destinationlocation.files.isih = fullfile( self.folders.qchdsort.plot., 'isih');
+            self.destinationlocation.files.isih = fullfile( self.folders.qcplot, 'isih');
             if ~exist(self.destinationlocation.files.isih, 'file')
                 F = mysort.hdsort.plot.isi( res.gdf_merged )
                 mysort.hdsort.plot.savefig(F.figureHandle, self.destinationlocation.files.isih)
             end
             
             %% Footprints whole
-            self.destinationlocation.files.footprints = fullfile( self.folders.qchdsort.plot., 'footprints_whole');
+            self.destinationlocation.files.footprints = fullfile( self.folders.qcplot, 'footprints_whole');
             if ~exist(self.destinationlocation.files.footprints, 'file')
                 F.figureHandle = figure();
                 mysort.hdsort.plot.hdsort.waveforms.D(res.T_merged, MES.electrodePositions, 'IDs', res.localSortingID);
@@ -273,7 +273,7 @@ classdef SortJob < hdsort.grid.GridJob
             end
             
             %% Footprints localized
-            self.destinationlocation.files.footprints2 = fullfile( self.folders.qchdsort.plot., 'footprints_localized');
+            self.destinationlocation.files.footprints2 = fullfile( self.folders.qcplot, 'footprints_localized');
             if ~exist(self.destinationlocation.files.footprints2, 'file')
                 F.figureHandle = figure(); P.AxesHandle = []
                 for i = 1:length(res.localSorting)
@@ -485,7 +485,7 @@ classdef SortJob < hdsort.grid.GridJob
                 
                 DS.restrictToChannels(taskP.groupidx);
                 disp('Start sorting...')
-                [S P_] = mysort.sorters.sort(DS, fullfile(taskP.outputPath, taskP.groupPath ), taskP.runName, sortP);
+                [S P_] = hdsort.sortScript(DS, fullfile(taskP.outputPath, taskP.groupPath ), taskP.runName, sortP);
                 
                 if S.STOP_ME_BECAUSE_I_AM_SLOW return; end
                 
