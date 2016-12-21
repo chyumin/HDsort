@@ -22,10 +22,10 @@ function [gdf_merged, T_merged, localSorting, localSortingID, sessionLengths] = 
     
     cutleft = 10;
     Tf = 45;
-%     DSFull = mysort.mea.compoundMea(h5FileList, 'useFilter', 0, 'name', 'PREFILT'); 
+
     if iscell(h5FileList)
-        DSFull = mysort.mea.CMOSMEA(h5FileList, 'useFilter', 0, 'name', 'PREFILT');
-    elseif isa(h5FileList, 'mysort.ds.MultiSessionInterface')
+        DSFull = filewrapper.CMOSMEA(h5FileList, 'useFilter', 0, 'name', 'PREFILT');
+    elseif isa(h5FileList, 'filewrapper.MultiSessionInterface')
         DSFull = h5FileList;
         warning('If a Datasource object is provided the parfor option will be disabled.');
         useParForIfPossible = false;
@@ -38,7 +38,7 @@ function [gdf_merged, T_merged, localSorting, localSortingID, sessionLengths] = 
     electrodePositions = DSFull.MultiElectrode.electrodePositions;
     electrodeNumbers   = DSFull.MultiElectrode.electrodeNumbers;
     % Make groupings of electrodes to be sorted independently
-    [groupsidx nGroupsPerElectrode] = mysort.mea.constructLocalElectrodeGroups(electrodePositions(:,1), electrodePositions(:,2));
+    [groupsidx nGroupsPerElectrode] = hdsort.constructLocalElectrodeGroups(electrodePositions(:,1), electrodePositions(:,2));
     % replace electrode indices with electrode numbers
     groups = {};
     for ii=1:length(groupsidx)
@@ -69,21 +69,20 @@ function [gdf_merged, T_merged, localSorting, localSortingID, sessionLengths] = 
     if matlabpool('size') > 0 && useParForIfPossible
         parfor ii=1:length(groupsidx)
             % Build Mea that concatenates multiple ntk files (WARNING NEED TO HAVE THE SAME CONFIGURATIONS!
-%             DScopy = mysort.mea.compoundMea(h5FileList, 'useFilter', 0, 'name', 'PREFILT');            
-            DScopy = mysort.mea.CMOSMEA(h5FileList, 'useFilter', 0, 'name', 'PREFILT');
+            DScopy = filewrapper.CMOSMEA(h5FileList, 'useFilter', 0, 'name', 'PREFILT');
             DScopy.restrictToChannels(groupsidx{ii});
-            [S P_] = mysort.sorters.sort(DScopy, fullfile(outPath, ['group' sprintf('%04d', ii)]), runName, P);
+            [S P_] = hdsort.sortScript(DScopy, fullfile(outPath, ['group' sprintf('%04d', ii)]), runName, P);
             % RELEASE CHANNEL RESTRICTIONS FOR TEMPLATE ESTIMATION
             DScopy.restrictToChannels();
-            mysort.HDSorting.startHDSortingTemplateEstimation(outPath, ['group' sprintf('%04d', ii)], runName, Tf, cutleft, DScopy, groupsidx{ii}, MES);
+            hdsort.startHDSortingTemplateEstimation(outPath, ['group' sprintf('%04d', ii)], runName, Tf, cutleft, DScopy, groupsidx{ii}, MES);
         end
     else
         for ii=1:length(groupsidx)
             DSFull.restrictToChannels(groupsidx{ii});
-            [S P_] = mysort.sorters.sort(DSFull, fullfile(outPath, ['group' sprintf('%04d', ii)]), runName, P);
+            [S P_] = hdsort.sortScript(DSFull, fullfile(outPath, ['group' sprintf('%04d', ii)]), runName, P);
             % RELEASE CHANNEL RESTRICTIONS FOR TEMPLATE ESTIMATION
             DSFull.restrictToChannels();
-            mysort.HDSorting.startHDSortingTemplateEstimation(outPath, ['group' sprintf('%04d', ii)], runName, Tf, cutleft, DSFull, groupsidx{ii}, MES);
+            hdsort.startHDSortingTemplateEstimation(outPath, ['group' sprintf('%04d', ii)], runName, Tf, cutleft, DSFull, groupsidx{ii}, MES);
         end
     end
     
@@ -98,7 +97,7 @@ function [gdf_merged, T_merged, localSorting, localSortingID, sessionLengths] = 
 
     disp('Postprocessing...');
     [gdf_merged T_merged localSorting localSortingID] =...
-        mysort.HDSorting.processLocalSortings(outPath, runName, groups, groupsidx);
+        hdsort.processLocalSortings(outPath, runName, groups, groupsidx);
     units = unique(gdf_merged(:,1));
     nU = length(units)
     assert(length(localSorting) == nU, 'must be identical');

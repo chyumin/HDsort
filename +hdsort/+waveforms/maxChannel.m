@@ -1,7 +1,7 @@
 function [maxChannels, maxVal] = maxChannel(fp)
 if size(fp, 2) == 1
     fp_ = [fp fp*0];
-    [maxChannels, maxVal] = waveforms.maxChannel(fp_);
+    [maxChannels, maxVal] = mysort.wf.maxChannel(fp_);
     maxChannels = 0*maxChannels + 1;
     return
 end
