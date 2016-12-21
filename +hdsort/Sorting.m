@@ -185,7 +185,7 @@ classdef Sorting < handle
                     % This function includes the postprocessing step and
                     % saves the results directluy to a file:
                     [gdf_merged, T_merged, localSorting, localSortingID] = ...
-                        mysort.HDSorting.startHDSorting(self.DS, self.dPath, self.name);
+                        hdsort.startHDSorting(self.DS, self.dPath, self.name);
                     R.gdf_merged = gdf_merged;
                     R.T_merged = T_merged;
                     R.localSorting = localSorting;
