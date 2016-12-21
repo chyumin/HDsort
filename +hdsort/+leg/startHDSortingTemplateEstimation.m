@@ -43,7 +43,7 @@ function startHDSortingTemplateEstimation(outPath, dpath, runName, Tf, cutleft, 
         for uidx = 1:length(units)
             myidx = igdf(:,2) == uidx;
             assert(~isempty(myidx), sprintf('No Spikes found for unit: %d', uidx));
-            wfs(:,:,uidx) = waveforms.v2t(median(wfs_(myidx,:),1), size(DSFull,2));
+            wfs(:,:,uidx) = hdsort.waveforms.v2t(median(wfs_(myidx,:),1), size(DSFull,2));
             nSourceSpikesPerTemplateAndChannel(uidx, 1:size(DSFull,2)) = size(wfs_,1); % necessary for saving!
         end
     else

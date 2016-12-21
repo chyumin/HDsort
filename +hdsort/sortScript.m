@@ -1,4 +1,4 @@
-function [S P] = sort(DS, dpath, name, varargin)
+function [S P] = sortScript(DS, dpath, name, varargin)
     S.STOP_ME_BECAUSE_I_AM_SLOW = false;
     % Artefact Detection
     P.artefactDetection.use = 0;
@@ -250,12 +250,12 @@ function [S P] = sort(DS, dpath, name, varargin)
                     P.spikeDetection.removeOscillationGroupsWithNMembersOfMinAmplitude(2));
             end
             % remove spikes in artefact epochs
-            removeIdx = epoch.findPointsInEpochs(allspikes(:,1), S.artefactDetection.epochs)>0;               
+            removeIdx = hdsort.epoch.findPointsInEpochs(allspikes(:,1), S.artefactDetection.epochs)>0;               
             allspikes(removeIdx,:) = [];
             allspikes(abs(allspikes(:,2))>P.spikeDetection.removeEventsWithAbsAmplitudeLargerThan,:) = [];
             fprintf('%d spikes after artefact removal (%d removed)\n', size(allspikes,1), nSp-size(allspikes,1));
 
-            allspikes  = spiketrain.mergeSingleElectrodeDetectedSpikes(allspikes, P.spikeDetection.mergeSpikesMaxDist);
+            allspikes  = hdsort.spiketrain.mergeSingleElectrodeDetectedSpikes(allspikes, P.spikeDetection.mergeSpikesMaxDist);
             
             % remove spikes that are too close to the beginning of the file
             removeTooEarly = find(allspikes(:,1) < P.spikeCutting.Tf);
@@ -415,7 +415,7 @@ function [S P] = sort(DS, dpath, name, varargin)
             else
                 L  = P.spikeDetection.maxDataLength;
             end
-            noise.epochs = epoch.flip(epoch.merge([s1 s2]), L);
+            noise.epochs = hdsort.epoch.flip(hdsort.epoch.merge([s1 s2]), L);
 
             maxTf = max([P.botm.Tf P.featureExtraction.Tf P.spikeAlignment.Tf]); %P.spikeCutting.Tf
             Cest = hdsort.noise.Covest2(DS, 'maxLag', maxTf,...
@@ -460,7 +460,7 @@ function [S P] = sort(DS, dpath, name, varargin)
                     spikeAligned.alignIdx = [];
                 else
                     spikeAligned.alignIdx = S.spikeCut.alignIdx;
-                    spikeAligned.unalignedwfs = double(waveforms.vSubsel(S.spikeCut.unalignedwfs,...
+                    spikeAligned.unalignedwfs = double(hdsort.waveforms.vSubsel(S.spikeCut.unalignedwfs,...
                         nC, idxstart:idxstop));    
 
                     spikeAligned.tau = zeros(size(spikeAligned.unalignedwfs,1),1);
@@ -472,11 +472,11 @@ function [S P] = sort(DS, dpath, name, varargin)
                     tic
                     if strcmp(P.spikeAlignment.method, 'onMax')
                         [spikeAligned.wfs spikeAligned.tau] = ...
-                            waveforms.vAlignOnMax(spikeAligned.unalignedwfs, nC,...
+                            hdsort.waveforms.vAlignOnMax(spikeAligned.unalignedwfs, nC,...
                             'maxIdx', spikeAligned.maxIdx, 'restrictToIdx', spikeAligned.restrictToIdx);
                     elseif strcmp(P.spikeAlignment.method, 'onUpsampledMean')
                         [spikeAligned.wfs spikeAligned.tau] = ...
-                            waveforms.vAlignOnUpsampleMean(spikeAligned.unalignedwfs, nC,...
+                            hdsort.waveforms.vAlignOnUpsampleMean(spikeAligned.unalignedwfs, nC,...
                             'maxIdx', P.spikeAlignment.maxIdx,...
                             'maxShiftPerIter', 3,...
                             'maxIter', P.spikeAlignment.maxIterations, ...
@@ -484,25 +484,25 @@ function [S P] = sort(DS, dpath, name, varargin)
 %                             'restrictToIdx',  spikeAligned.restrictToIdx,...                        
                     elseif strcmp(P.spikeAlignment.method, 'onUpsampledMax')
                         [spikeAligned.tau spikeAligned.wfs] = ...
-                            waveforms.alignWaveformsUpsampleMax(spikeAligned.unalignedwfs, nC,...
+                            hdsort.waveforms.alignWaveformsUpsampleMax(spikeAligned.unalignedwfs, nC,...
                             'maxIdx', spikeAligned.maxIdx, 'restrictToIdx', spikeAligned.restrictToIdx, 'nIter', 2);
                     elseif strcmp(P.spikeAlignment.method, 'onUpsampledMin')
                         [spikeAligned.tau spikeAligned.wfs] = ...
-                            waveforms.alignWaveformsUpsampleMax(-spikeAligned.unalignedwfs, nC,...
+                            hdsort.waveforms.alignWaveformsUpsampleMax(-spikeAligned.unalignedwfs, nC,...
                             'maxIdx', spikeAligned.maxIdx, 'restrictToIdx', spikeAligned.restrictToIdx, 'nIter', 2); 
                         spikeAligned.wfs = -spikeAligned.unalignedwfs;
                     elseif strcmp(P.spikeAlignment.method, 'onMin')
                         [spikeAligned.wfs spikeAligned.tau] = ...
-                            waveforms.vAlignOnMax(-spikeAligned.unalignedwfs, nC,...
+                            hdsort.waveforms.vAlignOnMax(-spikeAligned.unalignedwfs, nC,...
                             'maxIdx', spikeAligned.maxIdx, 'restrictToIdx', spikeAligned.restrictToIdx);
                         spikeAligned.wfs = -spikeAligned.wfs;
                     elseif strcmp(P.spikeAlignment.method, 'onAverageMax')
                         [spikeAligned.tau spikeAligned.wfs] = ...
-                            waveforms.vAlignOnAverageMaxSample(spikeAligned.unalignedwfs, nC,...
+                            hdsort.waveforms.vAlignOnAverageMaxSample(spikeAligned.unalignedwfs, nC,...
                             'maxIdx', spikeAligned.maxIdx, 'restrictToIdx', spikeAligned.restrictToIdx);
                     elseif strcmp(P.spikeAlignment.method, 'onAverageMin')
                         [spikeAligned.tau spikeAligned.wfs] = ...
-                            waveforms.vAlignOnAverageMaxSample(-spikeAligned.unalignedwfs, nC,...
+                            hdsort.waveforms.vAlignOnAverageMaxSample(-spikeAligned.unalignedwfs, nC,...
                             'maxIdx', spikeAligned.maxIdx, 'restrictToIdx', spikeAligned.restrictToIdx);
                         spikeAligned.wfs = -spikeAligned.wfs;
                     elseif strcmp(P.spikeAlignment.method, 'none')
@@ -546,7 +546,7 @@ function [S P] = sort(DS, dpath, name, varargin)
                 % Prewhiten
                 spikePrewhitened.wfs = [];
             else
-                spikePrewhitened.wfs = waveforms.vSubsel(S.spikeAligned.wfs, nC, idxstart:idxstop);      
+                spikePrewhitened.wfs = hdsort.waveforms.vSubsel(S.spikeAligned.wfs, nC, idxstart:idxstop);      
                 % Build the noise covariance matrix and load it
                 spikePrewhitened.wfs = spikePrewhitened.wfs/spikePrewhitened.U; 
             end
@@ -607,11 +607,11 @@ function [S P] = sort(DS, dpath, name, varargin)
                 X = S.spikeFeatures.X(clustering.clusterIdx,:)';
                 
                 t_ = tic;
-    %             [clustCent,point2cluster,clustMembsCell] = MeanShiftCluster(X, clustering.bandwidth);
-                [clustCent,point2cluster,clustMembsCell] = MeanShiftClusterIncreaseBW(X, clustering.bandwidth, 0 , P.clustering.minSpikesPerCluster, S.maxNBandwidthIncreases, S.bandwidthIncreaseFactor);
+    %             [clustCent,point2cluster,clustMembsCell] = meanshift.MeanShiftCluster(X, clustering.bandwidth);
+                [clustCent,point2cluster,clustMembsCell] = meanshift.MeanShiftClusterIncreaseBW(X, clustering.bandwidth, 0 , P.clustering.minSpikesPerCluster, S.maxNBandwidthIncreases, S.bandwidthIncreaseFactor);
                 t_ = toc(t_);
                 fprintf('Mean Shift Clustering took %.1f sec\n', t_);
-                [clustering.ids clustering.clusterCenter] = MeanShiftClusterBundleResult(X', clustMembsCell, P.clustering.minSpikesPerCluster);
+                [clustering.ids clustering.clusterCenter] = meanshift.MeanShiftClusterBundleResult(X', clustMembsCell, P.clustering.minSpikesPerCluster);
                 %*** clustering.ids==0 --> noise cluster ***
                 clustering.classes = unique(clustering.ids);
                 clusteredAlignedSpikes = S.spikeAligned.wfs(clustering.clusterIdx,:);
@@ -688,7 +688,7 @@ function [S P] = sort(DS, dpath, name, varargin)
                     idxstart = 1 + P.spikeCutting.cutLeft - P.spikeAlignment.cutLeft;
     %                 idxstop  = idxstart + P.spikeAlignment.Tf - 1;
 
-                    [D maxTaus TupShiftDown FupShiftDown tauRange tauIdx subTauRange subTauIdx] = waveforms.vTemplateMatching(...
+                    [D maxTaus TupShiftDown FupShiftDown tauRange tauIdx subTauRange subTauIdx] =hdsort.waveforms.vTemplateMatching(...
                         S.spikeCut.wfs, T, nC, idxstart, 'maxShift', 5, 'upsample', 5, 'noiseCovariance', C, 'chunkSize', P.spikeCutting.chunkSize);
                     assert(any(D(:)~=0.0), 'SpikeCut file corrupt!')
                     F = FupShiftDown(:,:,1);
@@ -755,7 +755,7 @@ function [S P] = sort(DS, dpath, name, varargin)
                         CUTME = [CUTME; myIdx(:) myID(:)];
                     end
                     wfs_temp = S.spikeCut.wfs(CUTME(:,1),:);
-                    wfs_temp_aligned = waveforms.vShift(wfs_temp, nC, -round(clusteringMatched.maxTausPerSpike(CUTME(:,1))), 1);
+                    wfs_temp_aligned =hdsort.waveforms.vShift(wfs_temp, nC, -round(clusteringMatched.maxTausPerSpike(CUTME(:,1))), 1);
                         [templates_temp, N_per_template] = hdsort.util.calculateClassMeans(...
                             wfs_temp_aligned, CUTME(:,2), 'usemedian');  
                     clusteringMatched.templates  = templates_temp;
@@ -764,8 +764,8 @@ function [S P] = sort(DS, dpath, name, varargin)
                     clusteringMatched.ts = S.spikeDetectionMerged.ts(S.spikeCut.cutIdx)+clusteringMatched.maxTausPerSpike;
                     
                     %clusteringMatched.amps = S.spikeDetectionMerged.allspikes(S.spikeCut.cutIdx, 2);
-                    wfstmp = waveforms.v2t(S.spikeCut.wfs(:,:), nC);
-                    [clusteringMatched.ampsChIdx, clusteringMatched.amps] = waveforms.maxChannel(wfstmp);
+                    wfstmp = hdsort.waveforms.v2t(S.spikeCut.wfs(:,:), nC);
+                    [clusteringMatched.ampsChIdx, clusteringMatched.amps] = hdsort.waveforms.maxChannel(wfstmp);
                     %[clusteringMatched.amps, clusteringMatched.ampsChIdx] = max(wfstmp, [], 2);
                     clear wfstmp
                    % [amps, ampsChIdx] = max(S.spikeCut.wfs, [], 2);
@@ -809,12 +809,12 @@ function [S P] = sort(DS, dpath, name, varargin)
                 groups = {};
             else
                 % resample only templates that do not have id==0
-                resampledTemplates = waveforms.tResample(waveforms.v2t(...
+                resampledTemplates = hdsort.waveforms.tResample(hdsort.waveforms.v2t(...
                     S.clusteringMatched.templates(realTemplateIdx,:), nC), 3, 1);                
 
                 % the indices in the groups are indices into
                 % realTemplateIdx which is index into S.clusteringMatched.template_ids
-                [groups maxT D] = waveforms.mergeTemplates(resampledTemplates, S.noise.meanNoiseStd,...
+                [groups maxT D] = hdsort.waveforms.mergeTemplates(resampledTemplates, S.noise.meanNoiseStd,...
                     'maxRelativeDistance', P.mergeTemplates.ifMaxRelDistSmallerPercent/100,...
                     'minCorrelation', P.mergeTemplates.atCorrelation);
             end
@@ -863,7 +863,7 @@ function [S P] = sort(DS, dpath, name, varargin)
             Cest = hdsort.noise.Covest2(Cest);
             idxstart = 1 + P.spikeCutting.cutLeft - P.botm.cutLeft;
             idxstop  = idxstart + P.botm.Tf - 1;
-            botm.templates = waveforms.vSubsel(T, nC, idxstart:idxstop);
+            botm.templates = hdsort.waveforms.vSubsel(T, nC, idxstart:idxstop);
             botmsorter = botm.BOTM(Cest, P.botm.Tf, botm.templates,...
                         'upsample', 3, 'spikePrior', P.botm.prior,...
                         'max_num_of_channels_per_template', 30, 'adaptOnInit', 1);    
@@ -925,7 +925,7 @@ function [S P] = sort(DS, dpath, name, varargin)
                 SpSoBOTM = spiketrain.SpikeSortingContainer('botm', gdfbotm, ...
                     'templateCutLeft', S.P.spike_cut_cutLeft, ...
                     'templateCutLength', S.P.spike_cut_Tf, ...
-                    'templateWfs', waveforms.v2t(templatesAfterBOTM, nC),...
+                    'templateWfs', hdsort.waveforms.v2t(templatesAfterBOTM, nC),...
                     'wfDataSource', DS, 'nMaxSpikesForTemplateCalc', 1000);
                 DS.addSpikeSorting(SpSoBOTM); DS.setActiveSpikeSortingIdx('botm')            
                 DS.bReturnSortingResiduals = 1;

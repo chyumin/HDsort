@@ -9,8 +9,9 @@ function [gdf_merged, T_merged, localSorting, localSortingID, sessionLengths] = 
 %   outPath - output folder where the sorting info should be stored
 %   runName - (optional) Name of the run of this Sorting. If not
 %             provided it defaults to "sortingRun".
+useParForIfPossible = false;
 
-% sort the groups
+% Sorting Parameters:
 P = struct();
 P.spikeDetection.method = '-';
 P.spikeDetection.thr = 4.2;
@@ -28,8 +29,6 @@ P.mergeTemplates.merge = 1;
 P.mergeTemplates.upsampleFactor = 3;
 P.mergeTemplates.atCorrelation = .93; % DONT SET THIS TOO LOW! USE OTHER ELECTRODES ON FULL FOOTPRINT TO MERGE
 P.mergeTemplates.ifMaxRelDistSmallerPercent = 30;
-
-P.useParForIfPossible = true;
 
 P = hdsort.util.parseInputs(P, varargin, 'error');
 
@@ -70,7 +69,14 @@ groupFile = fullfile(fullfile(outPath, 'groupFile.mat'));
 save(groupFile, 'groups', 'electrodeNumbers', 'electrodePositions', 'nGroupsPerElectrode', 'groupsidx');
 
 % Prepare data
-if P.useParForIfPossible && matlabpool('size') > 0
+useParFor = false;
+if useParForIfPossible
+    pPool = gcp;
+    if isempty(pPool) pPool = parpool(); end
+    if pPool.NumWorkers > 0 useParFor = true; end
+end
+
+if useParFor
     parfor ii=1:length(groupsidx)
         % Build Mea that concatenates multiple ntk files (WARNING NEED TO HAVE THE SAME CONFIGURATIONS!
         DScopy = hdsort.filewrapper.CMOSMEA(h5FileList, 'useFilter', 0, 'name', 'PREFILT');
