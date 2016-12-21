@@ -3,7 +3,7 @@ function T = pruneTemplates(T, varargin)
     P.minChannels = 1;
     P.absThreshold = 0;
     P.setInvalidChannelsTo = 0;
-    P = mysort.util.parseInputs(P, varargin, 'error');
+    P = mysort.hdsort.util.parseInputs(P, varargin, 'error');
     
     [Tf nC nT] = size(T);
     

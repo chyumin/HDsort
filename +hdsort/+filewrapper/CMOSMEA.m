@@ -1,4 +1,4 @@
-classdef CMOSMEA < filewrapper.MultiSessionInterface
+classdef CMOSMEA < hdsort.hdsort.filewrapper.MultiSessionInterface
     properties
         P
         h5info
@@ -18,7 +18,7 @@ classdef CMOSMEA < filewrapper.MultiSessionInterface
             P.filterOrder = 2;
             P.filterType = 'butter';
             P.filterName = '';
-            P = util.parseInputs(P, varargin, 'error');
+            P = hdsort.util.parseInputs(P, varargin, 'error');
             
             if ~iscell(fnames)
                 fnames = {fnames};
@@ -26,10 +26,10 @@ classdef CMOSMEA < filewrapper.MultiSessionInterface
             s_per_sec = hdf5read(fnames{1}, '/Sessions/Session0/sr');  
             assert(length(s_per_sec)==1, 'samples per second is an array!?');
             
-            filterFactory_ = filewrapper.FilterWrapper(P.hpf, ...
+            filterFactory_ = hdsort.hdsort.filewrapper.FilterWrapper(P.hpf, ...
                 P.lpf, s_per_sec, P.filterOrder, P.filterType);
             
-            sessionList_ = filewrapper.CMOSMEASession.empty(); 
+            sessionList_ = hdsort.hdsort.filewrapper.CMOSMEASession.empty(); 
             currentSessionCount = 0;
             nSessions = 0;
             for f=1:length(fnames)
@@ -41,13 +41,13 @@ classdef CMOSMEA < filewrapper.MultiSessionInterface
                 nSessions = nSessions+nSessions_;
                 for i=1:nSessions_
                     currentSessionCount = currentSessionCount+1;
-                    sessionList_(currentSessionCount) = filewrapper.CMOSMEASession(fname, h5info_,...
+                    sessionList_(currentSessionCount) = hdsort.hdsort.filewrapper.CMOSMEASession(fname, h5info_,...
                         filterFactory_, i-1, P.useFilter);
                 end
             end
 
-            self = self@filewrapper.MultiSessionInterface(P.name, s_per_sec, sessionList_);
-%             self = self@filewrapper.ExtendedDataSourceInterface(P.name, s_per_sec, sessionList_(1).getMultiElectrode());
+            self = self@hdsort.hdsort.filewrapper.MultiSessionInterface(P.name, s_per_sec, sessionList_);
+%             self = self@hdsort.hdsort.filewrapper.ExtendedDataSourceInterface(P.name, s_per_sec, sessionList_(1).getMultiElectrode());
             
             for i=1:nSessions
                 self.sessionList(i).parent = self;
@@ -87,7 +87,7 @@ classdef CMOSMEA < filewrapper.MultiSessionInterface
         function x = isBinaryFile(self)
             assert(~isempty(self.sessionList), 'Session list empty');
             s = self.sessionList(1);
-            x = isa( s.h5matrix_raw, 'filewrapper.binaryFileMatrix');
+            x = isa( s.h5matrix_raw, 'hdsort.hdsort.filewrapper.binaryFileMatrix');
         end
         
         %------------------------------------------------------------------
@@ -96,7 +96,7 @@ classdef CMOSMEA < filewrapper.MultiSessionInterface
             P.channels = [];
             P.session = self.activeSessionIdx;
             P.maxLoadSamples = 100000;
-            P = util.parseInputs(P, varargin, 'error');
+            P = hdsort.util.parseInputs(P, varargin, 'error');
 
             if isempty(timepoints)
                 W=[];
@@ -104,7 +104,7 @@ classdef CMOSMEA < filewrapper.MultiSessionInterface
             end
             
             L = cutright+cutleft+1;
-            assert(L>0, 'cant cut negative epochs length!');
+            assert(L>0, 'cant cut negative hdsort.epoch. length!');
             nConnectedChannels = self.getNChannels(); % NConnectedChannels();
             if isempty(P.channels);
                 P.channels = 1:nConnectedChannels;
@@ -126,15 +126,15 @@ classdef CMOSMEA < filewrapper.MultiSessionInterface
             t1 = max(1, min(timepoints)-cutleft);
             t2 = min(self.size_(1, P.session), max(timepoints)+cutright);
             X = self.getData(t1:t2, P.channels, P.session)';
-            epochs = [timepoints-cutleft timepoints+cutright]-t1 + 1;
-%             eL = epoch.length(epochs);
+            hdsort.epoch. = [timepoints-cutleft timepoints+cutright]-t1 + 1;
+%             eL = hdsort.epoch.length(hdsort.epoch.);
 %             cL = [0; cumsum(eL)];
 %             IDX = zeros(1, cL(end));            
-%             for i=1:size(epochs,1)
-%                 IDX(cL(i)+1:cL(i+1)) = epochs(i,1):epochs(i,2);
+%             for i=1:size(hdsort.epoch.,1)
+%                 IDX(cL(i)+1:cL(i+1)) = hdsort.epoch.(i,1):hdsort.epoch.(i,2);
 %             end
 %             Xs = X(:,IDX);
-            W = epoch.extractWaveform(X, epochs);
+            W = hdsort.epoch.extractWaveform(X, hdsort.epoch.);
         end
   
         %------------------------------------------------------------------

@@ -1,13 +1,13 @@
-classdef ISIH < plot.PlotInterface
+classdef ISIH < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
-        spiketrains
+        hdsort.spiketrain.
         isih
         times_ms
         threshold_line
         nUnits
         bar
         
-        subplots
+        subhdsort.plot.
     end
     
     properties
@@ -19,16 +19,16 @@ classdef ISIH < plot.PlotInterface
     methods
         
         %%% ----------------CONSTRUCTOR------------------------------------
-        function self = ISIH(spiketrains_or_gdf, varargin)
+        function self = ISIH(hdsort.spiketrain._or_gdf, varargin)
             
-            if ~iscell(spiketrains_or_gdf) && any(size(spiketrains_or_gdf) == 1)
-                spiketrains = {spiketrains_or_gdf(:)};
-            elseif ~iscell(spiketrains_or_gdf)
-                spiketrains = mysort.spiketrain.tGdf2cell(spiketrains_or_gdf);
+            if ~iscell(hdsort.spiketrain._or_gdf) && any(size(hdsort.spiketrain._or_gdf) == 1)
+                hdsort.spiketrain. = {hdsort.spiketrain._or_gdf(:)};
+            elseif ~iscell(hdsort.spiketrain._or_gdf)
+                hdsort.spiketrain. = mysort.hdsort.spiketrain.tGdf2cell(hdsort.spiketrain._or_gdf);
             else
-                spiketrains = spiketrains_or_gdf;
+                hdsort.spiketrain. = hdsort.spiketrain._or_gdf;
             end
-            nUnits = numel(spiketrains);
+            nUnits = numel(hdsort.spiketrain.);
             nX = ceil(sqrt(nUnits));
             nY = ceil(nUnits);
             
@@ -37,21 +37,21 @@ classdef ISIH < plot.PlotInterface
             P.maxlag_ms = 20.0;
             P.xlabel = 'ISI [ms]';
             %P.title = 'ISI refractory period violations';
-            self = self@plot.PlotInterface(P, varargin{:});
+            self = self@hdsort.plot.PlotInterface(P, varargin{:});
             
             if nUnits > 1
-                self.subplots = plot.Subplots([nX nY], 'showOnStartup', false);
+                self.subhdsort.plot. = hdsort.plot.Subhdsort.plot.([nX nY], 'showOnStartup', false);
             end
             
-            self.plotName = 'ISIH';
-            self.spiketrains = spiketrains;
+            self.hdsort.plot.ame = 'ISIH';
+            self.hdsort.spiketrain. = hdsort.spiketrain.;
             self.nUnits = nUnits;
             
             %if self.nUnits == 1
             %    self.showAh = true;
             %end
             
-            [isih times_ms] = util.isih(self.spiketrains, 'binSize_ms', self.binSize_ms, 'maxlag_ms', self.maxlag_ms, 'Fs', self.Fs);
+            [isih times_ms] = hdsort.util.isih(self.hdsort.spiketrain., 'binSize_ms', self.binSize_ms, 'maxlag_ms', self.maxlag_ms, 'Fs', self.Fs);
             self.isih = isih;
             self.times_ms = times_ms;
             
@@ -62,16 +62,16 @@ classdef ISIH < plot.PlotInterface
             self.setColor(self.color, 1);
             
             if self.nUnits > 1
-                %show_@plot.Subplots(self);
-                self.subplots.setAh(self.ah);
-                self.subplots.show();
+                %show_@hdsort.plot.Subhdsort.plot.(self);
+                self.subhdsort.plot..setAh(self.ah);
+                self.subhdsort.plot..show();
             else
                 self.useDefaultValues();
             end
             
             for ii = 1:self.nUnits
                 if self.nUnits > 1
-                    ah = self.subplots.getSubplotHandle(ii);
+                    ah = self.subhdsort.plot..getSubhdsort.plot.andle(ii);
                 else
                     ah = self.ah;
                     self.setAh(ah);
@@ -79,7 +79,7 @@ classdef ISIH < plot.PlotInterface
                 
                 %b1 = bar(ah, self.times_ms, self.isih(ii, :)', 'histc');
                 %set(b1, 'facecolor', self.color);
-                self.bar = plot.Bar(self.times_ms, self.isih(ii, :)', 'Style', 'histc', 'ah', ah, 'color', self.color);
+                self.bar = hdsort.plot.Bar(self.times_ms, self.isih(ii, :)', 'Style', 'histc', 'ah', ah, 'color', self.color);
                 
                 % Plot a refractory period line:
                 if self.refPeriod_ms > self.binSize_ms

@@ -1,5 +1,5 @@
-classdef CMOSMEASession < filewrapper.FilteredDataSourceInterface & ...
-                          filewrapper.ExtendedDataSourceInterface
+classdef CMOSMEASession < hdsort.hdsort.filewrapper.FilteredDataSourceInterface & ...
+                          hdsort.hdsort.filewrapper.ExtendedDataSourceInterface
     properties
         parent
         fname
@@ -39,7 +39,7 @@ classdef CMOSMEASession < filewrapper.FilteredDataSourceInterface & ...
                 cpx = cpx(:);
                 cpy = cpy(connectedChannels==1);
                 cpy = cpy(:);
-                ME = filewrapper.MultiElectrode([cpx cpy], cnr);
+                ME = hdsort.hdsort.filewrapper.MultiElectrode([cpx cpy], cnr);
             catch
                 % Seems to be the old format
                 % WHY EVER, BUT THIS READ CALL IS SLOW LIKE HELL
@@ -54,11 +54,11 @@ classdef CMOSMEASession < filewrapper.FilteredDataSourceInterface & ...
                 connectedChannels = CL_(:,2)==1;
                 CL_(~connectedChannels, :) = [];   % remove unconnected channels
                 CL_(:,3:4) = CL_(:,3:4)/1000; % convert to micro meter
-                ME = filewrapper.MultiElectrode(CL_(:,3:4), CL_(:,5));
+                ME = hdsort.hdsort.filewrapper.MultiElectrode(CL_(:,3:4), CL_(:,5));
             end
             
-            self = self@filewrapper.FilteredDataSourceInterface(filterFactory_, useFilter, 'CMOSMEASession', s_per_sec, ME);
-            self = self@filewrapper.ExtendedDataSourceInterface('CMOSMEASession', s_per_sec, ME);
+            self = self@hdsort.hdsort.filewrapper.FilteredDataSourceInterface(filterFactory_, useFilter, 'CMOSMEASession', s_per_sec, ME);
+            self = self@hdsort.hdsort.filewrapper.ExtendedDataSourceInterface('CMOSMEASession', s_per_sec, ME);
 
             self.fname = fname;
             self.session_idx = session_idx;
@@ -80,7 +80,7 @@ classdef CMOSMEASession < filewrapper.FilteredDataSourceInterface & ...
                 binDims = h5read(self.fname, [self.session_str 'bin_dims']);
                 assert( exist(binFile, 'file') == 2, ['Task aborted: binary file ' binFile ' not found!']);
                 % todo: naming not good!
-                self.h5matrix_raw =  filewrapper.binaryFileMatrix(binFile, binDims);
+                self.h5matrix_raw =  hdsort.hdsort.filewrapper.binaryFileMatrix(binFile, binDims);
             else
                 self.h5matrix_raw = mysort.h5.matrix(self.fname, [self.session_str 'sig'], true);
             end
@@ -162,7 +162,7 @@ classdef CMOSMEASession < filewrapper.FilteredDataSourceInterface & ...
         %------------------------------------------------------------------
         function X = getRawData(self, timeIndex, channelIndex, varargin)
             P.channels = []; %set channels to 'all' to also get unconnected channels
-            P = util.parseInputs(P, '', varargin);
+            P = hdsort.util.parseInputs(P, '', varargin);
             
             if isempty(P.channels) || strcmp(P.channels, 'connected')
                 assert(max(channelIndex)<=length(self.connected_channels), 'channel index out of bounds')
@@ -174,7 +174,7 @@ classdef CMOSMEASession < filewrapper.FilteredDataSourceInterface & ...
         %------------------------------------------------------------------
         function X = getScaledData(self, timeIndex, channelIndex, varargin)
 %             P.progressDisplay = 'none'; % or 'console' or 'progressbar';
-%             P = util.parseInputs(P, '', varargin);   
+%             P = hdsort.util.parseInputs(P, '', varargin);   
             
             channelIndex = self.connected_channels(channelIndex);
             tmp = self.h5matrix_raw(timeIndex, channelIndex);
@@ -220,7 +220,7 @@ classdef CMOSMEASession < filewrapper.FilteredDataSourceInterface & ...
                 % If Cest could not be retrieved from someone else,
                 % calculate with super method
                 if isempty(Cest)
-                    Cest = getCovest@filewrapper.ExtendedDataSourceInterface(self, varargin{:});
+                    Cest = getCovest@hdsort.hdsort.filewrapper.ExtendedDataSourceInterface(self, varargin{:});
                 end
                 CestS = Cest.toStruct();
                 save(self.preprocCov, 'CestS');

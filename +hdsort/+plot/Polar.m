@@ -1,4 +1,4 @@
-classdef Polar < plot.PlotInterface
+classdef Polar < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         compass
         polar
@@ -16,10 +16,10 @@ classdef Polar < plot.PlotInterface
         closeCurve
         %yShift
         
-        %plotAll
-        %plotMean
-        %plotMedian
-        %plotStd
+        %hdsort.plot.ll
+        %hdsort.plot.ean
+        %hdsort.plot.edian
+        %hdsort.plot.td
         %meanColor
     end
     
@@ -64,17 +64,17 @@ classdef Polar < plot.PlotInterface
             
             % 
             %P.yShift = 0.0;
-            %P.plotAll = true;
-            %P.plotMean = false;
-            %P.plotMedian = false;
-            %P.plotStd = false;
+            %P.hdsort.plot.ll = true;
+            %P.hdsort.plot.ean = false;
+            %P.hdsort.plot.edian = false;
+            %P.hdsort.plot.td = false;
             %P.meanColor = [0,0,0];
             P.vectors = VECTORS;
             P.normalize = true;
             P.closeCurve = true;
-            self = self@plot.PlotInterface(P, varargin{:});
+            self = self@hdsort.plot.PlotInterface(P, varargin{:});
             
-            self.plotName = 'Polar';
+            self.hdsort.plot.ame = 'Polar';
             
             if any(THETA > 2*pi)
                 THETA = deg2rad(THETA);
@@ -115,10 +115,10 @@ classdef Polar < plot.PlotInterface
                     if isempty(self.vectors)
                         try
                             self.polar = ezpolar(theta, rho(ii,:), 'Color', self.color(ii, :) );
-                            %self.polar = polarplot(theta, rho(ii,:), 'Color', self.color(ii, :) );
+                            %self.polar = polarhdsort.plot.theta, rho(ii,:), 'Color', self.color(ii, :) );
                             hold on;
                             fallback = false;
-%                            self.polar = polarplot(theta, rho(ii,:), 'r');
+%                            self.polar = polarhdsort.plot.theta, rho(ii,:), 'r');
                         catch
                             fallback = true
                         end

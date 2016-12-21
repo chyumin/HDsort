@@ -1,4 +1,4 @@
-classdef FilteredDataSourceInterface < filewrapper.DataSourceInterface
+classdef FilteredDataSourceInterface < hdsort.hdsort.filewrapper.DataSourceInterface
     properties
         filterFactory
         filterObject
@@ -13,7 +13,7 @@ classdef FilteredDataSourceInterface < filewrapper.DataSourceInterface
     methods
         %------------------------------------------------------------------
         function self = FilteredDataSourceInterface(filterFactory, useFilter, varargin)
-            self = self@filewrapper.DataSourceInterface(varargin{:});
+            self = self@hdsort.hdsort.filewrapper.DataSourceInterface(varargin{:});
             self.filterFactory = filterFactory;
             self.useFilter = useFilter;
         end
@@ -31,7 +31,7 @@ classdef FilteredDataSourceInterface < filewrapper.DataSourceInterface
             P.chunkOverlap = 100; % burn-in time for filter
             P.filterProgressDisplay = 'none'; % or 'console' or 'progressbar';
             P.loadProgressDisplay = 'none'; % or 'console' or 'progressbar';
-            P = util.parseInputs(P, varargin, 'error');
+            P = hdsort.util.parseInputs(P, varargin, 'error');
             
             t1 = max(1, min(timeIndex)-P.chunkOverlap);            
             offset = min(timeIndex)-t1;

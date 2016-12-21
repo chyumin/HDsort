@@ -2,14 +2,14 @@ classdef PlotInterface < handle
     properties (SetAccess=protected)
         titleBox
         
-        plotObj
+        hdsort.plot.bj
         
         Children
         Parent
     end
     
     properties
-        plotName
+        hdsort.plot.ame
         
         ah
         fh
@@ -134,7 +134,7 @@ classdef PlotInterface < handle
                 end
             end
             
-            P = util.parseInputs(P_in, varargin, 'error');
+            P = hdsort.util.parseInputs(P_in, varargin, 'error');
             
             self.setProperties(P, varargin);
             
@@ -169,7 +169,7 @@ classdef PlotInterface < handle
             
             %% Copy Properties of other PlotInterface:
             if ~isempty(P.addTo)
-                for f_ = properties(plot.PlotInterface)'
+                for f_ = properties(hdsort.plot.PlotInterface)'
                     f = f_{1};
                     self.(f) = P.addTo.(f);
                 end
@@ -202,8 +202,8 @@ classdef PlotInterface < handle
                 fh = varargin{1};
                 figure(fh);
             else
-                [P restargs] = util.parseInputs(P, varargin, 'split');
-                restargs = util.deflateP(restargs);
+                [P restargs] = hdsort.util.parseInputs(P, varargin, 'split');
+                restargs = hdsort.util.deflateP(restargs);
                 fh = figure(restargs{:});
             end
             if ~isempty(P.h); P.height = P.h; end
@@ -226,7 +226,7 @@ classdef PlotInterface < handle
         
         % -----------------------------------------------------------------
         function setFigureTitle(self, title_str)
-            % plots a title to a figure not to a single axes
+            % hdsort.plot. a title to a figure not to a single axes
             % inputs:
             %   title - title string if figure handle is provided
             self.setAh(self.ah);
@@ -258,7 +258,7 @@ classdef PlotInterface < handle
         
         % -----------------------------------------------------------------
         function setAxisTitle(self, title_str)
-            % plots a title to a figure not to a single axes
+            % hdsort.plot. a title to a figure not to a single axes
             % inputs:
             %   title - title string if figure handle is provided
             self.setAh(self.ah);
@@ -564,7 +564,7 @@ classdef PlotInterface < handle
         
         % -----------------------------------------------------------------
         function saveFig(self, fname, varargin)
-            %From mysort.plot.savefig(fig, fname):
+            %From mysort.hdsort.plot.savefig(fig, fname):
             P.dpi = 300;
             P.fig = 1;
             P.png = 1;
@@ -574,10 +574,10 @@ classdef PlotInterface < handle
             P.ai = 0;
             P.special = 0;
             P.render_manual = true;
-            P = util.parseInputs(P, varargin, 'error');
+            P = hdsort.util.parseInputs(P, varargin, 'error');
             
             if nargin == 1
-                fname = self.plotName;
+                fname = self.hdsort.plot.ame;
                 warning(['No filename specified. Figure saved as ' fname '.fig'])
             end
             
@@ -595,7 +595,7 @@ classdef PlotInterface < handle
             visibility = get(self.fh, 'visible');
             set(self.fh, 'visible', 'on');
             
-            % From mysort.plot.figureChildrenSet(self.fh, 'Units', 'normalized'):
+            % From mysort.hdsort.plot.figureChildrenSet(self.fh, 'Units', 'normalized'):
             count = 0;
             try
                 set(self.fh, 'Units', 'normalized');
@@ -646,15 +646,15 @@ classdef PlotInterface < handle
                 P.EdgeAlpha = self.EdgeAlpha;
                 P.MarkerFaceAlpha = self.MarkerFaceAlpha;
                 P.MarkerEdgeAlpha = self.MarkerEdgeAlpha;
-                P = util.parseInputs(P, varargin, 'error');
+                P = hdsort.util.parseInputs(P, varargin, 'error');
             end
             
-            if ~isempty(self.plotObj) && any(ismember(fieldnames(self.plotObj), {'FaceAlpha', 'EdgeAlpha', 'MarkerFaceAlpha', 'MarkerEdgeAlpha'}))
-            %if any([isfield(self.plotObj, 'FaceAlpha'), isfield(self.plotObj, 'EdgeAlpha'),  isfield(self.plotObj, 'MarkerFaceAlpha'), isfield(self.plotObj, 'MarkerEdgeAlpha')])
-                for ii = 1:numel(self.plotObj)
+            if ~isempty(self.hdsort.plot.bj) && any(ismember(fieldnames(self.hdsort.plot.bj), {'FaceAlpha', 'EdgeAlpha', 'MarkerFaceAlpha', 'MarkerEdgeAlpha'}))
+            %if any([isfield(self.hdsort.plot.bj, 'FaceAlpha'), isfield(self.hdsort.plot.bj, 'EdgeAlpha'),  isfield(self.hdsort.plot.bj, 'MarkerFaceAlpha'), isfield(self.hdsort.plot.bj, 'MarkerEdgeAlpha')])
+                for ii = 1:numel(self.hdsort.plot.bj)
                     for f = fields(P)'
                         try
-                            set(self.plotObj(ii), f{1}, P.(f{1}));
+                            set(self.hdsort.plot.bj(ii), f{1}, P.(f{1}));
                         catch
                         end
                     end
@@ -782,7 +782,7 @@ classdef PlotInterface < handle
     methods(Static)
         % -----------------------------------------------------------------
         function [colorVec markerSet C] = vectorColor(nIdx)
-            % from: markerSet = mysort.plot.lineTypes():
+            % from: markerSet = mysort.hdsort.plot.lineTypes():
             markers = {'+','o','*','.','x','s','d','^','v','>','<','p','h'};
             %markerSet = {markers{1:(mod(N,length(markers))+1)}};
             

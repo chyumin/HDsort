@@ -11,32 +11,32 @@ function [T, tau, mMPmask] = tAlignOnUpsampleMean(T, varargin)
     P.initAlignment = '-';
     P.useMedian = 0;
     P.maxShiftPerIter = 3;
-    P = mysort.util.parseInputs(P, varargin, 'error');
+    P = mysort.hdsort.util.parseInputs(P, varargin, 'error');
     
     % Upsample all 
-%     T = mysort.util.resampleTensor(T, P.upsample, 1);
+%     T = mysort.hdsort.util.resampleTensor(T, P.upsample, 1);
     if ~isempty(P.upsample) && P.upsample > 1
         disp('Upsampling Waveforms...')
-        T = waveforms.tResample(T, P.upsample, 1, 1);
+        T = hdsort.waveforms.tResample(T, P.upsample, 1, 1);
     end
     if 0
         %%
-        vT = waveforms.t2v(T); 
-        figure, plot(vT(1:1000,:)')
+        vT = hdsort.waveforms.t2v(T); 
+        figure, hdsort.plot.vT(1:1000,:)')
     end
-    % figure; plot(squeeze(T))
+    % figure; hdsort.plot.squeeze(T))
     % Initial alignment on maxima
     if ~isempty(P.initAlignment)
         if isnumeric(P.initAlignment)
             tau_init = round(P.initAlignment*P.upsample);
             tau_init = tau_init(:);
-            T = waveforms.tShift(T, tau_init, 1);
+            T = hdsort.waveforms.tShift(T, tau_init, 1);
         elseif strcmp(P.initAlignment, '+')
-            [T tau_init] = waveforms.tAlignOnMax(T, 'truncate', 1, ...
+            [T tau_init] = hdsort.waveforms.tAlignOnMax(T, 'truncate', 1, ...
                 'restrictToIdx', P.restrictToIdx, ...
                 'restrictToChannels', P.restrictToChannels, 'maxIdx', P.maxIdx*P.upsample);
         elseif strcmp(P.initAlignment, '-')
-            [T tau_init] = waveforms.tAlignOnMax(-T, 'truncate', 1, ...
+            [T tau_init] = hdsort.waveforms.tAlignOnMax(-T, 'truncate', 1, ...
                 'restrictToIdx', P.restrictToIdx, ...
                 'restrictToChannels', P.restrictToChannels, 'maxIdx', P.maxIdx*P.upsample);
             T = -T;
@@ -44,9 +44,9 @@ function [T, tau, mMPmask] = tAlignOnUpsampleMean(T, varargin)
     else
         tau_init = zeros(size(T,3),1);
     end
-    % figure; plot(squeeze(T))
+    % figure; hdsort.plot.squeeze(T))
     % align on mean
-    [T, tau_m, mMPmask] = waveforms.tAlignOnMean(T, 'maxIter', P.maxIter, ...
+    [T, tau_m, mMPmask] = hdsort.waveforms.tAlignOnMean(T, 'maxIter', P.maxIter, ...
         'useMedian', P.useMedian, ...
         'restrictToNMaximalValues', P.restrictToNMaximalValues*P.upsample,...
         'restrictToChannels', P.restrictToChannels,...
@@ -62,5 +62,5 @@ function [T, tau, mMPmask] = tAlignOnUpsampleMean(T, varargin)
         % Dont use resample again. This takes very long since it applies
         % anti aliasing. We do not need to do that, there shouldnt be any
         % high frequencies in the data, since we just upsampled it.
-%         T = mysort.util.resampleTensor(T, 1, P.upsample);
+%         T = mysort.hdsort.util.resampleTensor(T, 1, P.upsample);
     end

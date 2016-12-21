@@ -9,15 +9,15 @@ function [X tau] = vAlignOnTemplateInterpolated(X,nC,t,maxShift)
     
     nS = size(X,1);
 
-    mt = waveforms.v2m(t, nC);
+    mt = hdsort.waveforms.v2m(t, nC);
     range = 1:size(mt,2);
     
     tau = zeros(nS, 1);
     for i=1:nS
-        xsinc = waveforms.mSincfun(waveforms.v2m(X(i,:), nC));            
+        xsinc = hdsort.waveforms.mSincfun(hdsort.waveforms.v2m(X(i,:), nC));            
         fun = @(t)   -sum(sum(mt.*xsinc(range-t)));
         [tau(i), k] = fminbnd(fun, -maxShift, maxShift, opt);
     end
 
-    X   = mysort.util.shiftRowsInterpolated(X, tau, nC);
+    X   = mysort.hdsort.util.shiftRowsInterpolated(X, tau, nC);
 end

@@ -1,4 +1,4 @@
-classdef Gscatter3 < plot.PlotInterface
+classdef Gscatter3 < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         labels
         xData
@@ -22,9 +22,9 @@ classdef Gscatter3 < plot.PlotInterface
             P.color = '';
             P.zlabel = '';
             
-            self = self@plot.PlotInterface(P, varargin{:})
+            self = self@hdsort.plot.PlotInterface(P, varargin{:})
             
-            self.plotName = 'Gscatter3';
+            self.hdsort.plot.ame = 'Gscatter3';
             
             self.xData = xData;
             self.yData = yData;
@@ -63,8 +63,8 @@ classdef Gscatter3 < plot.PlotInterface
              
             for g = 1:nGroups
                 idx = self.labels == uLabels(g);
-                self.plotObj(g) = scatter3(self.ah, self.xData(idx), self.yData(idx), self.zData(idx), self.markerArea, self.color(g,:), self.markerType{g});
-                set(self.plotObj(g), 'MarkerFaceAlpha',.3, 'MarkerEdgeAlpha',.2)
+                self.hdsort.plot.bj(g) = scatter3(self.ah, self.xData(idx), self.yData(idx), self.zData(idx), self.markerArea, self.color(g,:), self.markerType{g});
+                set(self.hdsort.plot.bj(g), 'MarkerFaceAlpha',.3, 'MarkerEdgeAlpha',.2)
             end
             
             self.useDefaultValues();

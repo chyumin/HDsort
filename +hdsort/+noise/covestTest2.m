@@ -19,35 +19,35 @@ function covestTest2()
     [T3a2 T3b2 T3c2] = loop(maxLags3,Ls,channels);
     
 
-    mysort.plot.figure('w', 800, 'h', 900);
-    ah = mysort.plot.subplot2([3 1], 'spacerY', 70, 'marginRight', 25);
+    mysort.hdsort.plot.figure('w', 800, 'h', 900);
+    ah = mysort.hdsort.plot.subhdsort.plot.([3 1], 'spacerY', 70, 'marginRight', 25);
     set(ah,'NextPlot', 'add');
 
     
-    plot(ah(1), channels1, squeeze(T1a), '.-', 'linewidth', 2, 'markersize', 15);
-    plot(ah(1), channels1, squeeze(T1a2), 'r.-', 'linewidth', 2, 'markersize', 15);
-    plot(ah(1), channels1, squeeze(T1b), '.--', 'linewidth', 2, 'markersize', 15);
-    plot(ah(1), channels1, squeeze(T1b2), 'r.--', 'linewidth', 2, 'markersize', 15);
+    hdsort.plot.ah(1), channels1, squeeze(T1a), '.-', 'linewidth', 2, 'markersize', 15);
+    hdsort.plot.ah(1), channels1, squeeze(T1a2), 'r.-', 'linewidth', 2, 'markersize', 15);
+    hdsort.plot.ah(1), channels1, squeeze(T1b), '.--', 'linewidth', 2, 'markersize', 15);
+    hdsort.plot.ah(1), channels1, squeeze(T1b2), 'r.--', 'linewidth', 2, 'markersize', 15);
     xlabel(ah(1), '# channels', 'fontsize', 14);
     legend(ah(1),'L=1000, lag=10', 'L=10000, lag=10','location', 'northwest');
     
-    plot(ah(2), Ls2/1000, squeeze(T2a), '.-', 'linewidth', 2, 'markersize', 15);
-    plot(ah(2), Ls2/1000, squeeze(T2b), '.--', 'linewidth', 2, 'markersize', 15);
+    hdsort.plot.ah(2), Ls2/1000, squeeze(T2a), '.-', 'linewidth', 2, 'markersize', 15);
+    hdsort.plot.ah(2), Ls2/1000, squeeze(T2b), '.--', 'linewidth', 2, 'markersize', 15);
     xlabel(ah(2), '# kSamples', 'fontsize', 14);
     legend(ah(2),'nC=20, lag=10', 'location', 'southeast');
     
-    plot(ah(3), maxLags3, squeeze(T3a), '.-', 'linewidth', 2, 'markersize', 15);
-    plot(ah(3), maxLags3, squeeze(T3b), '.--', 'linewidth', 2, 'markersize', 15);
-    plot(ah(3), maxLags3, squeeze(T3c), '.--g', 'linewidth', 2, 'markersize', 15);
+    hdsort.plot.ah(3), maxLags3, squeeze(T3a), '.-', 'linewidth', 2, 'markersize', 15);
+    hdsort.plot.ah(3), maxLags3, squeeze(T3b), '.--', 'linewidth', 2, 'markersize', 15);
+    hdsort.plot.ah(3), maxLags3, squeeze(T3c), '.--g', 'linewidth', 2, 'markersize', 15);
     xlabel(ah(3), 'maxlag', 'fontsize', 14);
     legend(ah(3),'nC=20, L=10000, xcorr', 'matmul', 'both', 'location', 'southeast');
-    plot(ah(3), maxLags3, squeeze(T3a2), '.-k', 'linewidth', 2, 'markersize', 15);
-    plot(ah(3), maxLags3, squeeze(T3b2), '.--k', 'linewidth', 2, 'markersize', 15);
-    plot(ah(3), maxLags3, squeeze(T3c2), '.--c', 'linewidth', 2, 'markersize', 15);
+    hdsort.plot.ah(3), maxLags3, squeeze(T3a2), '.-k', 'linewidth', 2, 'markersize', 15);
+    hdsort.plot.ah(3), maxLags3, squeeze(T3b2), '.--k', 'linewidth', 2, 'markersize', 15);
+    hdsort.plot.ah(3), maxLags3, squeeze(T3c2), '.--c', 'linewidth', 2, 'markersize', 15);
     
     set(ah, 'fontsize', 14);
     ylabel('time [s]', 'fontsize', 14);
-    %mysort.plot.savefig(gcf, 'runtime_analysis_new');
+    %mysort.hdsort.plot.savefig(gcf, 'runtime_analysis_new');
 
     function [Ta Tb Tc] = loop(maxLags, Ls, channels)
         Ta = zeros(length(maxLags), length(Ls), length(channels));
@@ -65,17 +65,17 @@ function covestTest2()
                     MEA = mysort.ds.Matrix(X, 32000, el_positions);
 
                     %% NOISE Estimation
-                    % Build noise estimators
+                    % Build hdsort.noise.estimators
                     tic;
-                    C = mysort.noise.Covest(MEA, 'maxLag', lag, 'forceMethod', 'xcorr');
+                    C = mysort.hdsort.noise.Covest(MEA, 'maxLag', lag, 'forceMethod', 'xcorr');
                     Ta(lag_idx, len_idx, nC_idx) = toc;
                     tic;
                     xc1 = C.xcovs;
-                    C = mysort.noise.Covest(MEA, 'maxLag', lag, 'forceMethod', 'matmul');
+                    C = mysort.hdsort.noise.Covest(MEA, 'maxLag', lag, 'forceMethod', 'matmul');
                     Tb(lag_idx, len_idx, nC_idx) = toc;
                     tic;
                     xc2 = C.xcovs;
-                    C = mysort.noise.Covest(MEA, 'maxLag', lag);
+                    C = mysort.hdsort.noise.Covest(MEA, 'maxLag', lag);
                     Tc(lag_idx, len_idx, nC_idx) = toc;                            
                     xc3 = C.xcovs;
                     tol = .0000001;

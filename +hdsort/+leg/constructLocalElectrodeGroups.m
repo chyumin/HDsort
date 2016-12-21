@@ -4,7 +4,7 @@ function [groups nGroupsPerElectrode] = constructLocalElectrodeGroups(x, y, vara
     P.addIfNearerThan = 20; % always add direct neighbors
 %     P.maxOverlapPerGroup = 6;
     P.maxDistanceWithinGroup = 52;  %keep over 51.59 !
-    P = util.parseInputs(P, varargin, 'error');
+    P = hdsort.util.parseInputs(P, varargin, 'error');
 
     groups = {};
     

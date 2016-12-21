@@ -1,4 +1,4 @@
-classdef Rasterplot < plot.Plot
+classdef Rasterhdsort.plot.< hdsort.plot.Plot
     properties (SetAccess=protected)
         gdf
     end
@@ -13,17 +13,17 @@ classdef Rasterplot < plot.Plot
     methods
         
         %%% ----------------CONSTRUCTOR------------------------------------
-        function self = Rasterplot(input, varargin)
+        function self = Rasterhdsort.plot.input, varargin)
             P.Units = [];
             P.unitIds = [];
             P.timeToZero = false;
             P.xlabel = 'time [s]';
             P.interval = [];
-            self = self@plot.Plot(P, varargin{:})
+            self = self@hdsort.plot.Plot(P, varargin{:})
             
             %% Create a gdf:
             if iscell(input)
-                self.gdf = mysort.spiketrain.toGdf(input);
+                self.gdf = mysort.hdsort.spiketrain.toGdf(input);
             elseif isa(input,'lsa.Unit')
                 self.gdf = []; self.Units = [];
                 for U = input
@@ -81,7 +81,7 @@ classdef Rasterplot < plot.Plot
             end
             
             if isempty(self.color)
-                self.color = mysort.plot.vectorColor(1:nUnits);
+                self.color = mysort.hdsort.plot.vectorColor(1:nUnits);
             elseif self.color == -1
                 self.color = zeros(nUnits,3);
             end
@@ -100,7 +100,7 @@ classdef Rasterplot < plot.Plot
                     xx(1:3:3*numspikes) = (sp-time0)/self.Fs;
                     xx(2:3:3*numspikes) = (sp-time0)/self.Fs;
                     
-                    plot(xx, yy, 'Color', self.color(i,:), 'linewidth',1);
+                    hdsort.plot.xx, yy, 'Color', self.color(i,:), 'linewidth',1);
                 end
             end
             

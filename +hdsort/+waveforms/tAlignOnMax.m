@@ -4,11 +4,11 @@ function [A tau mx] = tAlignOnMax(T, varargin)
     P.maxIdx = [];
     P.restrictToIdx = [];
     P.restrictToChannels = [];
-    P = mysort.util.parseInputs(P, varargin, 'error');
+    P = mysort.hdsort.util.parseInputs(P, varargin, 'error');
     
     A = T;
     
-    % Check if we have to ignore some parts of the waveforms
+    % Check if we have to ignore some parts of the hdsort.waveforms.
     offset = 0;
     if ~isempty(P.restrictToIdx)
         idx = setdiff(1:size(T,1), P.restrictToIdx);
@@ -37,5 +37,5 @@ function [A tau mx] = tAlignOnMax(T, varargin)
         tau = (-(idx - P.maxIdx))';
     end
     tau = tau(:);
-    A = waveforms.tShift(T, tau, P.truncate);
+    A = hdsort.waveforms.tShift(T, tau, P.truncate);
 end

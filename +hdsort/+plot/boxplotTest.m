@@ -14,33 +14,33 @@ data = [100 206 823 500;
         109 205 700 540;
         ]
 %%
-P = plot.Boxplot(data, [3 3 1 1 1 1 1 1 2 3 1 2 3], 'groupnames', {'a', 'b', 'c'}, 'subgroupnames', {'one', 'two', 'three', 'four'})
-P = plot.Boxplot(data, [3 3 1 1 1 1 1 1 2 3 1 2 3], 'groupnames', {'a', 'b', 'c'})
-P = plot.Boxplot(data, [3 3 1 1 1 1 1 1 2 3 1 2 3], 'subgroupnames', {'one', 'two', 'three', 'four'})
-P = plot.Boxplot(data, [3 3 1 1 1 1 1 1 2 3 1 2 3])
+P = hdsort.plot.Boxhdsort.plot.data, [3 3 1 1 1 1 1 1 2 3 1 2 3], 'groupnames', {'a', 'b', 'c'}, 'subgroupnames', {'one', 'two', 'three', 'four'})
+P = hdsort.plot.Boxhdsort.plot.data, [3 3 1 1 1 1 1 1 2 3 1 2 3], 'groupnames', {'a', 'b', 'c'})
+P = hdsort.plot.Boxhdsort.plot.data, [3 3 1 1 1 1 1 1 2 3 1 2 3], 'subgroupnames', {'one', 'two', 'three', 'four'})
+P = hdsort.plot.Boxhdsort.plot.data, [3 3 1 1 1 1 1 1 2 3 1 2 3])
 %%
 data = randn(100, 5);
-P = plot.Boxplot(data, [1 2 3 3 2 1 1 1 2 1], 'groupnames', {'a', 'b', 'c'}, 'subgroupnames', {'one', 'two', 'three', 'four', 'five'})
+P = hdsort.plot.Boxhdsort.plot.data, [1 2 3 3 2 1 1 1 2 1], 'groupnames', {'a', 'b', 'c'}, 'subgroupnames', {'one', 'two', 'three', 'four', 'five'})
 %%
 data = randn(100, 4);
 groupIdx = randi(3, [1 100]);
-P = plot.Boxplot(data, groupIdx, 'groupnames', {'a', 'b', 'c'}, 'subgroupnames', {'one', 'two', 'three', 'four'}, 'displayN', true)
-P = plot.Boxplot(data, groupIdx, 'groupnames', {'a', 'b', 'c'}, 'subgroupnames', {'one', 'two', 'three', 'four', 'five'})
-P = plot.Boxplot(data, groupIdx, 'groupnames', {'a', 'b'}, 'subgroupnames', {'one', 'two', 'three', 'four'})
-P = plot.Boxplot(data, groupIdx, 'subgroupnames', {'one', 'two', 'three', 'four'})
-P = plot.Boxplot(data, groupIdx, 'displayN', true)
+P = hdsort.plot.Boxhdsort.plot.data, groupIdx, 'groupnames', {'a', 'b', 'c'}, 'subgroupnames', {'one', 'two', 'three', 'four'}, 'displayN', true)
+P = hdsort.plot.Boxhdsort.plot.data, groupIdx, 'groupnames', {'a', 'b', 'c'}, 'subgroupnames', {'one', 'two', 'three', 'four', 'five'})
+P = hdsort.plot.Boxhdsort.plot.data, groupIdx, 'groupnames', {'a', 'b'}, 'subgroupnames', {'one', 'two', 'three', 'four'})
+P = hdsort.plot.Boxhdsort.plot.data, groupIdx, 'subgroupnames', {'one', 'two', 'three', 'four'})
+P = hdsort.plot.Boxhdsort.plot.data, groupIdx, 'displayN', true)
 %%
 data = randn(100, 1);
 groupIdx = randi(4, [1 100]);
-P = plot.Boxplot(data, groupIdx, 'displayN', true)
+P = hdsort.plot.Boxhdsort.plot.data, groupIdx, 'displayN', true)
 %%
-P = plot.Boxplot(data)
+P = hdsort.plot.Boxhdsort.plot.data)
 
 %%
-P = plot.boxplot_old(data, [3 3 1 1 1 1 1 1 2 3 1 2 3], 'groupnames', {'a', 'b', 'c'}, 'subgroupnames', {'one', 'two', 'three', 'four'})
-P = plot.boxplot_old(data, [3 3 1 1 1 1 1 1 2 3 1 2 3], 'groupnames', {'a', 'b', 'c'})
-P = plot.boxplot_old(data, [3 3 1 1 1 1 1 1 2 3 1 2 3], 'subgroupnames', {'one', 'two', 'three', 'four'})
-P = plot.boxplot_old(data, [3 3 1 1 1 1 1 1 2 3 1 2 3])
+P = hdsort.plot.boxhdsort.plot.old(data, [3 3 1 1 1 1 1 1 2 3 1 2 3], 'groupnames', {'a', 'b', 'c'}, 'subgroupnames', {'one', 'two', 'three', 'four'})
+P = hdsort.plot.boxhdsort.plot.old(data, [3 3 1 1 1 1 1 1 2 3 1 2 3], 'groupnames', {'a', 'b', 'c'})
+P = hdsort.plot.boxhdsort.plot.old(data, [3 3 1 1 1 1 1 1 2 3 1 2 3], 'subgroupnames', {'one', 'two', 'three', 'four'})
+P = hdsort.plot.boxhdsort.plot.old(data, [3 3 1 1 1 1 1 1 2 3 1 2 3])
 
 
 

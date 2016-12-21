@@ -1,4 +1,4 @@
-classdef Covest < mysort.util.DebuggableClass
+classdef Covest < mysort.hdsort.util.DebuggableClass
     properties
         dataSource
         xcovs
@@ -8,17 +8,17 @@ classdef Covest < mysort.util.DebuggableClass
     methods
         %------------------------------------------------------------------
         function self = Covest(X, varargin)
-            self = self@mysort.util.DebuggableClass(varargin{:});
+            self = self@mysort.hdsort.util.DebuggableClass(varargin{:});
             self.P.maxDist = 50; % micro meter
             self.P.maxLag  = 20; % samples, should be = Tf-1
-            self.P.noiseEpochs = [];
+            self.P.hdsort.noise.pochs = [];
             self.P.delayComputation = 0;
             self.P.forceMethod = []; % possible: "xcorr", "matmul"
-            self.P = mysort.util.parseInputs(self.P, '', varargin);
+            self.P = mysort.hdsort.util.parseInputs(self.P, '', varargin);
             self.dataSource = mysort.datasource.check(X);
             
-            if isempty(self.P.noiseEpochs)
-                self.P.noiseEpochs = [1 self.dataSource.getLen()];
+            if isempty(self.P.hdsort.noise.pochs)
+                self.P.hdsort.noise.pochs = [1 self.dataSource.getLen()];
             end
             
             if ~self.P.delayComputation
@@ -35,7 +35,7 @@ classdef Covest < mysort.util.DebuggableClass
                 xcovs = self.calcXCovsWithXCorr();
             elseif isempty(self.P.forceMethod)
                 if self.P.maxLag <= 30 % this is the break-even point. see 
-                                       % \mysortpackage\tests\tests\noise\covestTest2.m
+                                       % \mysortpackage\tests\tests\hdsort.noise.covestTest2.m
                     xcovs = self.calcXCovsWithMatMul();
                 else 
                     xcovs = self.calcXCovsWithXCorr();
@@ -66,19 +66,19 @@ classdef Covest < mysort.util.DebuggableClass
         function xcov = calcXCovBetweenChannelWithXCorr(self, c1, c2)
             maxLag = self.P.maxLag;
             xcov = zeros(1, 2*maxLag +1 );
-            totalNoiseEpochLength = sum(mysort.epoch.length(self.P.noiseEpochs));
+            totalNoiseEpochLength = sum(mysort.hdsort.epoch.length(self.P.hdsort.noise.pochs));
             if c1 == c2
-                for i=1:size(self.P.noiseEpochs,1)
+                for i=1:size(self.P.hdsort.noise.pochs,1)
                     xcov = xcov +  xcorr(...
                         self.dataSource.getData(...
-                            [self.P.noiseEpochs(i,1) self.P.noiseEpochs(i,2)], ...
+                            [self.P.hdsort.noise.pochs(i,1) self.P.hdsort.noise.pochs(i,2)], ...
                             c1), ...
                         maxLag, 'none');
                 end
             else
-                for i=1:size(self.P.noiseEpochs,1)
+                for i=1:size(self.P.hdsort.noise.pochs,1)
                     X = self.dataSource.getData(...
-                        [self.P.noiseEpochs(i,1) self.P.noiseEpochs(i,2)], ...
+                        [self.P.hdsort.noise.pochs(i,1) self.P.hdsort.noise.pochs(i,2)], ...
                         [c1 c2]);
                     xcov = xcov + xcorr(...
                         X(1,:), X(2,:), maxLag, 'none');
@@ -93,15 +93,15 @@ classdef Covest < mysort.util.DebuggableClass
             nC = self.dataSource.getNChannel();
             xcovs = cell(nC, nC);
             maxlag = self.P.maxLag;
-            totalNoiseEpochLength = sum(mysort.epoch.length(self.P.noiseEpochs));
+            totalNoiseEpochLength = sum(mysort.hdsort.epoch.length(self.P.hdsort.noise.pochs));
             % do this only once since "isa" and getDistance are very slow 
             % when called often (50% of total computation time)
             bIsMea = isa(self.dataSource, 'mysort.datasource.MultiElectrodeInterface');
             bufferedChannelPairs = prepareChannelPairs();
-            X = self.dataSource.getData(self.P.noiseEpochs);
-            EL = mysort.epoch.length(self.P.noiseEpochs);
+            X = self.dataSource.getData(self.P.hdsort.noise.pochs);
+            EL = mysort.hdsort.epoch.length(self.P.hdsort.noise.pochs);
             ELcumsum = [0; cumsum(EL)];
-            for ne=1:size(self.P.noiseEpochs,1)
+            for ne=1:size(self.P.hdsort.noise.pochs,1)
                 for c1=1:nC
                     xcovs{c1,c1} = calcXCovBetweenChannelMatMul(...
                         X(c1, ELcumsum(ne)+1:ELcumsum(ne+1)), ...
@@ -162,7 +162,7 @@ classdef Covest < mysort.util.DebuggableClass
             if ~exist('maxLag', 'var')
                 maxLag = self.P.maxLag;
             end
-            ccol = mysort.noise.xcov2ccol(self.xcovs, maxLag);
+            ccol = mysort.hdsort.noise.xcov2ccol(self.xcovs, maxLag);
         end       
         
         %------------------------------------------------------------------

@@ -24,8 +24,8 @@ function [gdf_merged, T_merged, localSorting, localSortingID, sessionLengths] = 
     Tf = 45;
 
     if iscell(h5FileList)
-        DSFull = filewrapper.CMOSMEA(h5FileList, 'useFilter', 0, 'name', 'PREFILT');
-    elseif isa(h5FileList, 'filewrapper.MultiSessionInterface')
+        DSFull = hdsort.filewrapper.CMOSMEA(h5FileList, 'useFilter', 0, 'name', 'PREFILT');
+    elseif isa(h5FileList, 'hdsort.filewrapper.MultiSessionInterface')
         DSFull = h5FileList;
         warning('If a Datasource object is provided the parfor option will be disabled.');
         useParForIfPossible = false;
@@ -38,7 +38,7 @@ function [gdf_merged, T_merged, localSorting, localSortingID, sessionLengths] = 
     electrodePositions = DSFull.MultiElectrode.electrodePositions;
     electrodeNumbers   = DSFull.MultiElectrode.electrodeNumbers;
     % Make groupings of electrodes to be sorted independently
-    [groupsidx nGroupsPerElectrode] = hdsort.constructLocalElectrodeGroups(electrodePositions(:,1), electrodePositions(:,2));
+    [groupsidx nGroupsPerElectrode] = hdsort.leg.constructLocalElectrodeGroups(electrodePositions(:,1), electrodePositions(:,2));
     % replace electrode indices with electrode numbers
     groups = {};
     for ii=1:length(groupsidx)
@@ -69,12 +69,12 @@ function [gdf_merged, T_merged, localSorting, localSortingID, sessionLengths] = 
     if matlabpool('size') > 0 && useParForIfPossible
         parfor ii=1:length(groupsidx)
             % Build Mea that concatenates multiple ntk files (WARNING NEED TO HAVE THE SAME CONFIGURATIONS!
-            DScopy = filewrapper.CMOSMEA(h5FileList, 'useFilter', 0, 'name', 'PREFILT');
+            DScopy = hdsort.filewrapper.CMOSMEA(h5FileList, 'useFilter', 0, 'name', 'PREFILT');
             DScopy.restrictToChannels(groupsidx{ii});
             [S P_] = hdsort.sortScript(DScopy, fullfile(outPath, ['group' sprintf('%04d', ii)]), runName, P);
             % RELEASE CHANNEL RESTRICTIONS FOR TEMPLATE ESTIMATION
             DScopy.restrictToChannels();
-            hdsort.startHDSortingTemplateEstimation(outPath, ['group' sprintf('%04d', ii)], runName, Tf, cutleft, DScopy, groupsidx{ii}, MES);
+            hdsort.leg.startHDSortingTemplateEstimation(outPath, ['group' sprintf('%04d', ii)], runName, Tf, cutleft, DScopy, groupsidx{ii}, MES);
         end
     else
         for ii=1:length(groupsidx)
@@ -82,7 +82,7 @@ function [gdf_merged, T_merged, localSorting, localSortingID, sessionLengths] = 
             [S P_] = hdsort.sortScript(DSFull, fullfile(outPath, ['group' sprintf('%04d', ii)]), runName, P);
             % RELEASE CHANNEL RESTRICTIONS FOR TEMPLATE ESTIMATION
             DSFull.restrictToChannels();
-            hdsort.startHDSortingTemplateEstimation(outPath, ['group' sprintf('%04d', ii)], runName, Tf, cutleft, DSFull, groupsidx{ii}, MES);
+            hdsort.leg.startHDSortingTemplateEstimation(outPath, ['group' sprintf('%04d', ii)], runName, Tf, cutleft, DSFull, groupsidx{ii}, MES);
         end
     end
     
@@ -97,7 +97,7 @@ function [gdf_merged, T_merged, localSorting, localSortingID, sessionLengths] = 
 
     disp('Postprocessing...');
     [gdf_merged T_merged localSorting localSortingID] =...
-        hdsort.processLocalSortings(outPath, runName, groups, groupsidx);
+        hdsort.leg.processLocalSortings(outPath, runName, groups, groupsidx);
     units = unique(gdf_merged(:,1));
     nU = length(units)
     assert(length(localSorting) == nU, 'must be identical');

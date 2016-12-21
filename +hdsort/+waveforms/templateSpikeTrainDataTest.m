@@ -15,9 +15,9 @@ gdf = [1 10
        2 105
        3 110];
 cutLeft = 3;
-[x y] = waveforms.templateSpikeTrainData(T, gdf, cutLeft); 
+[x y] = hdsort.waveforms.templateSpikeTrainData(T, gdf, cutLeft); 
 
 figure;
-plot(x,y(1,:), 'b')
+hdsort.plot.x,y(1,:), 'b')
 hold on
-plot(x,y(2,:), 'g')
+hdsort.plot.x,y(2,:), 'g')

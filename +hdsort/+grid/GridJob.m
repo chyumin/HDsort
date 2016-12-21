@@ -63,7 +63,7 @@ classdef GridJob < handle
             p.memoryusage = [];
             p.gridType = 'BSSE';
             
-            [p p2] = util.parseInputs(p, varargin, 'split');
+            [p p2] = hdsort.util.parseInputs(p, varargin, 'split');
             self.P_untreated = p2; self.P = p;
             
             % For debugging on a local machine:
@@ -746,9 +746,9 @@ classdef GridJob < handle
                         move_str   = sprintf('mv %s %s', token_file, submit_token_file);
                         
                         cd('~')
-                        mysort.util.logToFile(log_file, submit_str)
+                        mysort.hdsort.util.logToFile(log_file, submit_str)
                         [status, result] = system(submit_str);
-                        mysort.util.logToFile(log_file, result)
+                        mysort.hdsort.util.logToFile(log_file, result)
                         cd(tokenFolder)
                         
                         if status == 0
@@ -758,9 +758,9 @@ classdef GridJob < handle
                             disp('Submit failed')
                         end
                         
-                        mysort.util.logToFile(log_file, move_str)
+                        mysort.hdsort.util.logToFile(log_file, move_str)
                         [status, result] = system(move_str);
-                        mysort.util.logToFile(log_file, result)
+                        mysort.hdsort.util.logToFile(log_file, result)
                         pause(2.5)
                         disp('Done processing. Waiting...')
                     end

@@ -10,14 +10,14 @@ P.xlabel = '';
 P.title = '';
 P.markerSize = [];
 P.color = [];
-P = mysort.util.parseInputs(P, varargin, 'error');
+P = mysort.hdsort.util.parseInputs(P, varargin, 'error');
 
 
 uLabels = unique(labels);
 nGroups = numel(uLabels);
 
 if isempty(P.fh) & isempty(P.ah)
-    P.fh = mysort.plot.figure('name',P.figureName);
+    P.fh = mysort.hdsort.plot.figure('name',P.figureName);
     P.ah = axes();
 elseif ~isempty(P.fh) & isempty(P.ah)
     figure(P.fh);
@@ -28,7 +28,7 @@ end
 hold on;
 
 if isempty(P.color)
-    P.color = mysort.plot.vectorColor(1:nGroups);
+    P.color = mysort.hdsort.plot.vectorColor(1:nGroups);
 end
 
 for g = 1:nGroups

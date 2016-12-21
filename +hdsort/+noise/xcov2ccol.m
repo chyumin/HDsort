@@ -1,5 +1,5 @@
 function CCol = xcov2ccol(xcovs, maxLag)
-    % Computes the column representation of a noise covariance matrix from
+    % Computes the column representation of a hdsort.noise.covariance matrix from
     % x-covariance function in xcovs with maximal lag maxlag.
     
     nC = size(xcovs,1);

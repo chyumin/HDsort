@@ -1,4 +1,4 @@
-classdef Covestrev21918 < mysort.util.DebuggableClass
+classdef Covestrev21918 < mysort.hdsort.util.DebuggableClass
     properties
         dataSource
         xcovs
@@ -8,11 +8,11 @@ classdef Covestrev21918 < mysort.util.DebuggableClass
     methods
         %------------------------------------------------------------------
         function self = Covestrev21918(X, varargin)
-            self = self@mysort.util.DebuggableClass(varargin{:});
+            self = self@mysort.hdsort.util.DebuggableClass(varargin{:});
             self.P.maxDist = 50; % micro meter
             self.P.maxLag  = 50; % samples
-            self.P.noiseEpochs = [];
-            self.P = mysort.util.parseInputs(self.P, '', varargin);
+            self.P.hdsort.noise.pochs = [];
+            self.P = mysort.hdsort.util.parseInputs(self.P, '', varargin);
             if isstruct(X)
                 self.fromStruct(X);
                 return
@@ -23,8 +23,8 @@ classdef Covestrev21918 < mysort.util.DebuggableClass
                 self.dataSource = mysort.datasource.DataSource(X);
             end
             
-            if isempty(self.P.noiseEpochs)
-                self.P.noiseEpochs = [1 self.dataSource.getLen()];
+            if isempty(self.P.hdsort.noise.pochs)
+                self.P.hdsort.noise.pochs = [1 self.dataSource.getLen()];
             end
             
             self.xcovs = self.calcXCovs();
@@ -64,16 +64,16 @@ classdef Covestrev21918 < mysort.util.DebuggableClass
         function xcov = calcXCovBetweenChannel(self, c1, c2)
             Tf = self.P.maxLag;
             xcov = zeros(1, 2*(Tf-1) +1 );
-            totalNoiseEpochLength = sum(self.P.noiseEpochs(:,2)-self.P.noiseEpochs(:,1));
+            totalNoiseEpochLength = sum(self.P.hdsort.noise.pochs(:,2)-self.P.hdsort.noise.pochs(:,1));
             if c1 == c2
-                for i=1:size(self.P.noiseEpochs,1)
+                for i=1:size(self.P.hdsort.noise.pochs,1)
                     xcov = xcov +  xcorr(...
-                        self.dataSource.getData(self.P.noiseEpochs(i,:), c1), ...
+                        self.dataSource.getData(self.P.hdsort.noise.pochs(i,:), c1), ...
                         Tf-1, 'none');
                 end
             else
-                for i=1:size(self.P.noiseEpochs,1)
-                    X = self.dataSource.getData(self.P.noiseEpochs(i,:), [c1 c2]);
+                for i=1:size(self.P.hdsort.noise.pochs,1)
+                    X = self.dataSource.getData(self.P.hdsort.noise.pochs(i,:), [c1 c2]);
                     xcov = xcov + xcorr(...
                         X(1,:), X(2,:), Tf-1, 'none');
                 end
@@ -82,7 +82,7 @@ classdef Covestrev21918 < mysort.util.DebuggableClass
         end
         %------------------------------------------------------------------
         function ccol = buildCColumn(self)
-            ccol = mysort.noise.xcov2ccol(self.xcovs);
+            ccol = mysort.hdsort.noise.xcov2ccol(self.xcovs);
         end       
         
         %------------------------------------------------------------------

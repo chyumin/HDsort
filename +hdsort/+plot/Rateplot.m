@@ -1,4 +1,4 @@
-classdef Rateplot < plot.PlotInterface
+classdef Ratehdsort.plot.< hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         rate
         nUnits
@@ -13,15 +13,15 @@ classdef Rateplot < plot.PlotInterface
     methods
         
         %%% ----------------CONSTRUCTOR------------------------------------
-        function self = Rateplot(rate, varargin)
+        function self = Ratehdsort.plot.rate, varargin)
             P.Units = [];
             P.unitIds = [];
             P.xlabel = 'time [s]';
             P.time = [];
             
-            self = self@plot.PlotInterface(P, varargin{:})
+            self = self@hdsort.plot.PlotInterface(P, varargin{:})
             
-            self.plotName = 'Rateplot';
+            self.hdsort.plot.ame = 'Ratehdsort.plot.;
             
             % Convert row vector to column vector:
             if size(rate, 1) == 1
@@ -57,14 +57,14 @@ classdef Rateplot < plot.PlotInterface
         function show_(self)
             
             if isempty(self.color)
-                self.color = mysort.plot.vectorColor(1:self.nUnits);
+                self.color = mysort.hdsort.plot.vectorColor(1:self.nUnits);
             elseif self.color == -1
                 self.color = zeros(self.nUnits,3);
             end
             
             maxInput = max(max(self.rate));
             for ii=1:self.nUnits
-                plot(self.time, self.rate(:,ii) + maxInput*ii , 'Color', self.color(ii,:), 'linewidth', self.LineWidth);
+                hdsort.plot.self.time, self.rate(:,ii) + maxInput*ii , 'Color', self.color(ii,:), 'linewidth', self.LineWidth);
             end
             
             if isempty(self.YTickLabel) & self.nUnits < 20

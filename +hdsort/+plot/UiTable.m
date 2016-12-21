@@ -1,4 +1,4 @@
-classdef UiTable < plot.PlotInterface
+classdef UiTable < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         
     end
@@ -40,9 +40,9 @@ classdef UiTable < plot.PlotInterface
             P.ColumnEditable = [];
             P.RowName = 'numbered';
             
-            self = self@plot.PlotInterface(P, varargin{:})
+            self = self@hdsort.plot.PlotInterface(P, varargin{:})
             
-            self.plotName = 'UiTable';
+            self.hdsort.plot.ame = 'UiTable';
             self.show();
         end
         

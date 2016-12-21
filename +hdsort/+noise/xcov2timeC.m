@@ -1,5 +1,5 @@
 function C = xcov2timeC(xcovs, maxLag)
-    % Computes the time embedded (Pouzat 2002) noise covariance matrix
+    % Computes the time embedded (Pouzat 2002) hdsort.noise.covariance matrix
     % from a set of x-covariance function in xcovs with maximal lag maxlag.
     
     nC = size(xcovs,1);

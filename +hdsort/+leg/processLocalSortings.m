@@ -3,7 +3,7 @@ function [R, P] = ...
     processLocalSortings(dpath, runName, elGroupNumbers, elGroupIndices, varargin)
 P.groupPaths = [];
 P.newPostProcFunc = '';
-P = util.parseInputs(P, varargin, 'error');
+P = hdsort.util.parseInputs(P, varargin, 'error');
 
 %% Load GDFs
 nGroups = length(elGroupNumbers);

@@ -1,5 +1,5 @@
 function T = v2t(V, nC)
-    % converts the multichannel waveforms stored as rows in v with single
+    % converts the multichannel hdsort.waveforms.stored as rows in v with single
     % channels concatenated into the tensor representation
     
     [nS TfnC nSubsampleTaus] = size(V);

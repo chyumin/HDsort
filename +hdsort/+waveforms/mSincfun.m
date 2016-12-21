@@ -16,7 +16,7 @@ function sf = mSincfun(x,y)
     % Example:
     %      sf = sincfun(sin(0:.1:pi));
     %      figure;
-    %      plot(sf(0:.01:pi));
+    %      hdsort.plot.sf(0:.01:pi));
     if nargin == 1
         y=x;
         x=1:size(x,2);
@@ -34,7 +34,7 @@ function sf = mSincfun(x,y)
         % compute for every point in t(i) a sinc function that will be
         % multiplied with the values in y to yield the respective single
         % sample corresponding to t(i)
-        S = mysort.util.sinc0(t(ones(size(x)),:) - x(ones(size(t)),:)');
+        S = mysort.hdsort.util.sinc0(t(ones(size(x)),:) - x(ones(size(t)),:)');
         % since_ is a matrix containing the single interpolator sinc
         % functions as columns. They need to be of norm one
         nSinc_ = sqrt(sum(S.^2, 1));

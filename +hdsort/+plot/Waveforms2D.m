@@ -1,4 +1,4 @@
-classdef Waveforms2D < plot.PlotInterface
+classdef Waveforms2D < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         wfs
         med
@@ -9,17 +9,17 @@ classdef Waveforms2D < plot.PlotInterface
         IDs
         absThreshold
         maxNumberOfChannels
-        plotAllTraces
-        plotMeanConfidenceWithSigma
-        plotElNumbers
+        hdsort.plot.llTraces
+        hdsort.plot.eanConfidenceWithSigma
+        hdsort.plot.lNumbers
         maxWaveforms
         channelIdx
         scaling
         wfsButtonDownFcn
         electrodeWidth
         
-        plotMean
-        plotMedian
+        hdsort.plot.ean
+        hdsort.plot.edian
         medianColor
         medianLineWidth
         
@@ -39,12 +39,12 @@ classdef Waveforms2D < plot.PlotInterface
             P.medianColor = [.0 .0 .0];
             P.medianLineWidth = 2.0;
             
-            P.plotAllTraces = 1;
-            P.plotMean = false;
-            P.plotMedian = false;
-            P.plotMeanConfidenceWithSigma = [];
+            P.hdsort.plot.llTraces = 1;
+            P.hdsort.plot.ean = false;
+            P.hdsort.plot.edian = false;
+            P.hdsort.plot.eanConfidenceWithSigma = [];
             
-            P.plotElNumbers = [];
+            P.hdsort.plot.lNumbers = [];
             P.maxWaveforms = 3000;
             P.channelIdx = [];
             P.scaling = [];
@@ -57,9 +57,9 @@ classdef Waveforms2D < plot.PlotInterface
             
             P.flipud = false;
             
-            self = self@plot.PlotInterface(P, varargin{:});
+            self = self@hdsort.plot.PlotInterface(P, varargin{:});
             
-            self.plotName = 'Waveforms2D';
+            self.hdsort.plot.ame = 'Waveforms2D';
             self.wfs = wfs;
             if ~self.flipud
                 self.wfs = -self.wfs;
@@ -94,12 +94,12 @@ classdef Waveforms2D < plot.PlotInterface
                 self.scaling = 15/max(abs(self.wfs(:)));
             end
             
-            if self.plotMedian || self.plotMean
-                assert(self.plotMedian ~= self.plotMean, 'Only one can be plotted!!!')
+            if self.hdsort.plot.edian || self.hdsort.plot.ean
+                assert(self.hdsort.plot.edian ~= self.hdsort.plot.ean, 'Only one can be hdsort.plot.ed!!!')
                 
-                if self.plotMedian
+                if self.hdsort.plot.edian
                     self.med = median( self.wfs, 3);
-                elseif self.plotMean
+                elseif self.hdsort.plot.ean
                     self.med = mean( self.wfs, 3);
                 else
                     error('Should not happen!')
@@ -119,18 +119,18 @@ classdef Waveforms2D < plot.PlotInterface
             % wfs is tensor time x channels x items
             % electrodePositions is matrix, first column x, second column y
             assert(isempty(self.IDs) || length(self.IDs) == 1 || length(self.IDs) == size(self.wfs,3), 'Length of IDs does not match number of items in wfs')
-            self.plotChannels()
+            self.hdsort.plot.hannels()
             
-            if self.plotMedian || self.plotMean
-                self.plotMedianFcn();
+            if self.hdsort.plot.edian || self.hdsort.plot.ean
+                self.hdsort.plot.edianFcn();
             end
             
             
-            if ~isempty(self.plotElNumbers)
+            if ~isempty(self.hdsort.plot.lNumbers)
                 for ii = 1:nC
                     x = self.electrodePositions(ii,1);
                     y = self.electrodePositions(ii,2);
-                    text(x + self.electrodeWidth, y, num2str(self.plotElNumbers(ii)), 'parent', self.ah);
+                    text(x + self.electrodeWidth, y, num2str(self.hdsort.plot.lNumbers(ii)), 'parent', self.ah);
                 end
             end
             if ~isempty(self.channelIdx)
@@ -145,7 +145,7 @@ classdef Waveforms2D < plot.PlotInterface
         end
         
         % -----------------------------------------------------------------
-        function plotChannels(self)
+        function hdsort.plot.hannels(self)
             
             uIDs = unique(self.IDs);
             nU = length(uIDs);
@@ -154,18 +154,18 @@ classdef Waveforms2D < plot.PlotInterface
             
             set(self.ah, 'NextPlot', 'add');
             
-            if self.plotAllTraces
+            if self.hdsort.plot.llTraces
                 if nU > 1
-                    if self.plotMedian
-                        self.color = 0.75 + 0.25* mysort.plot.vectorColor(uIDs);
+                    if self.hdsort.plot.edian
+                        self.color = 0.75 + 0.25* mysort.hdsort.plot.vectorColor(uIDs);
                     else
-                        self.color = mysort.plot.vectorColor(uIDs);
+                        self.color = mysort.hdsort.plot.vectorColor(uIDs);
                     end
                 end
                 
                 for u = 1:nU
                     uIdx = self.IDs == uIDs(u);
-                    [m mTf mchan_] =  util.max2D(abs(self.wfs(:,:,uIdx) ), 'each column');
+                    [m mTf mchan_] =  hdsort.util.max2D(abs(self.wfs(:,:,uIdx) ), 'each column');
                     
                     nC = min(self.maxNumberOfChannels, nC);
                     mchan = mchan_(1:nC);
@@ -180,7 +180,7 @@ classdef Waveforms2D < plot.PlotInterface
                         Y(idx)    = self.electrodePositions(mchan(ii),2) - squeeze(self.wfs(:,mchan(ii),uIdx))*self.scaling;
                     end
                     
-                    plot(self.ah, pIdx, Y, self.LineSpec, ...
+                    hdsort.plot.self.ah, pIdx, Y, self.LineSpec, ...
                         'Color', self.color(u,:), ...
                         'LineWidth', self.LineWidth);
                     
@@ -189,7 +189,7 @@ classdef Waveforms2D < plot.PlotInterface
         end
         % -----------------------------------------------------------------
         
-        function plotMedianFcn(self)
+        function hdsort.plot.edianFcn(self)
             
             uIDs = unique(self.IDs);
             [Tf, nC, nWf] = size(self.wfs);
@@ -204,18 +204,18 @@ classdef Waveforms2D < plot.PlotInterface
                 Y(idx)    = self.electrodePositions(ii,2) - squeeze(self.med(:,ii))*self.scaling;
             end
             
-            plot(self.ah, pIdx, Y, self.LineSpec, ...
+            hdsort.plot.self.ah, pIdx, Y, self.LineSpec, ...
                 'Color', self.medianColor, ...
                 'LineWidth', self.medianLineWidth);
             
-            if ~isempty(self.plotMeanConfidenceWithSigma)
-                var_mean = self.plotMeanConfidenceWithSigma/sqrt(nWf);
+            if ~isempty(self.hdsort.plot.eanConfidenceWithSigma)
+                var_mean = self.hdsort.plot.eanConfidenceWithSigma/sqrt(nWf);
                 
-                plot(self.ah, pIdx, Y + 3*var_mean, self.LineSpec, ...
+                hdsort.plot.self.ah, pIdx, Y + 3*var_mean, self.LineSpec, ...
                     'Color', self.medianColor, ...
                     'LineWidth', self.medianLineWidth);
                 
-                plot(self.ah, pIdx, Y - 3*var_mean, self.LineSpec, ...
+                hdsort.plot.self.ah, pIdx, Y - 3*var_mean, self.LineSpec, ...
                     'Color', self.medianColor, ...
                     'LineWidth', self.medianLineWidth);
                 

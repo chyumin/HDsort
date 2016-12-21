@@ -35,7 +35,7 @@ classdef SortJob < grid.GridJob
             p.nGroups = [];
             p.groupFile = '';
             
-            p = util.parseInputs(p, self.P_untreated, 'error');
+            p = hdsort.util.parseInputs(p, self.P_untreated, 'error');
             self.sortJobP = p;
             
             %% Set the data files:
@@ -124,7 +124,7 @@ classdef SortJob < grid.GridJob
             taskParameters.sortingParameters.botm.run = 0;
             taskParameters.sortingParameters.spikeCutting.maxSpikes = 200000000000; % Set this to basically inf
             
-            taskParameters.sortingParameters.noiseEstimation.minDistFromSpikes = 80;
+            taskParameters.sortingParameters.hdsort.noise.stimation.minDistFromSpikes = 80;
             
             taskParameters.sortingParameters.spikeAlignment.initAlignment = '-';
             taskParameters.sortingParameters.spikeAlignment.maxSpikes = 50000;     % so many spikes will be clustered
@@ -224,8 +224,8 @@ classdef SortJob < grid.GridJob
         %
         %                     units = unique( res.gdf_merged(:,1) );
         %                     nUnits = length(units);
-        %                     %[dir_exists,mess,messid] = mkdir(self.folders.main, 'qcplots');
-        %                     %self.folders.qcplots = fullfile( self.folders.main, 'qcplots');
+        %                     %[dir_exists,mess,messid] = mkdir(self.folders.main, 'qchdsort.plot.');
+        %                     %self.folders.qchdsort.plot. = fullfile( self.folders.main, 'qchdsort.plot.');
         %
         %                     %DSFull = mysort.mea.CMOSMEA(self.files.data);%, 'useFilter', self.sortJobP.useFilter, 'name', self.jobName);
         %                     %MES = DSFull.MultiElectrode.toStruct();
@@ -244,8 +244,8 @@ classdef SortJob < grid.GridJob
             try
                 res = load(self.destinationlocation.files.results)
                 
-                [dir_exists,mess,messid] = mkdir(self.folders.main, 'qcplots');
-                self.folders.qcplots = fullfile( self.folders.main, 'qcplots');
+                [dir_exists,mess,messid] = mkdir(self.folders.main, 'qchdsort.plot.');
+                self.folders.qchdsort.plot. = fullfile( self.folders.main, 'qchdsort.plot.');
                 
                 DSFull = mysort.mea.CMOSMEA(self.files.data);%, 'useFilter', self.sortJobP.useFilter, 'name', self.jobName);
                 MES = DSFull.MultiElectrode.toStruct();
@@ -258,30 +258,30 @@ classdef SortJob < grid.GridJob
             figures = struct;
             
             %% ISIH:
-            self.destinationlocation.files.isih = fullfile( self.folders.qcplots, 'isih');
+            self.destinationlocation.files.isih = fullfile( self.folders.qchdsort.plot., 'isih');
             if ~exist(self.destinationlocation.files.isih, 'file')
-                F = mysort.plot.isi( res.gdf_merged )
-                mysort.plot.savefig(F.figureHandle, self.destinationlocation.files.isih)
+                F = mysort.hdsort.plot.isi( res.gdf_merged )
+                mysort.hdsort.plot.savefig(F.figureHandle, self.destinationlocation.files.isih)
             end
             
             %% Footprints whole
-            self.destinationlocation.files.footprints = fullfile( self.folders.qcplots, 'footprints_whole');
+            self.destinationlocation.files.footprints = fullfile( self.folders.qchdsort.plot., 'footprints_whole');
             if ~exist(self.destinationlocation.files.footprints, 'file')
                 F.figureHandle = figure();
-                mysort.plot.waveforms2D(res.T_merged, MES.electrodePositions, 'IDs', res.localSortingID);
-                mysort.plot.savefig(F.figureHandle, self.destinationlocation.files.footprints)
+                mysort.hdsort.plot.hdsort.waveforms.D(res.T_merged, MES.electrodePositions, 'IDs', res.localSortingID);
+                mysort.hdsort.plot.savefig(F.figureHandle, self.destinationlocation.files.footprints)
             end
             
             %% Footprints localized
-            self.destinationlocation.files.footprints2 = fullfile( self.folders.qcplots, 'footprints_localized');
+            self.destinationlocation.files.footprints2 = fullfile( self.folders.qchdsort.plot., 'footprints_localized');
             if ~exist(self.destinationlocation.files.footprints2, 'file')
                 F.figureHandle = figure(); P.AxesHandle = []
                 for i = 1:length(res.localSorting)
                     id = res.localSortingID(i);
                     lu = res.localSorting(i);
-                    P = mysort.plot.waveforms2D(0.1*res.T_merged(:,:,i), MES.electrodePositions, 'IDs', (1000*id+lu), 'maxNumberOfChannels', 10, 'AxesHandle', P.AxesHandle, 'plotArgs', {'color', mysort.plot.vectorColor(i)});
+                    P = mysort.hdsort.plot.hdsort.waveforms.D(0.1*res.T_merged(:,:,i), MES.electrodePositions, 'IDs', (1000*id+lu), 'maxNumberOfChannels', 10, 'AxesHandle', P.AxesHandle, 'hdsort.plot.rgs', {'color', mysort.hdsort.plot.vectorColor(i)});
                 end
-                mysort.plot.savefig(F.figureHandle, self.destinationlocation.files.footprints2)
+                mysort.hdsort.plot.savefig(F.figureHandle, self.destinationlocation.files.footprints2)
             end
             
         end
@@ -447,10 +447,10 @@ classdef SortJob < grid.GridJob
             T = load(taskFile);
             
             %% Write "taskParameters" to struct "taskP" and "sortP":
-            sortP = mysort.util.mergeStructs(sortP, T.taskParameters.sortingParameters);
+            sortP = mysort.hdsort.util.mergeStructs(sortP, T.taskParameters.sortingParameters);
             taskParameters = rmfield(T.taskParameters,'sortingParameters');
             
-            taskP = mysort.util.mergeStructs(taskP, T.taskParameters);
+            taskP = mysort.hdsort.util.mergeStructs(taskP, T.taskParameters);
             clear T;
             
             %% Check necessary parameters:
@@ -503,7 +503,7 @@ classdef SortJob < grid.GridJob
             function errorHandling(ME)
                 
                 disp('Catch error...')
-                errStr = mysort.util.buildLastErrString(ME);
+                errStr = mysort.hdsort.util.buildLastErrString(ME);
                 disp(errStr)
                 
                 rep = mysort.ds.binaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);

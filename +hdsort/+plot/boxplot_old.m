@@ -1,22 +1,22 @@
-function P = boxplot(data, groupIdx, varargin)
+function P = boxhdsort.plot.data, groupIdx, varargin)
 % Data a NxS matrix containing N datapoints and S dimensions (subgroups)
 % each.
 P.fh = [];
 P.ah = [];
-P.figureName = 'Boxplot';
+P.figureName = 'Boxhdsort.plot.;
 P.ylabel = ''
 P.displayN = false;
 
 P.subgroupnames = {};
 P.groupnames = {};
-P = mysort.util.parseInputs(P, varargin, 'error');
+P = mysort.hdsort.util.parseInputs(P, varargin, 'error');
 
 if size(data, 1) == 1
     data = data';
 end
     
 if isempty(P.fh) & isempty(P.ah)
-    P.fh = mysort.plot.figure('name',P.figureName);
+    P.fh = mysort.hdsort.plot.figure('name',P.figureName);
 elseif ~isempty(P.fh) & isempty(P.ah)
     figure(P.fh);
 else
@@ -48,7 +48,7 @@ for sg = 1:nSubGroups
     subgrouplabels = [subgrouplabels, repmat({P.subgroupnames{sg}},1,nGroups)];
 end
 
-col = mysort.plot.vectorColor(1:nSubGroups);
+col = mysort.hdsort.plot.vectorColor(1:nSubGroups);
 
 %% Reshape data:
 data_ = zeros(nDataPoints, nGroups*nSubGroups)*NaN;
@@ -64,9 +64,9 @@ for g = 1:nGroups
 end
 
 if nSubGroups == 1
-    boxplot(data_, grouplabels);
+    boxhdsort.plot.data_, grouplabels);
 else
-    P.boxplot = boxplot(data_,{grouplabels,subgrouplabels}, 'colors', col,'factorgap',[5 2],'labelverbosity','minor');
+    P.boxhdsort.plot.= boxhdsort.plot.data_,{grouplabels,subgrouplabels}, 'colors', col,'factorgap',[5 2],'labelverbosity','minor');
 end
 ylabel(P.ylabel);
 

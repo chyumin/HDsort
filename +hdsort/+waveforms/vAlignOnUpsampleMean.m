@@ -1,4 +1,4 @@
 function [A, tau] = vAlignOnUpsampleMean(S, nC, varargin)
-    A = waveforms.v2t(S,nC);
-    [A, tau] = waveforms.tAlignOnUpsampleMean(A, varargin{:});
-    A = waveforms.t2v(A);
+    A = hdsort.waveforms.v2t(S,nC);
+    [A, tau] = hdsort.waveforms.tAlignOnUpsampleMean(A, varargin{:});
+    A = hdsort.waveforms.t2v(A);

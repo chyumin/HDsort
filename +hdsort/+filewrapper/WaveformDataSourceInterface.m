@@ -16,7 +16,7 @@ classdef WaveformDataSourceInterface < handle
         %------------------------------------------------------------------
         function self = WaveformDataSourceInterface(name, samplesPerSecond, MultiElectrode, SpikeSortingContainers)
             if nargin > 2 && ~isempty(MultiElectrode)
-                assert(isa(MultiElectrode, 'filewrapper.MultiElectrode'), 'MultiElectrode must be a filewrapper.MultiElectrode!');
+                assert(isa(MultiElectrode, 'hdsort.hdsort.filewrapper.MultiElectrode'), 'MultiElectrode must be a hdsort.hdsort.filewrapper.MultiElectrode!');
                 self.MultiElectrode = MultiElectrode;
             else
                 self.MultiElectrode = [];

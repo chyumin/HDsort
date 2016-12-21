@@ -3,8 +3,8 @@ function [D maxTaus TupShiftDown FupShiftDown tauRange tauIdx subTauRange subTau
     % Performs template matching on each row of X with the templates in T.
     % Mutliple channels must be concatenated in each row of X and T.
     % T can be made to contain matched filters of the form F = T*C^-1 
-    % by passing the noise covariance matrix as parameter
-    % "noiseCovariance". The subresampling should not be done on the
+    % by passing the hdsort.noise.covariance matrix as parameter
+    % "hdsort.noise.ovariance". The subresampling should not be done on the
     % filters but on the templates!
     %
     % Keep in mind that if T is not zero at the right end of each channel,
@@ -14,9 +14,9 @@ function [D maxTaus TupShiftDown FupShiftDown tauRange tauIdx subTauRange subTau
     % reference energy will be the correct full energy).
     %
     % Input:
-    %   X - waveforms, each row one waveform, multiple channels
+    %   X - hdsort.waveforms. each row one waveform, multiple channels
     %       concatenated
-    %   T - templates to match waveforms with. Waveforms in T can be
+    %   T - templates to match hdsort.waveforms.with. Waveforms in T can be
     %       shorter then those in X. If so, specify offset between T and X
     %  nC - number of channels in X and T
     % Toffset - offset of templates in T in respect to spikes in X. Defines
@@ -38,19 +38,19 @@ function [D maxTaus TupShiftDown FupShiftDown tauRange tauIdx subTauRange subTau
     %                the subsample shifted version of the templates
     % FupShiftDown - cell array with one cell for each Template containing 
     %                the subsample shifted version of filters for the
-    %                corresponding template. If no noiseCovariance matrix
+    %                corresponding template. If no hdsort.noise.ovariance matrix
     %                is given this is identical to TupShiftDown
     % tauRange     - range of full sample shifts that was considered. This
     %                depends on the possible shifts of T in X
     
     P.upsample = 5;    % upsample T (but not X!) to do subsample fine matching
     P.maxShift = 5;    % allow for shifts +- maxShifts to find optimal alignment
-    P.noiseCovariance = [];
+    P.hdsort.noise.ovariance = [];
     P.TupShiftDown = {}; % provide this if is was already computed
     P.FupShiftDown = {}; % provide this if is was already computed
     P.chunkSize    = []; % if X is a data source handle into a file which cannot
                          % be loaded due to memory concerns, the matching can be done in chunks
-    P = mysort.util.parseInputs(P, varargin, 'error');
+    P = mysort.hdsort.util.parseInputs(P, varargin, 'error');
     
     nS = size(X,1);
     TfX = size(X,2)/nC;
@@ -81,16 +81,16 @@ function [D maxTaus TupShiftDown FupShiftDown tauRange tauIdx subTauRange subTau
     if isempty(P.FupShiftDown) 
         if isempty(P.TupShiftDown)
             % compute the subsample shifted versions of T
-            [TupShiftDown subTauRange] = waveforms.vComputeSubsampleShiftedVersions(T, nC, P.upsample);
+            [TupShiftDown subTauRange] = hdsort.waveforms.vComputeSubsampleShiftedVersions(T, nC, P.upsample);
         else
             TupShiftDown = P.TupShiftDown;
             upsample = size(TupShiftDown,3);
             subTauRange = (0:upsample-1)/upsample;
         end
         FupShiftDown = TupShiftDown;
-        if ~isempty(P.noiseCovariance)
+        if ~isempty(P.hdsort.noise.ovariance)
             for i=1:size(TupShiftDown,3)
-                FupShiftDown(:,:,i) = FupShiftDown(:,:,i)/P.noiseCovariance;
+                FupShiftDown(:,:,i) = FupShiftDown(:,:,i)/P.hdsort.noise.ovariance;
             end
         end
     else
@@ -104,7 +104,7 @@ function [D maxTaus TupShiftDown FupShiftDown tauRange tauIdx subTauRange subTau
     subTauIdx = zeros(nS,nT);
     D_ = D;
         
-    chk = mysort.util.Chunker(size(X,1), 'chunkSize', P.chunkSize, ...
+    chk = mysort.hdsort.util.Chunker(size(X,1), 'chunkSize', P.chunkSize, ...
                              'chunkOverlap', 0);
     while chk.hasNextChunk()
         fprintf('Matching Spikes Chunk %d of %d\n', chk.currentChunk, chk.nChunks);
@@ -114,7 +114,7 @@ function [D maxTaus TupShiftDown FupShiftDown tauRange tauIdx subTauRange subTau
         for taui = 1:length(tauRange)
             tau = tauRange(taui);
             % get index into X for shifts tau of T
-            idx_tau = waveforms.vSubIdx(TfX, nC, (idxstart:idxstop)+tau);
+            idx_tau = hdsort.waveforms.vSubIdx(TfX, nC, (idxstart:idxstop)+tau);
 
             % compute for each template individually all subshift matchings                
             for k = 1:nT

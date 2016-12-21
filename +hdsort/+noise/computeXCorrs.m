@@ -1,13 +1,13 @@
-function all_xc = computeXCorrs(X, cp, maxLag, epochs, maxSamples)
+function all_xc = computeXCorrs(X, cp, maxLag, hdsort.epoch., maxSamples)
 
     %
     % computes the pairwise xcorr functions of columns cp(:,1) and cp(:,2)
-    % of matrix X in the epochs (parts of columns) given in epochs.
-    % if the length of all epochs is larger than maxSamples, only so many
-    % epochs will be used, that at least maxSamples are contained.
+    % of matrix X in the hdsort.epoch. (parts of columns) given in hdsort.epoch..
+    % if the length of all hdsort.epoch. is larger than maxSamples, only so many
+    % hdsort.epoch. will be used, that at least maxSamples are contained.
     
     if isempty(cp)
-        cp = mysort.noise.computeChannelPairs4Channels(1:size(X,2));
+        cp = mysort.hdsort.noise.computeChannelPairs4Channels(1:size(X,2));
     end
     
     nCP = size(cp,1);
@@ -17,29 +17,29 @@ function all_xc = computeXCorrs(X, cp, maxLag, epochs, maxSamples)
     if nargin < 5
         maxSamples = size(X,1);
     end    
-    if nargin < 4 || isempty(epochs)
-        epochs = cell(1, nCP);
+    if nargin < 4 || isempty(hdsort.epoch.)
+        hdsort.epoch. = cell(1, nCP);
         for i=1:nCP
-            epochs{i} = [1 min(size(X,1), maxSamples)];
+            hdsort.epoch.{i} = [1 min(size(X,1), maxSamples)];
         end
-    elseif ~iscell(epochs)
-        epochs_ = epochs;
-        epochs = cell(1, nCP);
+    elseif ~iscell(hdsort.epoch.)
+        hdsort.epoch._ = hdsort.epoch.;
+        hdsort.epoch. = cell(1, nCP);
         for i=1:nCP
-            epochs{i} = epochs_;
+            hdsort.epoch.{i} = hdsort.epoch._;
         end
     else
-        assert(length(epochs) == nCP, 'There must be one epoch per channelPair!');
+        assert(length(hdsort.epoch.) == nCP, 'There must be one hdsort.epoch.per channelPair!');
     end
     
     all_xc = zeros(2*maxLag+1, nCP);
     for i=1:nCP
-        myEpochs = epochs{i};
-        L = mysort.epoch.length(myEpochs);
+        myEpochs = hdsort.epoch.{i};
+        L = mysort.hdsort.epoch.length(myEpochs);
         totalEpochLength = sum(L);
 
         if totalEpochLength > maxSamples
-            % randomy permute epochs
+            % randomy permute hdsort.epoch.
             rp = randperm(size(myEpochs,1));
             cs = cumsum(L(rp));
             lastIdx = find(cs>maxSamples,1);
@@ -48,7 +48,7 @@ function all_xc = computeXCorrs(X, cp, maxLag, epochs, maxSamples)
             totalEpochLength = cs(lastIdx);
         end        
         for k=1:size(myEpochs,1)
-            % get all data for this epoch
+            % get all data for this hdsort.epoch.
             x = X(myEpochs(k,1):myEpochs(k,2), cp(i,:));
             % compute channel pairs
             all_xc(:,i) = all_xc(:,i)+xcorr(x(:,1), x(:,2), maxLag, 'none');        
@@ -76,9 +76,9 @@ function all_xc = computeXCorrs(X, cp, maxLag, epochs, maxSamples)
 %     [a cpidx] = ismember(cp, uChans);
 % 
 %     xc = zeros(2*maxLag+1, length(uChans)^2);
-%     for k=1:size(epochs,1)
-%         % get all data for this epoch
-%         x = X(epochs(k,1):epochs(k,2), uChans);
+%     for k=1:size(hdsort.epoch.,1)
+%         % get all data for this hdsort.epoch.
+%         x = X(hdsort.epoch.(k,1):hdsort.epoch.(k,2), uChans);
 %         % compute channel pairs
 %         xc = xc+xcorr(x, maxLag, 'none');        
 %     end

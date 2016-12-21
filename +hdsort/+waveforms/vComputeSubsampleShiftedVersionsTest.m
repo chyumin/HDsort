@@ -4,15 +4,15 @@ T = [0 1 2 3 0 0 1 2 3 0
 nC = 2;
 
     
-vT = waveforms.vComputeSubsampleShiftedVersions(T, nC, 3);
+vT = hdsort.waveforms.vComputeSubsampleShiftedVersions(T, nC, 3);
 
 figure;
-subplot(2,1,1);
-plot(vT(:,:,1)');
-subplot(2,1,2);
+subhdsort.plot.2,1,1);
+hdsort.plot.vT(:,:,1)');
+subhdsort.plot.2,1,2);
 hold on
 for i=1:size(vT,3)
-    plot(vT(:,:,i)', 'color', mysort.plot.vectorColor(i))
+    hdsort.plot.vT(:,:,i)', 'color', mysort.hdsort.plot.vectorColor(i))
 end
 
 %%
@@ -21,13 +21,13 @@ T = [sin(xrange) sin(xrange)
      cos(xrange*2) cos(xrange*2)];
 nC = 2;
     
-vT = waveforms.vComputeSubsampleShiftedVersions(T, nC, 20);
+vT = hdsort.waveforms.vComputeSubsampleShiftedVersions(T, nC, 20);
 
 figure;
-subplot(2,1,1);
-plot(vT(:,:,1)');
-subplot(2,1,2);
+subhdsort.plot.2,1,1);
+hdsort.plot.vT(:,:,1)');
+subhdsort.plot.2,1,2);
 hold on
 for i=1:size(vT,3)
-    plot(vT(:,:,i)', 'color', mysort.plot.vectorColor(i))
+    hdsort.plot.vT(:,:,i)', 'color', mysort.hdsort.plot.vectorColor(i))
 end

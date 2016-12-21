@@ -20,7 +20,7 @@ classdef Sorting < handle
         function self = Sorting(DS, dPath, name, varargin)
             
             P.maxElPerGroup = 9;
-            P = util.parseInputs(P, varargin, 'error');
+            P = hdsort.util.parseInputs(P, varargin, 'error');
             %self.gridType = P.gridType;
             
             self.DS = DS;
@@ -119,7 +119,7 @@ classdef Sorting < handle
             P.dataPath = self.dPath;
             P.queue = 'regular';
             P.maxElPerGroup = 9;
-            P = util.parseInputs(P, varargin, 'error');
+            P = hdsort.util.parseInputs(P, varargin, 'error');
             
             try
                 % Try loading the results. If the sorting was not run yet,
@@ -219,7 +219,7 @@ classdef Sorting < handle
             %P.parfor = true;
             %P.dataPath = self.dPath;
             
-            P = util.parseInputs(struct(), varargin, 'merge');
+            P = hdsort.util.parseInputs(struct(), varargin, 'merge');
             
             assert(isa(self.DS, 'mysort.mea.CMOSMEA'), 'At the moment, the grid framework can only be run with CMOSMEA objects! If you want to test the sorter with something else, use the flag ''sortingMode'', ''localHDSorting''');
             
@@ -242,7 +242,7 @@ classdef Sorting < handle
         
         % -----------------------------------------------------------------
         function [R, P] = sortOnGrid(self, varargin)
-            P = util.parseInputs(struct(), varargin, 'merge');
+            P = hdsort.util.parseInputs(struct(), varargin, 'merge');
             
             P = self.prepareSortJob(P);
             %if strcmp(P.runMode, 'grid') || strcmp(P.runMode, 'grid_locally')
@@ -308,7 +308,7 @@ classdef Sorting < handle
             %P.postProcessOnGrid = true;
             P.postProcessMode = 'BSSE';
             
-            P = util.parseInputs(P, varargin, 'error');
+            P = hdsort.util.parseInputs(P, varargin, 'error');
             
             try
                 R = self.loadSortingResult();
@@ -373,7 +373,7 @@ classdef Sorting < handle
         function [R, P] = reuptakeSorting(self, varargin)
             P.dataPath = self.dPath;
             %P.postProcFunc = '';
-            P = util.parseInputs(P, varargin, 'error');
+            P = hdsort.util.parseInputs(P, varargin, 'error');
             
             try
                 R = self.loadSortingResult();
@@ -425,7 +425,7 @@ classdef Sorting < handle
             end
             fname = self.getFileNameInGroup(groupNr, key);
             x = load(fname);
-            out = util.mergeStructs(out, x);
+            out = hdsort.util.mergeStructs(out, x);
         end
         
         % -----------------------------------------------------------------
@@ -519,7 +519,7 @@ classdef Sorting < handle
         function P = plotElectrodeGroups(self, varargin)
             P.fh = [];
             P.ah = [];
-            P = util.parseInputs(P, varargin, 'error');
+            P = hdsort.util.parseInputs(P, varargin, 'error');
             
             S = self.loadGroupFile();
             if isempty(P.ah)
@@ -628,9 +628,9 @@ classdef Sorting < handle
     %                         move_str   = sprintf('mv %s %s', token_file, submit_token_file);
     %
     %                         cd('~')
-    %                         mysort.util.logToFile(log_file, submit_str)
+    %                         mysort.hdsort.util.logToFile(log_file, submit_str)
     %                         [status, result] = system(submit_str);
-    %                         mysort.util.logToFile(log_file, result)
+    %                         mysort.hdsort.util.logToFile(log_file, result)
     %                         cd(tokenFolder)
     %
     %                         if status == 0
@@ -640,9 +640,9 @@ classdef Sorting < handle
     %                             disp('Submit failed')
     %                         end
     %
-    %                         mysort.util.logToFile(log_file, move_str)
+    %                         mysort.hdsort.util.logToFile(log_file, move_str)
     %                         [status, result] = system(move_str);
-    %                         mysort.util.logToFile(log_file, result)
+    %                         mysort.hdsort.util.logToFile(log_file, result)
     %                         pause(2.5)
     %                         disp('Done processing. Waiting...')
     %                     end

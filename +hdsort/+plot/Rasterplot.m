@@ -1,4 +1,4 @@
-classdef Rasterplot < plot.PlotInterface
+classdef Rasterhdsort.plot.< hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         gdf
         nUnits
@@ -14,19 +14,19 @@ classdef Rasterplot < plot.PlotInterface
     methods
         
         %%% ----------------CONSTRUCTOR------------------------------------
-        function self = Rasterplot(input, varargin)
+        function self = Rasterhdsort.plot.input, varargin)
             P.Units = [];
             P.unitIds = [];
             P.timeToZero = false;
             P.xlabel = 'time [s]';
             P.interval = [];
-            self = self@plot.PlotInterface(P, varargin{:})
+            self = self@hdsort.plot.PlotInterface(P, varargin{:})
             
-            self.plotName = 'Rasterplot';
+            self.hdsort.plot.ame = 'Rasterhdsort.plot.;
             
             %% Create a gdf:
             if iscell(input)
-                self.gdf = mysort.spiketrain.toGdf(input);
+                self.gdf = mysort.hdsort.spiketrain.toGdf(input);
             elseif isa(input,'lsa.Unit')
                 self.gdf = []; self.Units = [];
                 for U = input
@@ -110,7 +110,7 @@ classdef Rasterplot < plot.PlotInterface
                     xx(1:3:3*numspikes) = (sp-time0)/self.Fs;
                     xx(2:3:3*numspikes) = (sp-time0)/self.Fs;
                     
-                    plot(xx, yy, 'Color', self.color(i,:), 'linewidth',1);
+                    hdsort.plot.xx, yy, 'Color', self.color(i,:), 'linewidth',1);
                 end
             end
             

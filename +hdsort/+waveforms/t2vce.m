@@ -6,4 +6,4 @@ function vce = t2vce(t)
         return
     end
     
-    vce = waveforms.vte2vce(waveforms.t2v(t), nC);
+    vce = hdsort.waveforms.vte2vce(hdsort.waveforms.t2v(t), nC);

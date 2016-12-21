@@ -1,5 +1,5 @@
 function Cce = Cte2Cce(Cte, nC)
-% Compute the channel embedded (ce) representation of the noise block covariance
+% Compute the channel embedded (ce) representation of the hdsort.noise.block covariance
 % matrix C with nC channels from the time embedded (te) representation.
 % The time embedding is the one chosen e.g. in Pouzat2002 or Franke2010.
 % The channel embedding is chosen more in the signal processing literature,
@@ -12,7 +12,7 @@ maxLag = Tf-1;
 Cce = zeros(Tf*nC, Tf*nC);
 
 for lag=0:maxLag
-    ccollag = mysort.noise.Cte2CcolLag(Cte, nC, lag);
+    ccollag = mysort.hdsort.noise.Cte2CcolLag(Cte, nC, lag);
     if lag == 0
         for lag2 = 0:maxLag
             idx = lag2*nC+1 : (lag2+1)*nC;

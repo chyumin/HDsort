@@ -5,6 +5,6 @@ CCol = zeros(maxLag*nC, nC);
 
 for lag=0:maxLag
     idx = lag*nC+1 : (lag+1)*nC;
-    CCol(idx,:) = mysort.noise.Cte2CcolLag(Cte, nC, lag);
+    CCol(idx,:) = mysort.hdsort.noise.Cte2CcolLag(Cte, nC, lag);
 end
 

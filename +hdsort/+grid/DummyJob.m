@@ -13,7 +13,7 @@ classdef DummyJob < grid.GridJob
             self.taskType = 'DummyJob';
             
             p = struct;
-            p = util.parseInputs(p, self.P_untreated, 'error');
+            p = hdsort.util.parseInputs(p, self.P_untreated, 'error');
             self.dummyJobP = p;
                        
             self.startIndex = 1;
@@ -89,7 +89,7 @@ classdef DummyJob < grid.GridJob
             function errorHandling(ME)
                 
                 disp('Catch error...')
-                errStr = mysort.util.buildLastErrString(ME);
+                errStr = mysort.hdsort.util.buildLastErrString(ME);
                 disp(errStr)
                 
                 rep = mysort.ds.binaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);

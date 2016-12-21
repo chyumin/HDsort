@@ -1,4 +1,4 @@
-classdef DataSourceInterface < filewrapper.WaveformDataSourceInterface
+classdef DataSourceInterface < hdsort.hdsort.filewrapper.WaveformDataSourceInterface
     properties
         activeChannels
         fullMultiElectrode
@@ -12,7 +12,7 @@ classdef DataSourceInterface < filewrapper.WaveformDataSourceInterface
     methods
         %------------------------------------------------------------------
         function self = DataSourceInterface(varargin)
-            self = self@filewrapper.WaveformDataSourceInterface(varargin{:});
+            self = self@hdsort.hdsort.filewrapper.WaveformDataSourceInterface(varargin{:});
         end
         
         %------------------------------------------------------------------
@@ -160,11 +160,11 @@ classdef DataSourceInterface < filewrapper.WaveformDataSourceInterface
             t2 = t-cutLeft+cutLength-1;
             nCut = length(t1);
             if nCut < nT
-                warning('Could not cut all waveforms, replacing the ones at the edges with zeros (%d from %d cut)', nCut, nT);
+                warning('Could not cut all hdsort.waveforms. replacing the ones at the edges with zeros (%d from %d cut)', nCut, nT);
             end
             
             wf_t = self.getWaveform_(nCut, channelindex, cutLength, t1, t2);
-            % Copy cut waveforms back into original order, leaving those
+            % Copy cut hdsort.waveforms.back into original order, leaving those
             % that were too close to the borders zero. Might not the best
             % way to deal with this, but hey, what can we do?            
             wf(idx_sort,:) = wf_t;
@@ -188,7 +188,7 @@ classdef DataSourceInterface < filewrapper.WaveformDataSourceInterface
             X = self.getData_(IDX, channelindex);
             X = reshape(X, [cutLength nCut length(channelindex)]);
             for i = 1:nCut
-                wf(i,:) = waveforms.m2v(squeeze(X(:, i, :))');
+                wf(i,:) = hdsort.waveforms.m2v(squeeze(X(:, i, :))');
             end
         end
     
@@ -215,19 +215,19 @@ classdef DataSourceInterface < filewrapper.WaveformDataSourceInterface
             % sorting
             if self.bReturnSortingResiduals && self.hasSpikeSorting()
                 S = self.getActiveSpikeSorting();
-                if ~isempty(S) && isa(S, 'spiketrain.SpikeSortingContainer')
+                if ~isempty(S) && isa(S, 'hdsort.spiketrain.SpikeSortingContainer')
                     gdf = S.getGdf(timeindex(1), timeindex(end));
                     if ~isempty(gdf)
                         %                         unitNames = unique(gdf(:,1));
                         T = S.getTemplateWaveforms();
-                        %                         T = waveforms.pruneTemplates(T, ...
+                        %                         T = hdsort.waveforms.pruneTemplates(T, ...
                         %                             'maxChannels', self.maxTemplateChannelsToPlot,...
                         %                             'minChannels', 1, ...
                         %                             'absThreshold', self.templateChannelThreshold,...
                         %                             'setInvalidChannelsTo', nan);
                         cutLeft = S.getTemplateCutLeft();
                         gdf(:,2) = gdf(:,2) - timeindex(1)+1;
-                        [x Y] = waveforms.templateSpikeTrainData(T, gdf, cutLeft);
+                        [x Y] = hdsort.waveforms.templateSpikeTrainData(T, gdf, cutLeft);
                         removeidx = isnan(x) | x < 1 | x > size(X,1);
                         x(removeidx) = [];
                         Y(:,removeidx) = [];

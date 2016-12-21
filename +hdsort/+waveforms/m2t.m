@@ -1,8 +1,8 @@
 
 function T = m2t(M, nC)
-    % converts the multi channel waveforms stores as rows in M (with
+    % converts the multi channel hdsort.waveforms.stores as rows in M (with
     % multiple channels in multiple rows) into the tensor representation.
-    % If nS is the number of waveforms, Tf is the number of samples per
+    % If nS is the number of hdsort.waveforms. Tf is the number of samples per
     % individual channel and nC is the number of channels, 
     %                 M is (nS*nC) x Tf
     % and the resulting 

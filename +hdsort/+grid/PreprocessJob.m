@@ -20,7 +20,7 @@ classdef PreprocessJob < grid.GridJob
             p.configFile = ''; % Legacy for old mea1k-files
             p.destinationFolder = '';
             
-            p = util.parseInputs(p, self.P_untreated, 'error');
+            p = hdsort.util.parseInputs(p, self.P_untreated, 'error');
             self.preprocessJobP = p;
             
             %% Set the data files:
@@ -173,7 +173,7 @@ classdef PreprocessJob < grid.GridJob
             function errorHandling(ME)
                 
                 disp('Catch error...')
-                errStr = mysort.util.buildLastErrString(ME);
+                errStr = mysort.hdsort.util.buildLastErrString(ME);
                 disp(errStr)
                 
                 rep = mysort.ds.binaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);

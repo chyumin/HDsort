@@ -1,9 +1,9 @@
-classdef Subplots < plot.PlotInterface
+classdef Subhdsort.plot. < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
-        nSubplots
+        nSubhdsort.plot.
         nRows
         nColumns
-        subplotHandles
+        subhdsort.plot.andles
         previousIdx
     end
     
@@ -26,7 +26,7 @@ classdef Subplots < plot.PlotInterface
     methods
         
         %%% ----------------CONSTRUCTOR------------------------------------
-        function self = Subplots(nSubplots, varargin)
+        function self = Subhdsort.plot.(nSubhdsort.plot., varargin)
             
             P.offsetX = .06;
             P.offsetY = .06;
@@ -40,24 +40,24 @@ classdef Subplots < plot.PlotInterface
             P.matrix = 0;
             P.holdOn = 1;
             P.upperTriangle = false;
-            self = self@plot.PlotInterface(P, varargin{:});
+            self = self@hdsort.plot.PlotInterface(P, varargin{:});
             
-            self.plotName = 'Subplots';
+            self.hdsort.plot.ame = 'Subhdsort.plot.';
             
-            self.nSubplots = nSubplots;
+            self.nSubhdsort.plot. = nSubhdsort.plot.;
             self.previousIdx = 0;
             
-            %% Set the subplot sizes:
-            if length(self.nSubplots) == 2
-                self.nRows = self.nSubplots(1);
-                self.nColumns = self.nSubplots(2);
-                self.nSubplots = self.nRows*self.nColumns;
+            %% Set the subhdsort.plot.sizes:
+            if length(self.nSubhdsort.plot.) == 2
+                self.nRows = self.nSubhdsort.plot.(1);
+                self.nColumns = self.nSubhdsort.plot.(2);
+                self.nSubhdsort.plot. = self.nRows*self.nColumns;
             elseif self.preferVertical
-                self.nColumns = floor(sqrt(self.nSubplots));
-                self.nRows = ceil(self.nSubplots/self.nColumns);
+                self.nColumns = floor(sqrt(self.nSubhdsort.plot.));
+                self.nRows = ceil(self.nSubhdsort.plot./self.nColumns);
             else
-                self.nRows = floor(sqrt(self.nSubplots));
-                self.nColumns = ceil(self.nSubplots/self.nRows);
+                self.nRows = floor(sqrt(self.nSubhdsort.plot.));
+                self.nColumns = ceil(self.nSubhdsort.plot./self.nRows);
             end
             
             self.showAh = false;
@@ -65,12 +65,12 @@ classdef Subplots < plot.PlotInterface
         end
         
         % -----------------------------------------------------------------
-        function ah = getSubplotHandle(self, idx)
+        function ah = getSubhdsort.plot.andle(self, idx)
             if nargin == 2
-                ah = self.structAh(self.subplotHandles(idx));
+                ah = self.structAh(self.subhdsort.plot.andles(idx));
             else
-                for ii = 1:length(self.subplotHandles);
-                    ah(ii) = self.structAh(self.subplotHandles(ii));
+                for ii = 1:length(self.subhdsort.plot.andles);
+                    ah(ii) = self.structAh(self.subhdsort.plot.andles(ii));
                 end
             end
         end
@@ -78,7 +78,7 @@ classdef Subplots < plot.PlotInterface
         % -----------------------------------------------------------------
         function mode = linkaxes(self, mode)
             if nargin == 1 mode = 'xy'; end
-            linkaxes(self.getSubplotHandle(), mode); 
+            linkaxes(self.getSubhdsort.plot.andle(), mode); 
         end
         
         % -----------------------------------------------------------------
@@ -89,8 +89,8 @@ classdef Subplots < plot.PlotInterface
             %    self.parentFh = gcf;
             %end
             
-            assert(isempty(self.labels) || length(self.labels) >= self.nSubplots, 'If labels is provided it must contain one label per subplot!');
-            assert(self.nRows < 37 && self.nColumns <37, 'Too many rows or columns to plot!');
+            assert(isempty(self.labels) || length(self.labels) >= self.nSubhdsort.plot., 'If labels is provided it must contain one label per subhdsort.plot.');
+            assert(self.nRows < 37 && self.nColumns <37, 'Too many rows or columns to hdsort.plot.');
             
             w = max(0.01, (.99-self.offsetX-(self.nColumns-1)*self.spacerX-self.spacerRight)/(self.nColumns));
             h = max(0.01, (.99-self.offsetY-(self.nRows-1)*self.spacerY-self.spacerTop)/(self.nRows));
@@ -115,11 +115,11 @@ classdef Subplots < plot.PlotInterface
             
             % calculate XCoords and YCoords:
             count = 1; xC = zeros(self.nColumns,1); yC = zeros(self.nRows,1);
-            self.subplotHandles = []; %zeros(self.nSubplots,1);
-            %self.subplotIdx = [];
+            self.subhdsort.plot.andles = []; %zeros(self.nSubhdsort.plot.,1);
+            %self.subhdsort.plot.dx = [];
             for j=self.nRows:-1:1
                 for i=1:self.nColumns
-                    if count > self.nSubplots
+                    if count > self.nSubhdsort.plot.
                         continue
                     end
                     if ~self.upperTriangle || i >= (self.nRows-j+1)
@@ -127,23 +127,23 @@ classdef Subplots < plot.PlotInterface
                         yC(j) = self.offsetY + (j-1)*(self.spacerY + h);
                         
                         
-                        if isempty(self.subplotHandles)
-                            self.subplotHandles = axes('Units','normalized','position',[xC(i) yC(j) w h]);
+                        if isempty(self.subhdsort.plot.andles)
+                            self.subhdsort.plot.andles = axes('Units','normalized','position',[xC(i) yC(j) w h]);
                         else
-                            self.subplotHandles(count) = axes('Units','normalized','position',[xC(i) yC(j) w h]);
+                            self.subhdsort.plot.andles(count) = axes('Units','normalized','position',[xC(i) yC(j) w h]);
                         end
                         
-                        %self.subplotIdx(count) = count;
-                            %self.subplotHandles(count) = axes('Units','normalized','position',[xC(i) yC(j) w h], 'parent', self.parentFh);
+                        %self.subhdsort.plot.dx(count) = count;
+                            %self.subhdsort.plot.andles(count) = axes('Units','normalized','position',[xC(i) yC(j) w h], 'parent', self.parentFh);
                         
                         if self.holdOn
-                            set(self.subplotHandles(count), 'nextplot', 'add');
+                            set(self.subhdsort.plot.andles(count), 'nexthdsort.plot., 'add');
                         end
                         
                         if ~isempty(self.labels)
-                            set(self.subplotHandles(count),'Units', 'pixel');
-                            pos = get(self.subplotHandles(count), 'Position' );
-                            set(self.subplotHandles(count),'Units', 'normalized');
+                            set(self.subhdsort.plot.andles(count),'Units', 'pixel');
+                            pos = get(self.subhdsort.plot.andles(count), 'Position' );
+                            set(self.subhdsort.plot.andles(count),'Units', 'normalized');
                             
                             ann = annotation('textbox',[0 .1 0 .1],...
                                 'Units','pixel',...
@@ -161,21 +161,21 @@ classdef Subplots < plot.PlotInterface
                 end
             end
             if self.upperTriangle
-                %self.subplotHandles = self.subplotHandles(self.subplotHandles>0);
+                %self.subhdsort.plot.andles = self.subhdsort.plot.andles(self.subhdsort.plot.andles>0);
             end
             if self.matrix
                 if self.upperTriangle
-                    tmp = self.subplotHandles;
-                    self.subplotHandles = nan([self.nColumns self.nRows]);
+                    tmp = self.subhdsort.plot.andles;
+                    self.subhdsort.plot.andles = nan([self.nColumns self.nRows]);
                     count = 0;
                     for i=1:self.nColumns
                         for j=i:self.nRows
                             count = count+1;
-                            self.subplotHandles(i,j) = tmp(count);
+                            self.subhdsort.plot.andles(i,j) = tmp(count);
                         end
                     end
                 else
-                    self.subplotHandles = reshape(self.subplotHandles, [self.nColumns self.nRows])';
+                    self.subhdsort.plot.andles = reshape(self.subhdsort.plot.andles, [self.nColumns self.nRows])';
                 end
             end
             
@@ -210,7 +210,7 @@ classdef Subplots < plot.PlotInterface
                 PI.closeAxis();
             end
             
-            PI.setAh(self.subplotHandles(n));
+            PI.setAh(self.subhdsort.plot.andles(n));
             PI.show();
             self.setChild(PI, n);
             

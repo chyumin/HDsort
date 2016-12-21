@@ -11,7 +11,7 @@ N = size(T, 3);
 assert( N > 1, 'You can only compare more than one footprint!')
 assert( N < 100, 'Otherwise it takes too long in order to calculate the XCorr!')
 
-[xc A S] = waveforms.tXCorr(T);
+[xc A S] = hdsort.waveforms.tXCorr(T);
 
 FTO = zeros(N,N);
 for ii = 1:N
@@ -39,11 +39,11 @@ end
 if false
     %%
     figure; hold on;
-    plot(reshape(FP1, 1, []), 'b');
-    plot(reshape(FP2, 1, []), 'r');
+    hdsort.plot.reshape(FP1, 1, []), 'b');
+    hdsort.plot.reshape(FP2, 1, []), 'r');
     
-    plot(reshape( FP1_shifted, 1, [])+10, 'g');
-    plot(reshape( FP2_shifted, 1, [])+10, 'm');
+    hdsort.plot.reshape( FP1_shifted, 1, [])+10, 'g');
+    hdsort.plot.reshape( FP2_shifted, 1, [])+10, 'm');
 end
 
 

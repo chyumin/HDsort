@@ -8,11 +8,11 @@ for subi=1:4
     end
 end
 [Tf nC nS nSubSamples] = size(T);
-vT = waveforms.t2v(T);
+vT = hdsort.waveforms.t2v(T);
 size(vT)
 squeeze(vT(:,:,1))
-T = waveforms.v2t(vT, nC);
-vT = waveforms.t2v(T);
+T = hdsort.waveforms.v2t(vT, nC);
+vT = hdsort.waveforms.t2v(T);
 size(vT)
 squeeze(vT(:,:,1))
 squeeze(vT(:,:,2))

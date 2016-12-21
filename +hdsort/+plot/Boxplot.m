@@ -1,4 +1,4 @@
-classdef Boxplot < plot.PlotInterface
+classdef Boxhdsort.plot.< hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         boxplot
         
@@ -24,7 +24,7 @@ classdef Boxplot < plot.PlotInterface
     methods
         
         %%% ----------------CONSTRUCTOR------------------------------------
-        function self = Boxplot(data, groupIdx, varargin)
+        function self = Boxhdsort.plot.data, groupIdx, varargin)
             % Data a NxS matrix containing N datapoints and S dimensions (subgroups)
             % each.
             if nargin == 1
@@ -40,9 +40,9 @@ classdef Boxplot < plot.PlotInterface
             P.displayN = true;
             P.subgroupnames = {};
             P.groupnames = {};
-            self = self@plot.PlotInterface(P, varargin{:})
+            self = self@hdsort.plot.PlotInterface(P, varargin{:})
             
-            self.plotName = 'Boxplot';
+            self.hdsort.plot.ame = 'Boxhdsort.plot.;
             
             self.data = data;
             if size(self.data, 1) == 1
@@ -97,7 +97,7 @@ classdef Boxplot < plot.PlotInterface
                 self.subgrouplabels = [self.subgrouplabels, repmat({self.subgroupnames{sg}},1,self.nGroups)];
             end
             
-            self.color = mysort.plot.vectorColor(1:self.nSubGroups);
+            self.color = mysort.hdsort.plot.vectorColor(1:self.nSubGroups);
             
             %% Reshape data:
             self.reshaped_data = zeros(self.nDataPoints, self.nGroups*self.nSubGroups)*NaN;
@@ -119,9 +119,9 @@ classdef Boxplot < plot.PlotInterface
         function show_(self)
             
             if self.nSubGroups == 1
-                self.boxplot = boxplot(self.reshaped_data, self.grouplabels);
+                self.boxhdsort.plot.= boxhdsort.plot.self.reshaped_data, self.grouplabels);
             else
-                self.boxplot = boxplot(self.reshaped_data, {self.grouplabels, self.subgrouplabels}, ...
+                self.boxhdsort.plot.= boxhdsort.plot.self.reshaped_data, {self.grouplabels, self.subgrouplabels}, ...
                     'colors', self.color, 'factorgap',[5 2], 'labelverbosity', 'minor');
             end
             

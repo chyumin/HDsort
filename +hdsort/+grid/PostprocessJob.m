@@ -18,7 +18,7 @@ classdef PostprocessJob < grid.GridJob
             
             p = struct;
             p.newPostProcFunc = '';
-            p = util.parseInputs(p, self.P_untreated, 'error');
+            p = hdsort.util.parseInputs(p, self.P_untreated, 'error');
             self.postprocessJobP = p;
             
             if ~isempty(self.postprocessJobP.newPostProcFunc)
@@ -138,7 +138,7 @@ classdef PostprocessJob < grid.GridJob
             function errorHandling(ME)
                 
                 disp('Catch error...')
-                errStr = mysort.util.buildLastErrString(ME);
+                errStr = mysort.hdsort.util.buildLastErrString(ME);
                 disp(errStr)
                 
                 rep = mysort.ds.binaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);

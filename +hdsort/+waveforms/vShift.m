@@ -1,7 +1,7 @@
 function Vs = vShift(V, nC, tau, trunc)
-    % shifts the single channel waveforms stored in a concatenated way in
-    % V. Ever row of V is multi channel waveforms
-    % truncates the sides of the resulting shifted waveforms if trunc is
+    % shifts the single channel hdsort.waveforms.stored in a concatenated way in
+    % V. Ever row of V is multi channel hdsort.waveforms.
+    % truncates the sides of the resulting shifted hdsort.waveforms.if trunc is
     % 1. truncates in a way, that V and Vs have the same dimensions.
     % If a waveform has a shift of 0, and trunc is 1 it will be unchanged.
     
@@ -18,6 +18,6 @@ function Vs = vShift(V, nC, tau, trunc)
     
     tau_ = repmat(tau, nC, 1);
     tau_ = tau_(:);
-    M = waveforms.v2m(V,nC);
-    Ms = mysort.util.shiftRows(M, tau_, trunc);
-    Vs = waveforms.m2v(Ms, nC);   
+    M = hdsort.waveforms.v2m(V,nC);
+    Ms = mysort.hdsort.util.shiftRows(M, tau_, trunc);
+    Vs = hdsort.waveforms.m2v(Ms, nC);   

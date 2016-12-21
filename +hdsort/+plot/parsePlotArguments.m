@@ -19,13 +19,13 @@ P.yTicklabel = [];
 P.color = [];
 P.nColors = [];
 
-P.subplot = [];
+P.subhdsort.plot.= [];
 P.spacerX = 0.1;
 P.spacerY = 0.1;
 P.offsetX = 0.1;
 P.offsetY = 0.1;
 
-%P = mysort.util.parseInputs(P, varargin, 'error');
+%P = mysort.hdsort.util.parseInputs(P, varargin, 'error');
 
 %% Check if there is already a default value:
 for f = fields(P)'
@@ -34,15 +34,15 @@ for f = fields(P)'
     end
 end
 
-[P untreatedArgs] = mysort.util.parseInputs(P_in, varargin{:}, 'error');
+[P untreatedArgs] = mysort.hdsort.util.parseInputs(P_in, varargin{:}, 'error');
 
 untreatedArgs = [fieldnames(untreatedArgs)'; struct2cell(untreatedArgs)']';
 
 if isempty(P.ah) & isempty(P.fh)
-    P.fh = mysort.plot.figure('name',P.title);
+    P.fh = mysort.hdsort.plot.figure('name',P.title);
 end
-if ~isempty(P.subplot)
-    P.ah = mysort.plot.subplots(P.subplot, 'spacerX', P.spacerX,'spacerY', P.spacerY, 'offsetX', P.offsetX, 'offsetY', P.offsetY);
+if ~isempty(P.subhdsort.plot.
+    P.ah = mysort.hdsort.plot.subhdsort.plot.(P.subhdsort.plot. 'spacerX', P.spacerX,'spacerY', P.spacerY, 'offsetX', P.offsetX, 'offsetY', P.offsetY);
 elseif isempty(P.ah)
     P.ah = axes();
 end
@@ -59,7 +59,7 @@ end
 if isempty(P.color)
     if ~isempty(P.nColors)
         %% P.color is left empty, but nColors is specified:
-        P.color = mysort.plot.vectorColor(1:P.nColors);
+        P.color = mysort.hdsort.plot.vectorColor(1:P.nColors);
     end
 elseif isstr(P.color)
     %% P.color is a string specifying a colormap:
@@ -69,7 +69,7 @@ elseif (numel(P.color) == 1) & isnumeric(P.color)
     if P.color < 1
         P.color = zeros(P.nColors,3);
     else
-        P.color = mysort.plot.vectorColor(1:P.color);
+        P.color = mysort.hdsort.plot.vectorColor(1:P.color);
     end
 end
 

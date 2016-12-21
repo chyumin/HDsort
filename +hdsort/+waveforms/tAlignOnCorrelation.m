@@ -3,18 +3,18 @@ function [ali tau xvsf] = tAlignOnCorrelation(T,varargin)
     P.trunc = 0;
     P.debug = 0;
     P.absMax = false;
-    P = mysort.util.parseInputs(P,'alignWaveformsOnMaxCorrelation',varargin);
+    P = mysort.hdsort.util.parseInputs(P,'alignWaveformsOnMaxCorrelation',varargin);
 
     [Tf nC nT] = size(T);
     if isempty(P.C)
         P.C = eye(Tf*nC);
     end
-    vT = waveforms.t2v(T);
+    vT = hdsort.waveforms.t2v(T);
     vF = vT/P.C;
-%     F = waveforms.v2t(vF, nC);
+%     F = hdsort.waveforms.v2t(vF, nC);
     
     zeroOutFilterArtefacts = true;
-    xvsf = mysort.util.calculateXIvsF(vT,vF,nC,zeroOutFilterArtefacts);
+    xvsf = mysort.hdsort.util.calculateXIvsF(vT,vF,nC,zeroOutFilterArtefacts);
     if P.absMax
         [M I] = max(abs(xvsf),[], 1);
     else
@@ -29,21 +29,21 @@ function [ali tau xvsf] = tAlignOnCorrelation(T,varargin)
     tau = I(min_shift_idx,:);
     
     
-    XM = waveforms.t2v(T);
-    XM = mysort.util.shiftMCRows(XM, -tau, nC, P.trunc);
+    XM = hdsort.waveforms.t2v(T);
+    XM = mysort.hdsort.util.shiftMCRows(XM, -tau, nC, P.trunc);
     
-    ali  = waveforms.v2t(XM, nC);
+    ali  = hdsort.waveforms.v2t(XM, nC);
     
     if P.debug
-        F = waveforms.v2t(vF, nC);
-        FM = waveforms.v2m(vF, nC);
-        FM = mysort.util.shiftMCRows(FM, -tau, nC, P.trunc);
-        aliF = mysort.util.m2t(FM, nC);
+        F = hdsort.waveforms.v2t(vF, nC);
+        FM = hdsort.waveforms.v2m(vF, nC);
+        FM = mysort.hdsort.util.shiftMCRows(FM, -tau, nC, P.trunc);
+        aliF = mysort.hdsort.util.m2t(FM, nC);
         
         disp(I);
-        RES = mysort.plot.XIvsF(T,F,'TvsF',xvsf,'title',0,'axistight',1);        
+        RES = mysort.hdsort.plot.XIvsF(T,F,'TvsF',xvsf,'title',0,'axistight',1);        
         hold on
-        RES = mysort.plot.XIvsF(ali,aliF,'title',0,'axistight',1,'figure',0,...
+        RES = mysort.hdsort.plot.XIvsF(ali,aliF,'title',0,'axistight',1,'figure',0,...
             'axesHandles',RES.axesHandles,'color','g','holdOn',1);
 
         [M I] = max(RES.XIvsF,[], 1);

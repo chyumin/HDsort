@@ -22,7 +22,7 @@ function [xc A S maxAbsDist maxAbsRelDist] = tXDiff(T)
     end
     
     if nargout > 1
-        T = waveforms.t2v(T);
+        T = hdsort.waveforms.t2v(T);
         A = zeros(nT);
         S = zeros(nT);
         maxAbsDist = zeros(nT);
@@ -34,14 +34,14 @@ function [xc A S maxAbsDist maxAbsRelDist] = tXDiff(T)
             ti = T(i,:);
             for j=i+1:nT
                 tj = T(j,:);
-%                 figure; plot([ti; tj]')
+%                 figure; hdsort.plot.[ti; tj]')
                 if abs(shifts(count)) <= 2
-                    tj = mysort.util.shiftMCRows(tj, shifts(count), nC,1);
-                    t = waveforms.vSubsel([tj; ti], nC, abs(shifts(count))+1:Tf-abs(shifts(count)));
+                    tj = mysort.hdsort.util.shiftMCRows(tj, shifts(count), nC,1);
+                    t = hdsort.waveforms.vSubsel([tj; ti], nC, abs(shifts(count))+1:Tf-abs(shifts(count)));
                 else
                     t = [tj; ti];
                 end
-%                 figure; plot(t')
+%                 figure; hdsort.plot.t')
                 A(i,j) = mins(count);
                 S(i,j) = shifts(count);
                 A(j,i) = mins(count);

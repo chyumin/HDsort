@@ -5,11 +5,11 @@ function [tau aliX] = vAlignOnAverageMaxSample(X, nC, varargin)
     P.maxIdx = [];
     P.restrictToIdx = [];
     P.nMaxChannelsForWeighting = 5;
-    P = mysort.util.parseInputs(P, 'alignWaveforms', varargin);
+    P = mysort.hdsort.util.parseInputs(P, 'alignWaveforms', varargin);
     Tf = size(X,2)/nC;
     assert(round(Tf)==Tf, 'Number of channels does not match!');
     
-    XX = waveforms.v2t(X, nC);
+    XX = hdsort.waveforms.v2t(X, nC);
     if ~isempty(P.restrictToIdx)
         idx = setdiff(1:size(XX,1), P.restrictToIdx);
         XX(idx,:,:) = 0;
@@ -49,15 +49,15 @@ function [tau aliX] = vAlignOnAverageMaxSample(X, nC, varargin)
     end
     
     if nargout > 1
-%         aliX = mysort.util.shiftMCRows(X, round(tau), nC);
-        XX = waveforms.v2t(X, nC);
-        aliX = waveforms.t2v(XX);
-        aliX = mysort.util.shiftRowsInterpolated(aliX, tau , nC);
+%         aliX = mysort.hdsort.util.shiftMCRows(X, round(tau), nC);
+        XX = hdsort.waveforms.v2t(X, nC);
+        aliX = hdsort.waveforms.t2v(XX);
+        aliX = mysort.hdsort.util.shiftRowsInterpolated(aliX, tau , nC);
     end
     if P.debug
-        mysort.plot.spikes(X,'nC',nC);
+        mysort.hdsort.plot.spikes(X,'nC',nC);
         title('Raw Spikes');
-        mysort.plot.spikes(MX,'nC',1);
+        mysort.hdsort.plot.spikes(MX,'nC',1);
         title('Preprocessed Spikes');            
     end
 end

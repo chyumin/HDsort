@@ -1,4 +1,4 @@
-classdef ExtendedDataSourceInterface < filewrapper.DataSourceInterface
+classdef ExtendedDataSourceInterface < hdsort.hdsort.filewrapper.DataSourceInterface
     properties
         memoryBufferNoiseSmad
         spikeTrains
@@ -11,7 +11,7 @@ classdef ExtendedDataSourceInterface < filewrapper.DataSourceInterface
     methods
         %------------------------------------------------------------------
         function self = ExtendedDataSourceInterface(varargin)
-            self = self@filewrapper.DataSourceInterface(varargin{:});
+            self = self@hdsort.hdsort.filewrapper.DataSourceInterface(varargin{:});
             self.memoryBufferNoiseSmad = [];
         end
         
@@ -32,11 +32,11 @@ classdef ExtendedDataSourceInterface < filewrapper.DataSourceInterface
             fprintf('Calculating Covest, that may take a while...\n');
             [times pks] = self.detectSpikes();
             times = double(cell2mat(times))';
-            spikeEpochs = epoch.merge([times(:)-50 times(:)+50]);
-            noiseEpochs = epoch.flip(spikeEpochs, size(self,1));
+            spikeEpochs = hdsort.epoch.merge([times(:)-50 times(:)+50]);
+            hdsort.noise.pochs = hdsort.epoch.flip(spikeEpochs, size(self,1));
             t1 = tic;
-            Cest = noise.Covest2(self, 'maxLag', maxlag, ...
-                'maxSamples', maxsamples, 'noiseEpochs', noiseEpochs,...
+            Cest = hdsort.noise.Covest2(self, 'maxLag', maxlag, ...
+                'maxSamples', maxsamples, 'hdsort.noise.pochs', hdsort.noise.pochs,...
                 'maxDist', maxdist, 'forceMethod', forceMethod);
             t2 = toc(t1);
             disp('Done.'); disp(t2);
@@ -47,21 +47,21 @@ classdef ExtendedDataSourceInterface < filewrapper.DataSourceInterface
             P.maxLen = 200000;
             P.maxLag = 100;            
             P.normalization = 'none';
-            P = util.parseInputs(P, varargin);
+            P = hdsort.util.parseInputs(P, varargin);
             
             R = xcorr(self(1:P.maxLen, P.channelIdx), P.maxLag, P.normalization);            
         end
         
         %------------------------------------------------------------------
-        function [smad] = noiseStd(self, varargin)
-            % Calculate channel wise noise standard deviation with the median
+        function [smad] = hdsort.noise.td(self, varargin)
+            % Calculate channel wise hdsort.noise.standard deviation with the median
             % absolute deviation (MAD), invert data to ignore negative peaks
             % for that calculation
             P.channelIdx = 1:self.size(2);
             P.maxLen = 300000;
             P.thr = 4;
             P.Tf = 80;            
-            P = util.parseInputs(P, varargin);
+            P = hdsort.util.parseInputs(P, varargin);
            
             Len = self.size(1);
             fullChanIdx = P.channelIdx;
@@ -81,9 +81,9 @@ classdef ExtendedDataSourceInterface < filewrapper.DataSourceInterface
             if any(notCalcIdx)
                 cidx = P.channelIdx(notCalcIdx);
                 fullcidx = fullChanIdx(cidx);
-                disp('Computing noise std...'); tic
+                disp('Computing hdsort.noise.std...'); tic
                 smadL = min(Len, P.maxLen);
-                smad = noise.estimateSigma(...
+                smad = hdsort.noise.estimateSigma(...
                         self.getData(1:smadL, cidx), P.Tf, P.thr);
                 self.memoryBufferNoiseSmad(fullcidx) = smad;
                 disp('Done.'); toc        
@@ -98,14 +98,14 @@ classdef ExtendedDataSourceInterface < filewrapper.DataSourceInterface
             P.energyfun = @(x) -x;
             P.minPeakDistance = ceil(self.getSamplesPerSecond/1000); % 1ms
             P.Len = [];
-            P = util.parseInputs(P, varargin);
+            P = hdsort.util.parseInputs(P, varargin);
             
             if isempty(P.Len)
                 P.Len = self.size(1);
             end
             
-            % get noise std
-            smad = self.noiseStd('channelIdx', P.channelIdx);
+            % get hdsort.noise.std
+            smad = self.hdsort.noise.td('channelIdx', P.channelIdx);
             
             % Detect spikes in the beginning of the file
             disp('Detecting spikes...'); tic
@@ -116,7 +116,7 @@ classdef ExtendedDataSourceInterface < filewrapper.DataSourceInterface
                 pks{c,1} = [];
                 times{c,1} = [];
             end
-            chunker = util.Chunker(P.Len, 'chunkSize', P.chunkSize, ...
+            chunker = hdsort.util.Chunker(P.Len, 'chunkSize', P.chunkSize, ...
                 'progressDisplay', 'console', 'minChunkSize', 1000, 'chunkOverlap', 2*P.minPeakDistance);
             while chunker.hasNextChunk()
                 [chunkOvp chunk] = chunker.getNextChunk();
@@ -143,7 +143,7 @@ classdef ExtendedDataSourceInterface < filewrapper.DataSourceInterface
         function allspikes = getMergedSingleElectrodeDetectedSpikes(self, mergeSpikesMaxDist, varargin)
             [times pks] = self.detectSpikes(varargin{:});
             allspikes = sortrows([cell2mat(times)   cell2mat(pks)], 1);
-            allspikes  = spiketrain.mergeSingleElectrodeDetectedSpikes(allspikes, mergeSpikesMaxDist);
+            allspikes  = hdsort.spiketrain.mergeSingleElectrodeDetectedSpikes(allspikes, mergeSpikesMaxDist);
         end        
     end
 end

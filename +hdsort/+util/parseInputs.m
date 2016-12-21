@@ -63,7 +63,7 @@ function [P unexplained_vars]= parseInputs(P, in, treat_unexp_vars, dummy)
             treat_unexp_vars = dummy;
         end
     else
-        caller_name = util.getCallerName();
+        caller_name = hdsort.util.getCallerName();
     end
     % END: THIS IS FOR DOWNWARD COMPATIBILITY
     

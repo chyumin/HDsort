@@ -28,7 +28,7 @@ function [G] = mergeLocalSortings_march24(G, meanNoiseStd, varargin)
     P.percentageCutoff = .3;
     P.maxPercentageAmplitudeDistance = .6;
     P.sameHighestElectrodesPercent = 80;  % this is the percentage of valid electrodes on which both tempaltes have the highest energy
-    P = mysort.util.parseInputs(P, varargin, 'error');
+    P = mysort.hdsort.util.parseInputs(P, varargin, 'error');
     
     % First step, walk through all templates and check if the maximal
     % amplitude is on an electrode that was inside the local sorting from
