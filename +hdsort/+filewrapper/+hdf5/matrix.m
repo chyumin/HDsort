@@ -41,7 +41,7 @@ classdef matrix < handle
                 self = self.openH5File(bReadOnly);
             catch
                 assert(~bReadOnly, sprintf('File does not exist, cannot open read-only! (%s)', fname));
-                self = mysort.h5.createVariableAndOrFile(fname, h5path, dims, maxDims, h5type, chunkDims, deflation, bReadOnly);
+                self = hdsort.filewrapper.hdf5.createVariableAndOrFile(fname, h5path, dims, maxDims, h5type, chunkDims, deflation, bReadOnly);
             end
         end
         % DESTRUCTOR
