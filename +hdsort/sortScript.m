@@ -418,12 +418,12 @@ function [S P] = sort(DS, dpath, name, varargin)
             noise.epochs = epoch.flip(epoch.merge([s1 s2]), L);
 
             maxTf = max([P.botm.Tf P.featureExtraction.Tf P.spikeAlignment.Tf]); %P.spikeCutting.Tf
-            Cest = noise.Covest2(DS, 'maxLag', maxTf,...
+            Cest = hdsort.noise.Covest2(DS, 'maxLag', maxTf,...
                 'maxSamplesPerEpoch', P.noiseEstimation.maxSamplesPerEpoch, ...
                 'maxSamples', P.noiseEstimation.maxSamples, ...
                 'noiseEpochs', noise.epochs, 'forceMethod', 'xcorr');
-            noise.C_time_cut = noise.ccol2Cte(Cest.CCol, maxTf);
-            noise.C_time_aligned = noise.ccol2Cte(Cest.CCol, P.spikeAlignment.Tf);
+            noise.C_time_cut = hdsort.noise.ccol2Cte(Cest.CCol, maxTf);
+            noise.C_time_aligned = hdsort.noise.ccol2Cte(Cest.CCol, P.spikeAlignment.Tf);
             noise.meanNoiseStd = sqrt(mean(diag(noise.C_time_cut)));
             noise.CestS = Cest.toStruct();    
             saveIfDoesNotExist(S.files.cov_file);                 
@@ -540,7 +540,7 @@ function [S P] = sort(DS, dpath, name, varargin)
                 ccol_loaded = S.noise.CestS.CCol;
                 ccol_loaded(1:nC, 1:nC) = ccol_loaded(1:nC, 1:nC) + eye(nC) * .1 * mean(diag(ccol_loaded(1:nC, 1:nC)));                
                 spikePrewhitened.ccol_loaded = ccol_loaded/2;
-                spikePrewhitened.C = noise.ccol2Cte(spikePrewhitened.ccol_loaded, P.featureExtraction.Tf);
+                spikePrewhitened.C = hdsort.noise.ccol2Cte(spikePrewhitened.ccol_loaded, P.featureExtraction.Tf);
                 spikePrewhitened.U = chol(spikePrewhitened.C);            
             if isempty(S.spikeAligned.wfs)
                 % Prewhiten
@@ -860,7 +860,7 @@ function [S P] = sort(DS, dpath, name, varargin)
             Cest = S.noise.CestS;
             Cest.CCol(1:nC,:) = Cest.CCol(1:nC,:) + diag(diag(Cest.CCol(1:nC,:)));
             Cest.CCol = Cest.CCol/2;
-            Cest = noise.Covest2(Cest);
+            Cest = hdsort.noise.Covest2(Cest);
             idxstart = 1 + P.spikeCutting.cutLeft - P.botm.cutLeft;
             idxstop  = idxstart + P.botm.Tf - 1;
             botm.templates = waveforms.vSubsel(T, nC, idxstart:idxstop);

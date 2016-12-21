@@ -1,5 +1,5 @@
 function V = vChannelMul(V, n)
-    % multiplies the channels of multichannel hdsort.waveforms.that are stored
+    % multiplies the channels of multichannel waveforms that are stored
     % in vector representation in V (single channel concatenated).
     % the number of channels is the number of elements in n.
     % each channel is multiplied by the repective number in n

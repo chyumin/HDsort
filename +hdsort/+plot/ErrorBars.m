@@ -1,4 +1,4 @@
-classdef ErrorBars < hdsort.plot.PlotInterface
+classdef ErrorBars < myplot.PlotInterface
     properties (SetAccess=protected)
         data
         xVals
@@ -36,9 +36,9 @@ classdef ErrorBars < hdsort.plot.PlotInterface
             P.highlightBars = [];
             P.highlightColor = [1.0, 0.0, 0.0];
             P.errorbarscolor = [0.0, 0.0, 0.0];
-            self = self@hdsort.plot.PlotInterface(P, varargin{:});
+            self = self@myplot.PlotInterface(P, varargin{:});
             
-            self.hdsort.plot.ame = 'Bar';
+            self.plotName = 'Bar';
             self.data = data;
             self.xVals = xVals;
             
@@ -68,10 +68,10 @@ classdef ErrorBars < hdsort.plot.PlotInterface
             sdev = cellfun(@std, self.data)
             
             
-            hdsort.plot.self.xVals, means, self.LineSpec, 'color', self.color)
+            plot(self.xVals, means, self.LineSpec, 'color', self.color)
 %    ylim=range(c(avg-sdev, avg+sdev)),
 %    pch=19, xlab="Measurements", ylab="Mean +/- SD",
-%    main="Scatter hdsort.plot.with std.dev error bars"
+%    main="Scatter plot with std.dev error bars"
 %)
 
             errorbar(self.xVals, means, sdev, 'color', self.errorbarscolor)

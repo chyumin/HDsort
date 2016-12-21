@@ -48,12 +48,12 @@ classdef MultiElectrode < handle
         %------------------------------------------------------------------
         function save2File(self, fname, h5path)
             S = self.toStruct();
-            hdsort.hdsort.filewrapper.hdf5.recursiveSave(fname, S, h5path);
+            hdsort.filewrapper.hdf5.recursiveSave(fname, S, h5path);
         end
         %------------------------------------------------------------------
         function cp = copy(self)
             S = self.toStruct();
-            cp = hdsort.hdsort.filewrapper.MultiElectrode(S);
+            cp = hdsort.filewrapper.MultiElectrode(S);
         end
         
         %------------------------------------------------------------------
@@ -64,7 +64,7 @@ classdef MultiElectrode < handle
             % electrode set where it came from or the new electrode idx if 
             % this electrode was only in ME
             merged = self.copy();
-            assert(isa(ME, 'hdsort.hdsort.filewrapper.MultiElectrode'), 'ME must be a multi electrode!');
+            assert(isa(ME, 'hdsort.filewrapper.MultiElectrode'), 'ME must be a multi electrode!');
             if ~isempty(self.electrodePositions)
                 assert(~isempty(self.electrodeNumbers), 'You can only merge multielectrodes that have electrode numbers!');
             end
@@ -111,7 +111,7 @@ classdef MultiElectrode < handle
             if ~isempty(self.parentElectrodeIndex)
                 epar = self.parentElectrodeIndex(elidx);
             end
-            ME = hdsort.hdsort.filewrapper.MultiElectrode(epos, enum, ...
+            ME = hdsort.filewrapper.MultiElectrode(epos, enum, ...
                 'dataSource', [], ...
                 'electrodeLabels', elab, ...
                 'parentElectrodeIndex', epar);
@@ -289,21 +289,21 @@ classdef MultiElectrode < handle
         end 
         %------------------------------------------------------------------        
         function [groupsidx nGroupsPerElectrode] = getLocalElectrodeGroups(self)
-            [groupsidx nGroupsPerElectrode] = hdsort.hdsort.filewrapper.constructLocalElectrodeGroups(self.electrodePositions(:,1), self.electrodePositions(:,2));       
+            [groupsidx nGroupsPerElectrode] = hdsort.filewrapper.constructLocalElectrodeGroups(self.electrodePositions(:,1), self.electrodePositions(:,2));       
         end
         %------------------------------------------------------------------        
-        function ah = hdsort.plot.lectrodeGroups(self, groupsidx)
+        function ah = plotElectrodeGroups(self, groupsidx)
             if nargin == 1
                 [groupsidx nGroupsPerElectrode] = self.getLocalElectrodeGroups();
             end
             figure;
             ah = axes();
-            hdsort.plot.self.electrodePositions(:,1), self.electrodePositions(:,2), 'ok');
+            plot(self.electrodePositions(:,1), self.electrodePositions(:,2), 'ok');
             hold on
             for ii=1:length(groupsidx)
                 x = self.electrodePositions(groupsidx{ii},1);
                 y = self.electrodePositions(groupsidx{ii},2);
-                hdsort.plot.ah, x+1+2*rand, y+2*rand, 'x', 'color', hdsort.plot.PlotInterface.vectorColor(ii), 'markersize', 14, 'linewidth', 2);
+                plot(ah, x+1+2*rand, y+2*rand, 'x', 'color', hdsort.plot.PlotInterface.vectorColor(ii), 'markersize', 14, 'linewidth', 2);
                 hold on
             end
             set(ah,'YDir','reverse');

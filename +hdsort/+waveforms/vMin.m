@@ -1,6 +1,6 @@
 function [m midx] = vMin(V, nC)
     % computes the channel wise minima and their positions for the
-    % vectorized multichannel hdsort.waveforms.in V
+    % vectorized multichannel waveforms in V
     
     % convert to matrix representations, single channel under each other
     M = hdsort.waveforms.v2m(V,nC);

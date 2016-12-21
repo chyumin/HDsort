@@ -1,4 +1,4 @@
-classdef DataSourceInterface < hdsort.hdsort.filewrapper.WaveformDataSourceInterface
+classdef DataSourceInterface < hdsort.filewrapper.WaveformDataSourceInterface
     properties
         activeChannels
         fullMultiElectrode
@@ -12,7 +12,7 @@ classdef DataSourceInterface < hdsort.hdsort.filewrapper.WaveformDataSourceInter
     methods
         %------------------------------------------------------------------
         function self = DataSourceInterface(varargin)
-            self = self@hdsort.hdsort.filewrapper.WaveformDataSourceInterface(varargin{:});
+            self = self@hdsort.filewrapper.WaveformDataSourceInterface(varargin{:});
         end
         
         %------------------------------------------------------------------

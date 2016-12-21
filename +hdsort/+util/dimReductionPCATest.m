@@ -2,7 +2,7 @@
 % template1 = template1/max(abs((template1)));
 D = load('dimReductionPCATestTemplate.mat');
 templates = D.templates;
-templates = resample(mysort.wf.vSubChanSel(templates, D.nC, 4)', 11, 1)'; 
+templates = resample(waveforms.vSubChanSel(templates, D.nC, 4)', 11, 1)'; 
 template1 = templates(1,:)/max(abs((templates(1,:))));
 template2 = templates(2,:)/max(abs((templates(2,:))));
 nC = 1;
@@ -22,82 +22,82 @@ TT = {[T1 T2], [Tshift1 Tshift2]};
 for it = 1:length(TT)
     myT = TT{it};
     Tdown = resample(myT, 1, down);
-    Tdownali      = mysort.wf.vAlignOnMax(Tdown', nC)';
+    Tdownali      = waveforms.vAlignOnMax(Tdown', nC)';
     % make more versions
     Tdown = repmat(Tdown, 1, 100);
     N = .1*randn(size(Tdown'));
-    [TdownaliNoise taus] = mysort.wf.vAlignOnMax(Tdown'+ N, nC);
+    [TdownaliNoise taus] = waveforms.vAlignOnMax(Tdown'+ N, nC);
     TdownaliNoise = TdownaliNoise';
     TdownaliNoise([1:max(1,max(taus)) end+min(0,min(taus))+1:end],:) = [];
     
-%     [taus TdownaliIntNoise] = mysort.wf.vAlignOnAverageMaxSample(Tdown'+ N, 1);
-    [TdownaliIntNoise taus] = mysort.wf.vAlignOnUpsampleMean(Tdown'+ N, nC, 'maxIter', 3);
+%     [taus TdownaliIntNoise] = waveforms.vAlignOnAverageMaxSample(Tdown'+ N, 1);
+    [TdownaliIntNoise taus] = waveforms.vAlignOnUpsampleMean(Tdown'+ N, nC, 'maxIter', 3);
     TdownaliIntNoise = TdownaliIntNoise';
     TdownaliIntNoise([1:max(1,ceil(max(taus))) end+min(0,min(floor(taus)))+1:end],:) = [];
 
     %%
     mysort.hdsort.plot.figure('w', 600, 'h', 800);
     nR = 5; nCol = 3;
-    subhdsort.plot.nR, nCol,1+nCol*0)
+    subplot.nR, nCol,1+nCol*0)
     hdsort.plot.T); axis tight;
     title('Template only')
-    subhdsort.plot.nR, nCol,1+nCol*1)
+    subplot.nR, nCol,1+nCol*1)
     hdsort.plot.Tdown); axis tight;
     title('Template With Shifts Downsampled')
-    subhdsort.plot.nR, nCol,1+nCol*2)
+    subplot.nR, nCol,1+nCol*2)
     hdsort.plot.Tdownali); axis tight;
     title('Template With Shifts Downsampled and Aligned')
-    subhdsort.plot.nR, nCol,1+nCol*3)
+    subplot.nR, nCol,1+nCol*3)
     hdsort.plot.TdownaliNoise); axis tight;
     title('Template With Shifts Downsampled, added Noise and then Aligned')
-    subhdsort.plot.nR, nCol,1+nCol*4)
+    subplot.nR, nCol,1+nCol*4)
     hdsort.plot.TdownaliIntNoise); axis tight;
     title('Template With Shifts Downsampled, added Noise and then Aligned and Int')
     %%
     dim = 2;
-    [XFet1 pcs1 T1] = mysort.hdsort.util.dimReductionPCA(T', dim, [], [], 1);
-    [XFet1down pcs1down T1down] = mysort.hdsort.util.dimReductionPCA(Tdown', dim, [], [], 1);
-    [XFet1downali pcs1downali T1downali] = mysort.hdsort.util.dimReductionPCA(Tdownali', dim, [], [], 1);
-    [XFet1downaliNoise pcs1downaliNoise T1downaliNoise] = mysort.hdsort.util.dimReductionPCA(TdownaliNoise', dim, [], [], 1);
-    [XFet1downaliIntNoise pcs1downaliIntNoise T1downaliIntNoise] = mysort.hdsort.util.dimReductionPCA(TdownaliIntNoise', dim, [], [], 1);
+    [XFet1 pcs1 T1] = hdsort.util.dimReductionPCA(T', dim, [], [], 1);
+    [XFet1down pcs1down T1down] = hdsort.util.dimReductionPCA(Tdown', dim, [], [], 1);
+    [XFet1downali pcs1downali T1downali] = hdsort.util.dimReductionPCA(Tdownali', dim, [], [], 1);
+    [XFet1downaliNoise pcs1downaliNoise T1downaliNoise] = hdsort.util.dimReductionPCA(TdownaliNoise', dim, [], [], 1);
+    [XFet1downaliIntNoise pcs1downaliIntNoise T1downaliIntNoise] = hdsort.util.dimReductionPCA(TdownaliIntNoise', dim, [], [], 1);
 
-    subhdsort.plot.nR, nCol,2+nCol*0)
+    subplot.nR, nCol,2+nCol*0)
     hdsort.plot.XFet1(:,1), XFet1(:,2), '.');
-    subhdsort.plot.nR, nCol,2+nCol*1)
+    subplot.nR, nCol,2+nCol*1)
     hdsort.plot.XFet1down(:,1), XFet1down(:,2), '.');
-    subhdsort.plot.nR, nCol,2+nCol*2)
+    subplot.nR, nCol,2+nCol*2)
     hdsort.plot.XFet1downali(:,1), XFet1downali(:,2), '.');
-    subhdsort.plot.nR, nCol,2+nCol*3)
+    subplot.nR, nCol,2+nCol*3)
     hdsort.plot.XFet1downaliNoise(:,1), XFet1downaliNoise(:,2), '.');
-    subhdsort.plot.nR, nCol,2+nCol*4)
+    subplot.nR, nCol,2+nCol*4)
     hdsort.plot.XFet1downaliIntNoise(:,1), XFet1downaliIntNoise(:,2), '.');
     
     upsample_factor = 11;
-    [XFet3 pcs3 T3] = mysort.hdsort.util.dimReductionPCA(T', dim, [], [], upsample_factor);
-    [XFet3down pcs3down T3down] = mysort.hdsort.util.dimReductionPCA(Tdown', dim, [], [], upsample_factor);
-    [XFet3downali pcs3downali T3downali] = mysort.hdsort.util.dimReductionPCA(Tdownali', dim, [], [], upsample_factor);
-    [XFet3downaliNoise pcs3downaliNoise T3downaliNoise T3shiftPCs] = mysort.hdsort.util.dimReductionPCA(TdownaliNoise', dim, [], [], upsample_factor);
-    [XFet3downaliIntNoise pcs3downaliIntNoise T3downaliIntNoise] = mysort.hdsort.util.dimReductionPCA(TdownaliIntNoise', dim, [], [], upsample_factor);
+    [XFet3 pcs3 T3] = hdsort.util.dimReductionPCA(T', dim, [], [], upsample_factor);
+    [XFet3down pcs3down T3down] = hdsort.util.dimReductionPCA(Tdown', dim, [], [], upsample_factor);
+    [XFet3downali pcs3downali T3downali] = hdsort.util.dimReductionPCA(Tdownali', dim, [], [], upsample_factor);
+    [XFet3downaliNoise pcs3downaliNoise T3downaliNoise T3shiftPCs] = hdsort.util.dimReductionPCA(TdownaliNoise', dim, [], [], upsample_factor);
+    [XFet3downaliIntNoise pcs3downaliIntNoise T3downaliIntNoise] = hdsort.util.dimReductionPCA(TdownaliIntNoise', dim, [], [], upsample_factor);
 
-    subhdsort.plot.nR, nCol,3+nCol*0)
+    subplot.nR, nCol,3+nCol*0)
     hdsort.plot.XFet3(:,1), XFet3(:,2), '.');
-    subhdsort.plot.nR, nCol,3+nCol*1)
+    subplot.nR, nCol,3+nCol*1)
     hdsort.plot.XFet3down(:,1), XFet3down(:,2), '.');
-    subhdsort.plot.nR, nCol,3+nCol*2)
+    subplot.nR, nCol,3+nCol*2)
     hdsort.plot.XFet3downali(:,1), XFet3downali(:,2), '.');
-    subhdsort.plot.nR, nCol,3+nCol*3)
+    subplot.nR, nCol,3+nCol*3)
     hdsort.plot.XFet3downaliNoise(:,1), XFet3downaliNoise(:,2), '.');
-    subhdsort.plot.nR, nCol,3+nCol*4)
+    subplot.nR, nCol,3+nCol*4)
     hdsort.plot.XFet3downaliIntNoise(:,1), XFet3downaliIntNoise(:,2), '.');    
 end
 %%
 figure
-subhdsort.plot.3,1,1)
+subplot.3,1,1)
 hdsort.plot.pcs1downaliIntNoise(:,1:2));
 title('Correct PCs');
-subhdsort.plot.3,1,2)
+subplot.3,1,2)
 hdsort.plot.pcs3downaliNoise(:,1:2));
 title('Approx PCs');
-subhdsort.plot.3,1,3)
+subplot.3,1,3)
 hdsort.plot.squeeze(T3shiftPCs(:,1:2,1)));
 title('Shifted Approx PCs');

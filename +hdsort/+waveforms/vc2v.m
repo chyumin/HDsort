@@ -1,11 +1,11 @@
 function V = vc2v(VC, Tf)
     % converts the vector-channel representation VC of the data into the
     % vector representation. Rows of VC correspond to channels and single
-    % hdsort.waveforms.are concatenates. But all hdsort.waveforms.in VC have their first
-    % channel waveform in row one. Single channel hdsort.waveforms.are of length
+    % waveforms are concatenates. But all waveforms in VC have their first
+    % channel waveform in row one. Single channel waveforms are of length
     % Tf, thus VC has dimensionality nC x (Tf*nS) where nC is the number of
     % channels, Tf is the length of a single channel waveform and nS is the
-    % number of single channel hdsort.waveforms.
+    % number of single channel waveforms
     %
     % V:  v1c1 v1c2 v1c3 ... v1c_nC
     %     ...

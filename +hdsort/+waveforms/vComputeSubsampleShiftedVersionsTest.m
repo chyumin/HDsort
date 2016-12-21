@@ -7,12 +7,12 @@ nC = 2;
 vT = hdsort.waveforms.vComputeSubsampleShiftedVersions(T, nC, 3);
 
 figure;
-subhdsort.plot.2,1,1);
-hdsort.plot.vT(:,:,1)');
-subhdsort.plot.2,1,2);
+subplot(2,1,1);
+plot(vT(:,:,1)');
+subplot(2,1,2);
 hold on
 for i=1:size(vT,3)
-    hdsort.plot.vT(:,:,i)', 'color', mysort.hdsort.plot.vectorColor(i))
+    plot(vT(:,:,i)', 'color', hdplot.plot.PlotInterface.vectorColor(i))
 end
 
 %%
@@ -24,10 +24,10 @@ nC = 2;
 vT = hdsort.waveforms.vComputeSubsampleShiftedVersions(T, nC, 20);
 
 figure;
-subhdsort.plot.2,1,1);
-hdsort.plot.vT(:,:,1)');
-subhdsort.plot.2,1,2);
+subplot(2,1,1);
+plot(vT(:,:,1)');
+subplot(2,1,2);
 hold on
 for i=1:size(vT,3)
-    hdsort.plot.vT(:,:,i)', 'color', mysort.hdsort.plot.vectorColor(i))
+    plot(vT(:,:,i)', 'color', hdplot.plot.PlotInterface.vectorColor(i))
 end

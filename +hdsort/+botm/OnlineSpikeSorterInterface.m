@@ -26,7 +26,7 @@ classdef OnlineSpikeSorterInterface < mysort.sorters.SpikeSorterInterface
             self = self@mysort.sorters.SpikeSorterInterface();
             self.P.chunk_size = 100000;   
             self.P.gui = false;
-            self.P = mysort.hdsort.util.parseInputs(self.P, varargin);
+            self.P = hdsort.util.parseInputs(self.P, varargin);
             
             self.chunk_overlap = [];
             self.chunk_start   = [];
@@ -53,7 +53,7 @@ classdef OnlineSpikeSorterInterface < mysort.sorters.SpikeSorterInterface
             self.chunk_overlap = 2*self.Tf;
             self.hasNextChunk = 1;
             self.currentChunk = 1;
-            timer = mysort.hdsort.util.ProcessTimer(self.nChunks);
+            timer = hdsort.util.ProcessTimer(self.nChunks);
             
             sorting = []; 
             while self.hasNextChunk

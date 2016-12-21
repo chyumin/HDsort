@@ -1,4 +1,4 @@
-classdef Image < hdsort.plot.PlotInterface
+classdef Image < myplot.PlotInterface
     properties (SetAccess=protected)
         xData
         yData
@@ -12,10 +12,10 @@ classdef Image < hdsort.plot.PlotInterface
         normalize 
         %yShift
         
-        %hdsort.plot.ll
-        %hdsort.plot.ean
-        %hdsort.plot.edian
-        %hdsort.plot.td
+        %plotAll
+        %plotMean
+        %plotMedian
+        %plotStd
         %meanColor
     end
     
@@ -52,16 +52,16 @@ classdef Image < hdsort.plot.PlotInterface
 
             % 
             %P.yShift = 0.0;
-            %P.hdsort.plot.ll = true;
-            %P.hdsort.plot.ean = false;
-            %P.hdsort.plot.edian = false;
-            %P.hdsort.plot.td = false;
+            %P.plotAll = true;
+            %P.plotMean = false;
+            %P.plotMedian = false;
+            %P.plotStd = false;
             %P.meanColor = [0,0,0];
             P.colormap = gray; 
             P.normalize = true;
-            self = self@hdsort.plot.PlotInterface(P, varargin{:});
+            self = self@myplot.PlotInterface(P, varargin{:});
             
-            self.hdsort.plot.ame = 'Image';
+            self.plotName = 'Image';
             
             self.xData = X;
             self.yData = Y;

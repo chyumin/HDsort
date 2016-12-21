@@ -19,7 +19,7 @@ disp('correlating channel 5 and 6 with lag 1');
 X(2:end, 5) = X(2:end, 5) + X(1:end-1, 6);
 
 %% Build XCorr container
-XCC = mysort.hdsort.noise.XCorrContainer(X, maxLag, 'spikeTrains', spikeTrains);
+XCC = hdsort.noise.XCorrContainer(X, maxLag, 'spikeTrains', spikeTrains);
 
 %% Invert example vector with levinson durbin
 Tf = (maxLag+1);
@@ -29,11 +29,11 @@ x = ones(1,Tf*nCinv);
 y = XCC.invMul(x, inversion_channel_idx);
 
 figure; 
-hdsort.plot.x);
+plot(x);
 hold on
-hdsort.plot.y, 'g');
+plot(y, 'g');
 
-%% Build the different covariance represenations and hdsort.plot.them for various
+%% Build the different covariance represenations and plot them for various
 %% channel sets
 idxset = {1:4, 2:5, 3:6, 7:10, 1:10};
 for i=1:length(idxset)
@@ -53,20 +53,20 @@ for i=1:length(idxset)
     
 
     figure;
-    subhdsort.plot.2,3,[1 4])
+    subplot(2,3,[1 4])
     imagesc(ccol)
     title('CCol for inversion')
 
-    subhdsort.plot.2,3,[2 3])
+    subplot(2,3,[2 3])
     imagesc(xc)
     title('internal xc functions')
 
-    subhdsort.plot.2,3,5)
+    subplot(2,3,5)
     imagesc(Cte)
     title('C time embedded')
 
-    subhdsort.plot.2,3,6)
+    subplot(2,3,6)
     imagesc(Cce)
     title('C channel embedded')
-    mysort.hdsort.plot.figureTitle(num2str(idx));
+    mysort.plot.figureTitle(num2str(idx));
 end

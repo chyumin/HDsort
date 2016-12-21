@@ -23,7 +23,7 @@ classdef MessageHandler < handle
             P.username = gc.user_name;
             P.host = 'mail.ethz.ch';
             P.port = '587';
-            P = mysort.hdsort.util.parseInputs(P, varargin, 'error');
+            P = hdsort.util.parseInputs(P, varargin, 'error');
             self.P = P;
             
             self.doSend = P.doSend;

@@ -4,7 +4,7 @@ names = fieldnames(P_additional);
 for i=1:length(names)
     if isstruct( P_additional.(names{i}))
          if isfield( P_base, names{i})
-             P_base.(names{i}) = mysort.hdsort.util.mergeStructs(P_base.(names{i}), P_additional.(names{i}));
+             P_base.(names{i}) = hdsort.util.mergeStructs(P_base.(names{i}), P_additional.(names{i}));
          else
              P_base.(names{i}) = P_additional.(names{i});
          end

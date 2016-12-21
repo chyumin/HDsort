@@ -1,4 +1,4 @@
-classdef Gscatter < hdsort.plot.PlotInterface
+classdef Gscatter < myplot.PlotInterface
     properties (SetAccess=protected)
         labels
         xData
@@ -6,7 +6,7 @@ classdef Gscatter < hdsort.plot.PlotInterface
     end
     
     properties
-        hdsort.plot.roupsTogether
+        plotGroupsTogether
         defaultLegend
         markerArea
         markerType
@@ -18,14 +18,14 @@ classdef Gscatter < hdsort.plot.PlotInterface
         function self = Gscatter(xData, yData, labels, varargin)
             
             P.markerArea = [];
-            P.hdsort.plot.roupsTogether = false;
+            P.plotGroupsTogether = false;
             P.defaultLegend = false;
             P.markerType = '';
             P.color = '';
             
-            self = self@hdsort.plot.PlotInterface(P, varargin{:})
+            self = self@myplot.PlotInterface(P, varargin{:})
             
-            self.hdsort.plot.ame = 'Gscatter';
+            self.plotName = 'Gscatter';
             
             self.xData = xData;
             self.yData = yData;
@@ -61,7 +61,7 @@ classdef Gscatter < hdsort.plot.PlotInterface
                 self.markerType = repmat({self.markerType}, 1, nGroups);
             end
             
-            if self.hdsort.plot.roupsTogether
+            if self.plotGroupsTogether
                 %for g = 1:nGroups
                 %idx = self.labels == uLabels(g);
                 axes(self.ah)
@@ -71,13 +71,13 @@ classdef Gscatter < hdsort.plot.PlotInterface
                     [p_(ii).Color] = deal([self.color(ii, :), self.Transparency]);
                 end            
                 
-                self.hdsort.plot.bj = [self.hdsort.plot.bj; p_];
+                self.plotObj = [self.plotObj; p_];
                 %end
             else
                 for g = 1:nGroups
                     idx = self.labels == uLabels(g);
                     p_ = scatter(self.ah, self.xData(idx), self.yData(idx), self.markerArea, self.color(g,:), self.markerType{g});
-                    self.hdsort.plot.bj = [self.hdsort.plot.bj; p_];
+                    self.plotObj = [self.plotObj; p_];
                 end
             end
             

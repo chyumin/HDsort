@@ -14,21 +14,21 @@ classdef XCorrContainer < handle
     methods
         %------------------------------------------------------------------
         function self = XCorrContainer(X, maxLag, varargin)
-            % Object to compute hdsort.noise.covariance matrices for a dataset X
+            % Object to compute noise covariance matrices for a dataset X
             % that has potentially so many channels 
             P_.spikeTrains = {};        % Cell array of spike trains (time
                                         % points in [samples] for each
                                         % channel of X. These define
                                         % periods for each channel that
                                         % should not be used to compute the
-                                        % hdsort.noise.covariance
+                                        % noise covariance
             P_.blockNSamplesAroundSpikes = 50;  % Defines how many samples
                                                 % before and after a spike
                                                 % should be ignored for
-                                                % hdsort.noise.computation
+                                                % noise computation
             P_.useMaxNNoiseSamples = 200000;
             P_.startBufferSize = 100;
-            P_ = mysort.hdsort.util.parseInputs(P_, varargin, 'error');
+            P_ = hdsort.util.parseInputs(P_, varargin, 'error');
             
             self.P = P_;
             self.X = X;
@@ -92,7 +92,7 @@ classdef XCorrContainer < handle
         function ccol = getCCol4Channels(self, channelIdx)
             Cte = self.getCte4Channels(channelIdx);
 %             Cte = Cte + 100*diag(diag(Cte));
-            ccol = mysort.hdsort.noise.Cte2Ccol(Cte, length(channelIdx));
+            ccol = hdsort.noise.Cte2Ccol(Cte, length(channelIdx));
         end        
         %------------------------------------------------------------------
         function Cte = getCte4Channels(self, channelIdx)
@@ -117,7 +117,7 @@ classdef XCorrContainer < handle
         %------------------------------------------------------------------
         function Cce = getCce4Channels(self, channelIdx)
             Cte = self.getCte4Channels(channelIdx);
-            Cce = mysort.hdsort.noise.Cte2Cce(Cte, length(channelIdx));
+            Cce = hdsort.noise.Cte2Cce(Cte, length(channelIdx));
         end               
         
         %------------------------------------------------------------------
@@ -126,10 +126,10 @@ classdef XCorrContainer < handle
                 bIdx = [];
                 return
             end
-            % estimate hdsort.noise.hdsort.epoch. for this particular channelpair
-            hdsort.noise.pochCell = self.getNoiseEpochs4ChannelPairs(cp);
+            % estimate noise epochs for this particular channelpair
+            noiseEpochCell = self.getNoiseEpochs4ChannelPairs(cp);
             
-            xc = mysort.hdsort.noise.computeXCorrs(self.X, cp, self.maxLag, hdsort.noise.pochCell, self.P.useMaxNNoiseSamples);
+            xc = hdsort.noise.computeXCorrs(self.X, cp, self.maxLag, noiseEpochCell, self.P.useMaxNNoiseSamples);
             bIdx = self.addXCorr4ChannelPairs(xc, hashes);
         end
         
@@ -144,7 +144,7 @@ classdef XCorrContainer < handle
             for i=1:nCP
                 st = sort([self.P.spikeTrains{cp(i,1)} self.P.spikeTrains{cp(i,2)}]);
                 se = [st(:)-self.P.blockNSamplesAroundSpikes st(:)+self.P.blockNSamplesAroundSpikes];
-                ne = mysort.hdsort.epoch.flip(se, size(self.X,1));
+                ne = hdsort.epoch.flip(se, size(self.X,1));
                 nec{i} = ne;
             end
         end
@@ -168,7 +168,7 @@ classdef XCorrContainer < handle
         
         %------------------------------------------------------------------
         function [bIdx cp h] = getBufferIdx4Channels(self, channelIdx)
-            cp = mysort.hdsort.noise.computeChannelPairs4Channels(channelIdx);
+            cp = hdsort.noise.computeChannelPairs4Channels(channelIdx);
             [bIdx h] = self.getBufferIdx4ChannelPairs(cp);
         end
         %------------------------------------------------------------------

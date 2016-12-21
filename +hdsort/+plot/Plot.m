@@ -1,4 +1,4 @@
-classdef Plot < hdsort.plot.PlotInterface
+classdef Plot < myplot.PlotInterface
     properties (SetAccess=protected)
         xData
         yData
@@ -8,10 +8,10 @@ classdef Plot < hdsort.plot.PlotInterface
     properties
         yShift
         
-        hdsort.plot.ll
-        hdsort.plot.ean
-        hdsort.plot.edian
-        hdsort.plot.td
+        plotAll
+        plotMean
+        plotMedian
+        plotStd
         meanColor
     end
     
@@ -41,15 +41,15 @@ classdef Plot < hdsort.plot.PlotInterface
             
             P.yShift = 0.0;
             
-            P.hdsort.plot.ll = true;
-            P.hdsort.plot.ean = false;
-            P.hdsort.plot.edian = false;
-            P.hdsort.plot.td = false;
+            P.plotAll = true;
+            P.plotMean = false;
+            P.plotMedian = false;
+            P.plotStd = false;
             P.meanColor = [0,0,0];
             
-            self = self@hdsort.plot.PlotInterface(P, varargin{:});
+            self = self@myplot.PlotInterface(P, varargin{:});
             
-            self.hdsort.plot.ame = 'Plot';
+            self.plotName = 'Plot';
             
             self.xData = X;
             self.yData = Y;
@@ -64,30 +64,30 @@ classdef Plot < hdsort.plot.PlotInterface
         function show_(self)
             self.setColor(self.color, self.nLines);
             
-            if self.hdsort.plot.ll
+            if self.plotAll
                % if size(self.xData, 2) == 1
                 
                
                 for ii = 1:self.nLines
-                    p_ = hdsort.plot.self.xData(:,ii), self.yData(:,ii) + self.yShift * ii, self.LineSpec, ...
+                    p_ = plot(self.xData(:,ii), self.yData(:,ii) + self.yShift * ii, self.LineSpec, ...
                         'Color', self.color(ii,:), ...
                         'LineWidth', self.LineWidth);
                     
                     [p_.Color] = deal([self.color(ii, :), self.Transparency]);
-                    self.hdsort.plot.bj = [self.hdsort.plot.bj; p_];
+                    self.plotObj = [self.plotObj; p_];
                 end
             end
             
-            if self.hdsort.plot.ean
-                assert(self.yShift == 0.0, 'Do not hdsort.plot.curves with a shift and the mean!')
-                hdsort.plot.self.xData, mean(self.yData,2), '--', 'Color', self.meanColor, 'LineWidth', 2.0*self.LineWidth);
+            if self.plotMean
+                assert(self.yShift == 0.0, 'Do not plot curves with a shift and the mean!')
+                plot(self.xData, mean(self.yData,2), '--', 'Color', self.meanColor, 'LineWidth', 2.0*self.LineWidth);
             end
-            if self.hdsort.plot.edian
-                assert(self.yShift == 0.0, 'Do not hdsort.plot.curves with a shift and the median!')
-                hdsort.plot.self.xData, median(self.yData,2), '-.', 'Color', self.meanColor, 'LineWidth', 2.0*self.LineWidth);
+            if self.plotMedian
+                assert(self.yShift == 0.0, 'Do not plot curves with a shift and the median!')
+                plot(self.xData, median(self.yData,2), '-.', 'Color', self.meanColor, 'LineWidth', 2.0*self.LineWidth);
             end
-            if self.hdsort.plot.td
-                assert(self.yShift == 0.0, 'Do not hdsort.plot.curves with a shift and the std!')
+            if self.plotStd
+                assert(self.yShift == 0.0, 'Do not plot curves with a shift and the std!')
                 xP = [self.xData; flipud(self.xData)];
                 yP = [mean(self.yData,2) + std(self.yData')'; flipud(mean(self.yData,2) - std(self.yData')')];
                 patch(xP,yP,1,'facecolor',self.meanColor,...

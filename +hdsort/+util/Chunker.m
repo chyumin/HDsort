@@ -31,7 +31,7 @@ classdef Chunker < handle
             self.P.progressDisplay = 'none'; % or 'console' or 'progressbar';
             self.P.showTotalTimeAtEnd = 1;
             self.P.one_sided_overlap = false;
-            self.P = mysort.hdsort.util.parseInputs(self.P, varargin, 'error');            
+            self.P = hdsort.util.parseInputs(self.P, varargin, 'error');            
             assert(isa(Len, 'double'), 'Len must be of type double, otherwise weird things can happen, e.g., with Matlabs min function!');
             assert(isa(self.P.chunkSize, 'double'), 'self.P.chunkSize must be of type double, otherwise weird things can happen, e.g., with Matlabs min function!');
             assert(isa(self.P.chunkOverlap, 'double'), 'isa(self.P.chunkOverlap must be of type self.P.chunkOverlap, otherwise weird things can happen, e.g., with Matlabs min function!');
@@ -67,7 +67,7 @@ classdef Chunker < handle
             if strcmp(self.P.progressDisplay, 'none')
                 self.progress = [];
             elseif strcmp(self.P.progressDisplay, 'console')
-                self.progress = mysort.hdsort.util.ProcessTimer(self.nChunks);
+                self.progress = hdsort.util.ProcessTimer(self.nChunks);
             elseif strcmp(self.P.progressDisplay, 'progressbar')
                 matlabfilecentral.progressbar.progressbar;
             else

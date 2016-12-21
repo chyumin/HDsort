@@ -28,7 +28,7 @@ function [G] = mergeLocalSortings_march24(G, meanNoiseStd, varargin)
     P.percentageCutoff = .3;
     P.maxPercentageAmplitudeDistance = .6;
     P.sameHighestElectrodesPercent = 80;  % this is the percentage of valid electrodes on which both tempaltes have the highest energy
-    P = mysort.hdsort.util.parseInputs(P, varargin, 'error');
+    P = hdsort.util.parseInputs(P, varargin, 'error');
     
     % First step, walk through all templates and check if the maximal
     % amplitude is on an electrode that was inside the local sorting from
@@ -178,25 +178,25 @@ function [G] = mergeLocalSortings_march24(G, meanNoiseStd, varargin)
                                 % Templates do not have a big difference
                                 st1 = G(g1).gdf(G(g1).gdf(:,1) == t1idx(t1)-1,2);
                                 st2 = G(g2).gdf(G(g2).gdf(:,1) == t2idx(t2)-1,2);
-                                [O nO] = mysort.spiketrain.checkForOverlaps({st1, st2}, P.overlapDist);
+                                [O nO] = hdsort.spiketrain.checkForOverlaps({st1, st2}, P.overlapDist);
                                 ovp = nO(1)/min([length(st1) length(st2)]);
                                 if ovp > P.minSpikeTrainOvp
                                     % Spike trains are similar enough
                                     if 0
-                                        mysort.plot.templates2D(G(g1).templates.wfs(:,:,t1idx(t1)), G(g1).templates.MES.electrodePositions, 100, 5, 'IDs', 1:length(t1idx))
+                                        hdsort.plot.templates2D(G(g1).templates.wfs(:,:,t1idx(t1)), G(g1).templates.MES.electrodePositions, 100, 5, 'IDs', 1:length(t1idx))
                                         ah = gca; 
                                         hold on
-                                        mysort.plot.templates2D(G(g2).templates.wfs(:,:,t2idx(t2)), G(g2).templates.MES.electrodePositions, 100, 5, 'IDs', length(t1idx)+(1:length(t2idx)), 'ah', ah)
+                                        hdsort.plot.templates2D(G(g2).templates.wfs(:,:,t2idx(t2)), G(g2).templates.MES.electrodePositions, 100, 5, 'IDs', length(t1idx)+(1:length(t2idx)), 'ah', ah)
                                     end
                                     bMerge = 1;
                                 else
                                     % Rejection because of spike trains
                                     bMerge = 0;
                                     if 0
-                                        mysort.plot.templates2D(G(g1).templates.wfs(:,:,t1idx(t1)), G(g1).templates.MES.electrodePositions, 100, 5, 'IDs', 1:length(t1idx))
+                                        hdsort.plot.templates2D(G(g1).templates.wfs(:,:,t1idx(t1)), G(g1).templates.MES.electrodePositions, 100, 5, 'IDs', 1:length(t1idx))
                                         ah = gca; 
                                         hold on
-                                        mysort.plot.templates2D(G(g2).templates.wfs(:,:,t2idx(t2)), G(g2).templates.MES.electrodePositions, 100, 5, 'IDs', length(t1idx)+(1:length(t2idx)), 'ah', ah)
+                                        hdsort.plot.templates2D(G(g2).templates.wfs(:,:,t2idx(t2)), G(g2).templates.MES.electrodePositions, 100, 5, 'IDs', length(t1idx)+(1:length(t2idx)), 'ah', ah)
                                     end                                
                                 end
                             end
@@ -215,10 +215,10 @@ function [G] = mergeLocalSortings_march24(G, meanNoiseStd, varargin)
                 end
             end
             if 0
-                mysort.plot.templates2D(G(g1).templates.wfs(:,:,t1idx), G(g1).templates.MES.electrodePositions, 10, 5, 'IDs', 1:length(t1idx))
+                hdsort.plot.templates2D(G(g1).templates.wfs(:,:,t1idx), G(g1).templates.MES.electrodePositions, 10, 5, 'IDs', 1:length(t1idx))
                 ah = gca; 
                 hold on
-                mysort.plot.templates2D(G(g2).templates.wfs(:,:,t2idx), G(g2).templates.MES.electrodePositions, 10, 5, 'IDs', length(t1idx)+(1:length(t2idx)), 'ah', ah)
+                hdsort.plot.templates2D(G(g2).templates.wfs(:,:,t2idx), G(g2).templates.MES.electrodePositions, 10, 5, 'IDs', length(t1idx)+(1:length(t2idx)), 'ah', ah)
             end
         end
     end

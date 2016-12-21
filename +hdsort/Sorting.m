@@ -97,7 +97,7 @@ classdef Sorting < handle
                 disp('Create groups...');
                 electrodePositions = MES.electrodePositions;
                 electrodeNumbers   = MES.electrodeNumbers;
-                [groupsidx nGroupsPerElectrode] = mysort.mea.constructLocalElectrodeGroups(electrodePositions(:,1), electrodePositions(:,2), 'maxElPerGroup', maxElPerGroup);
+                [groupsidx nGroupsPerElectrode] = hdsort.leg.constructLocalElectrodeGroups(electrodePositions(:,1), electrodePositions(:,2), 'maxElPerGroup', maxElPerGroup);
                 disp(['Number of groups created: ' num2str(length(groupsidx))])
                 
                 groups = {};
@@ -221,7 +221,7 @@ classdef Sorting < handle
             
             P = hdsort.util.parseInputs(struct(), varargin, 'merge');
             
-            assert(isa(self.DS, 'mysort.mea.CMOSMEA'), 'At the moment, the grid framework can only be run with CMOSMEA objects! If you want to test the sorter with something else, use the flag ''sortingMode'', ''localHDSorting''');
+            assert(isa(self.DS, 'hdsort.filewrapper.CMOSMEA'), 'At the moment, the grid framework can only be run with CMOSMEA objects! If you want to test the sorter with something else, use the flag ''sortingMode'', ''localHDSorting''');
             
             if ~strcmp(P.sortingMode, 'BSSE') && ~strcmp(P.sortingMode, 'euler') 
                         gridType = 'BSSE';
@@ -349,7 +349,7 @@ classdef Sorting < handle
                     GF = load(self.files.groupFile, 'groups', 'electrodeNumbers', 'electrodePositions', 'nGroupsPerElectrode', 'groupsidx');
                     
                     disp('Start postprocessing...');
-                    [R, P_] = mysort.HDSorting.processLocalSortings(...
+                    [R, P_] = hdsort.leg.processLocalSortings(...
                         self.sortjob.folders.groups,...
                         self.name, GF.groups, GF.groupsidx, ...
                         'groupPaths', self.sortjob.folders.groups);
@@ -501,7 +501,7 @@ classdef Sorting < handle
             % Get the spike waveforms:
             spikes_struct = self.loadFileInGroup(groupNumber, 'spikes_cut');
             try
-                wfs = mysort.h5.matrix(spikes_struct.spikeCut.wfs.fname, '/wfs', 1)
+                wfs = hdsort.filewrapper.hdf5.matrix(spikes_struct.spikeCut.wfs.fname, '/wfs', 1)
             catch
                 warning('Could not read waveforms!')
                 wfs = [];
@@ -531,7 +531,7 @@ classdef Sorting < handle
             set(P.ah, 'nextplot', 'add');
             N = self.getNElGroups();
             for i=1:N
-                c = mysort.plot.vectorColor(i);
+                c = hdsort.plot.PlotInterface.vectorColor(i);
                 m = mysort.plot.markerTypes(i);
                 ep = S.electrodePositions(S.groupsidx{i},:);
                 plot(P.ah, ep(:,1), ep(:,2), '.', 'marker', m, 'color', c, 'linewidth', 2, 'markersize', 16);
@@ -547,7 +547,7 @@ classdef Sorting < handle
             
             disp('Postprocessing...');
             [gdf_merged, T_merged, localSorting, localSortingID, NeuronCombinations] =...
-                mysort.HDSorting.processLocalSortings(self.dPath, self.name, G.groups, G.groupsidx, ...
+                hdsort.leg.processLocalSortings(self.dPath, self.name, G.groups, G.groupsidx, ...
                 'newPostProcFunc', 'newMergeFelix');
             units = unique(gdf_merged(:,1));
             nU = length(units);

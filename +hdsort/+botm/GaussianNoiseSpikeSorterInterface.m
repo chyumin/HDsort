@@ -19,13 +19,13 @@ classdef GaussianNoiseSpikeSorterInterface  < mysort.sorters.SpikeSorterInterfac
             self.P.spikeDetector = mysort.detectors.threshold('method', 'none', 'threshFactor',4); 
             self.P.minCondNumber = 10000;
             self.P.diagonalLoading = 'DL'; % May be 'DL', 'DSL', 'none'
-            self.P = mysort.hdsort.util.parseInputs(self.P, varargin);
+            self.P = hdsort.util.parseInputs(self.P, varargin);
             
             self.Tf = Tf;
-%             if isa(NE, 'mysort.hdsort.util.NoiseEstimator') %, 'You must provide a NoiseEstimator as first argument!');
+%             if isa(NE, 'hdsort.util.NoiseEstimator') %, 'You must provide a NoiseEstimator as first argument!');
                 self.Covest = Covest;
 %             else
-%                 self.NE = mysort.hdsort.util.NoiseEstimator(NE, Tf);
+%                 self.NE = hdsort.util.NoiseEstimator(NE, Tf);
 %             end
         end   
         
@@ -47,7 +47,7 @@ classdef GaussianNoiseSpikeSorterInterface  < mysort.sorters.SpikeSorterInterfac
 %             
 %             iU = self.NE.getPrewhiteningOperator(self.Tf);
 %             pwSpikesX = spikes*iU;            
-%             fetX = mysort.hdsort.util.dimReductionPCA(pwSpikesX, 4);
+%             fetX = hdsort.util.dimReductionPCA(pwSpikesX, 4);
 %             mysort.hdsort.plot.clustering(fetX, classes);
 %             mysort.hdsort.plot.figureName('ClusterPCA'); 
         end        

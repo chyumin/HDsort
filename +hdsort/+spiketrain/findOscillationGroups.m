@@ -35,7 +35,7 @@ function [spike_times_amps_chan keepspikes] = findOscillationGroups(spike_times_
 %             thisKS = cell(length(uChans), 1);
 %             for i=1:length(uChans)
 %                 thisSTA{i} = spike_times_amps_chan(spike_times_amps_chan(:,3)==uChans(i),:);
-%                 [thisSTA{i} thisKS{i}] = mysort.hdsort.spiketrain.findOscillationGroups(thisSTA{i}, ...
+%                 [thisSTA{i} thisKS{i}] = hdsort.spiketrain.findOscillationGroups(thisSTA{i}, ...
 %                     mergeSpikesMaxDist, minGroupSize, minAmplitude);
 %             end
 %             spike_times_amps_chan = sortrows(cell2mat(thisSTA));

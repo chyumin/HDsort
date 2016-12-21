@@ -14,7 +14,7 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
         Tf_up
         blockLen
             
-        hdsort.noise.rior
+        noisePrior
         threshold
         priors
         Dshifts
@@ -36,12 +36,12 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
                 varargin(1) = [];
             else % T is in tensor form, Tf x nC x nWfs
                 Tf = size(T,1);
-                T = mysort.wf.t2v(T);
+                T = waveforms.t2v(T);
             end            
             
             self = self@botm.OnlineSpikeSorterInterface(varargin{:});
             self = self@botm.FilterBasedSpikeSorterInterface(Covest, Tf, T, varargin{:});
-            %self = self@mysort.hdsort.spiketrain.SpikeSortingContainer('BOTM', []);
+            %self = self@hdsort.spiketrain.SpikeSortingContainer('BOTM', []);
             self.P.spikePrior = 0.00001;
             self.P.upsample = 3;
             self.P.adapt = false;
@@ -53,7 +53,7 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
             self.P.useSIC = true;
             self.P.storeSICvaluesForDebugging = 0;
             self.P.minEpochLength = round(.5*Tf);
-            self.P = mysort.hdsort.util.parseInputs(self.P, varargin, 'error');
+            self.P = hdsort.util.parseInputs(self.P, varargin, 'error');
             
             if ~self.P.useSIC
                 % There is no need to upsample if we do not use SIC
@@ -61,8 +61,8 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
             end
             
             if isempty(self.P.templMaxIdx)
-                TT = mysort.wf.v2m(T, size(T,2)/Tf);
-                [i j] = mysort.hdsort.util.matrixArgMax(abs(TT));
+                TT = waveforms.v2m(T, size(T,2)/Tf);
+                [i j] = hdsort.util.matrixArgMax(abs(TT));
                 self.P.templMaxIdx = j;
             end
             
@@ -76,7 +76,7 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
             self.Tf_up = [];
             self.blockLen = [];
             
-            self.hdsort.noise.rior = [];
+            self.noisePrior = [];
             self.threshold = [];
             self.priors = [];
             self.activeSpikeSortingIdx = 1;
@@ -101,7 +101,7 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
         end
         %%% ------------------------------------------------------
         function T = getTemplateWaveforms(self)
-            T = mysort.wf.v2t(self.T, size(self.DH,2));
+            T = waveforms.v2t(self.T, size(self.DH,2));
         end
         %------------------------------------------------------------------
         function cutleft = getTemplateCutLeft(self)
@@ -120,60 +120,60 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
         %%% ------------------------------------------------------
         function fout = getFilterOutputs_(self, X, filterindex)
             self.debugout('Applying filter...', self.LEVEL_PROCESSING);
-            self.Y = mysort.hdsort.util.applyMcFilters(X, self.F);
+            self.Y = hdsort.util.applyMcFilters(X, self.F);
 
             self.debugout('Calculating Discriminant Function...', self.LEVEL_PROCESSING);
-            [self.D self.Dshifts] = mysort.hdsort.util.calculateDiscriminantFunctions(self.Y, self.CONF, self.priors);  
+            [self.D self.Dshifts] = hdsort.util.calculateDiscriminantFunctions(self.Y, self.CONF, self.priors);  
             
             if 0
                 ax = [];
                 mysort.hdsort.plot.figure('w', 800, 'h', 800);
-                ax(1) = subhdsort.plot.4,1,1)
+                ax(1) = subplot.4,1,1)
                 hold on
                 for i=1:size(self.D,1)
-                    hdsort.plot.self.D(i,:), 'color', mysort.hdsort.plot.vectorColor(i), 'linewidth', 2);
+                    plot(self.D(i,:), 'color', hdsort.plot.PlotInterface.vectorColor(i), 'linewidth', 2);
                 end
                 title('BOTM discrm func')
                 
-                [Da alphas] = mysort.hdsort.util.calculateDiscriminantFunctionsWithAlpha(self.Y, self.CONF, self.priors);  
+                [Da alphas] = hdsort.util.calculateDiscriminantFunctionsWithAlpha(self.Y, self.CONF, self.priors);  
                 Palpha = evpdf(alphas, 1, .2);
                 Palpha(alphas<.1) = 0;
                 logPalpha = log(Palpha);
                 logPalpha(logPalpha < -2) = nan;
-                ax(2) = subhdsort.plot.5,1,2);
+                ax(2) = subplot.5,1,2);
                 hold on
                 for i=1:size(self.D,1)
-                    hdsort.plot.alphas(i,:), 'color', mysort.hdsort.plot.vectorColor(i), 'linewidth', 2);
+                    plot(alphas(i,:), 'color', hdsort.plot.PlotInterface.vectorColor(i), 'linewidth', 2);
                 end
                 title('optimal alphas (scaling of templates)')
                 set(ax(2), 'ylim', [0 1.5]);
                 
-                ax(3) = subhdsort.plot.5,1,3);
+                ax(3) = subplot.5,1,3);
                 hold on
                 for i=1:size(self.D,1)
-                    hdsort.plot.Palpha(i,:), 'color', mysort.hdsort.plot.vectorColor(i), 'linewidth', 2);
+                    plot(Palpha(i,:), 'color', hdsort.plot.PlotInterface.vectorColor(i), 'linewidth', 2);
                 end
                 title('p(alpha)')
                 set(ax(3), 'ylim', [0 1.5]);
                 
-                ax(4) = subhdsort.plot.5,1,4)
+                ax(4) = subplot.5,1,4)
                 hold on
                 for i=1:size(self.D,1)
-                    hdsort.plot.Da(i,:), 'color', mysort.hdsort.plot.vectorColor(i), 'linewidth', 2);
+                    plot(Da(i,:), 'color', hdsort.plot.PlotInterface.vectorColor(i), 'linewidth', 2);
                 end
                 title('Discr wo alpha prior')
                 
-                ax(5) = subhdsort.plot.5,1,5)
+                ax(5) = subplot.5,1,5)
                 hold on
                 for i=1:size(self.D,1)
-                    hdsort.plot.Da(i,:)+logPalpha(i,:), 'color', mysort.hdsort.plot.vectorColor(i), 'linewidth', 2);
+                    plot(Da(i,:)+logPalpha(i,:), 'color', hdsort.plot.PlotInterface.vectorColor(i), 'linewidth', 2);
                 end
                 linkaxes(ax, 'x');
                 [maxis maxChan] = max(Da+logPalpha,[], 1);
                 [pks locs] = findpeaks(maxis,'MINPEAKDISTANCE', 2);
                 ids = maxChan(locs);
                 for i=1:size(self.D,1)
-                    hdsort.plot.locs(ids==i), pks(ids==i), 'o', 'color', mysort.hdsort.plot.vectorColor(i), 'linewidth', 2);
+                    plot(locs(ids==i), pks(ids==i), 'o', 'color', hdsort.plot.PlotInterface.vectorColor(i), 'linewidth', 2);
                 end
                 title('Discr funcs')
             end
@@ -212,7 +212,7 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
                 hdsort.epoch. = self.getSpikeEpochs('start', maxPastSample ,'stopp', self.chunk_end);
                 X = self.DH(maxPastSample:self.chunk_end, :)';
                 for t = 1:size(self.T,1)
-                    myNonOverlappingSpikes = mysort.hdsort.epoch.removeOverlapping(hdsort.epoch.(classes==t,:), hdsort.epoch.(classes~=t,:));
+                    myNonOverlappingSpikes = hdsort.epoch.removeOverlapping(hdsort.epoch.(classes==t,:), hdsort.epoch.(classes~=t,:));
                     weight = 1;
                     if size(myNonOverlappingSpikes,1) > 250
                         myNonOverlappingSpikes = myNonOverlappingSpikes(end-250+1:end,:);
@@ -221,20 +221,20 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
                     elseif isempty(myNonOverlappingSpikes)
                         continue
                     end
-                    spikes = mysort.hdsort.epoch.extractWaveform(X, myNonOverlappingSpikes - maxPastSample +1);
+                    spikes = hdsort.epoch.extractWaveform(X, myNonOverlappingSpikes - maxPastSample +1);
                     UP = 3;
-                    spikesUP = mysort.hdsort.util.resampleTensor(mysort.hdsort.util.m2t(spikes, nC), UP,1);
-                    spikesUP = mysort.wf.t2m(spikesUP);
-                    [tau spikesUP] = mysort.hdsort.util.alignWaveformsOnMaxOrMin(spikesUP, nC, 'maxIdx', UP*self.P.templMaxIdx);
+                    spikesUP = hdsort.util.resampleTensor(hdsort.util.m2t(spikes, nC), UP,1);
+                    spikesUP = waveforms.t2m(spikesUP);
+                    [tau spikesUP] = hdsort.util.alignWaveformsOnMaxOrMin(spikesUP, nC, 'maxIdx', UP*self.P.templMaxIdx);
                     t_up = mean(spikesUP, 1);
                     self.T(t,:) = (1-weight) * self.T(t,:) + ...
-                                     weight  * mysort.wf.m2v(mysort.hdsort.util.resampleMC(mysort.hdsort.util.v2m(t_up, nC), 1, UP));
+                                     weight  * waveforms.m2v(hdsort.util.resampleMC(hdsort.util.v2m(t_up, nC), 1, UP));
                 end
             end
-%             [self.templateAlignmentShifts self.T] = mysort.hdsort.util.alignWaveformsOnMaxOrMin(self.T, nC, 'maxIdx', self.P.templMaxIdx);
-            tT = mysort.wf.v2t(self.T, nC);
-            [ self.T self.templateAlignmentShifts] = mysort.wf.tAlignOnCorrelation(tT, 'trunc', 1, 'absMax', 1);
-            self.T = mysort.wf.t2v(self.T);
+%             [self.templateAlignmentShifts self.T] = hdsort.util.alignWaveformsOnMaxOrMin(self.T, nC, 'maxIdx', self.P.templMaxIdx);
+            tT = waveforms.v2t(self.T, nC);
+            [ self.T self.templateAlignmentShifts] = waveforms.tAlignOnCorrelation(tT, 'trunc', 1, 'absMax', 1);
+            self.T = waveforms.t2v(self.T);
 %             self.T = -self.T;
             % set all channels to exactly zero, if there is not enough
             % energy on the whole channel in that template
@@ -245,7 +245,7 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
             self.channelSets = {};
             for t=1:size(self.T,1)
                 % get one template
-                templ = mysort.wf.v2m(self.T(t,:), nC);
+                templ = waveforms.v2m(self.T(t,:), nC);
                 
                 % compute the mahalanobis energies on every channel
                 % individually
@@ -256,11 +256,11 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
                     if ~any(t_red)
                         mahalanobis_energy(chan, 2) = 0;
                     else
-                        t_red_ = mysort.hdsort.util.embedTime2embedChan(t_red, nC_red);
-                        CCol_red = mysort.hdsort.noise.ccolSubChanIdx(self.Covest.CCol, chan, self.Tf-1);
+                        t_red_ = hdsort.util.embedTime2embedChan(t_red, nC_red);
+                        CCol_red = hdsort.noise.ccolSubChanIdx(self.Covest.CCol, chan, self.Tf-1);
                         CCol_red(1:nC_red, 1:nC_red) = CCol_red(1:nC_red, 1:nC_red) + 0*diag(ones(1,nC_red));
                         f_red_ = matlabfilecentral.block_levinson(t_red_(:), CCol_red);
-                        f_red = mysort.hdsort.util.embedChan2embedTime(f_red_(:), nC_red);                    
+                        f_red = hdsort.util.embedChan2embedTime(f_red_(:), nC_red);                    
                         mahalanobis_energy(chan, 2) = sqrt(t_red*f_red/self.Tf);
                     end
                 end
@@ -292,44 +292,44 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
                 fprintf(')\n');
 
 %                 clf
-%                 hdsort.plot.mahalanobis_energy(:,1), mahalanobis_energy(:,2), 'kx')
+%                 plot(mahalanobis_energy(:,1), mahalanobis_energy(:,2), 'kx')
 %                 hold on
-%                 hdsort.plot.[0 size(templ,1)], [amplThresh amplThresh], 'g:');
-%                 hdsort.plot.[0 size(templ,1)], sum(mahalanobis_energy(:,2))/20 *[1 1], 'r:');
-%                 hdsort.plot.self.channelSets{t}, energies, 'xm', 'markersize', 15, 'linewidth', 3);
+%                 plot([0 size(templ,1)], [amplThresh amplThresh], 'g:');
+%                 plot([0 size(templ,1)], sum(mahalanobis_energy(:,2))/20 *[1 1], 'r:');
+%                 plot(self.channelSets{t}, energies, 'xm', 'markersize', 15, 'linewidth', 3);
 %                 
                 % build the "reduced" template:
                 nC_red = length(self.channelSets{t});
-                t_red = mysort.wf.m2v(templ(self.channelSets{t},:));
+                t_red = waveforms.m2v(templ(self.channelSets{t},:));
                 if ~any(t_red)
-                    f_red = mysort.wf.v2m(t_red, nC_red);
+                    f_red = waveforms.v2m(t_red, nC_red);
                 else
-                    t_red_ = mysort.hdsort.util.embedTime2embedChan(t_red, nC_red);
-                    CCol_red = mysort.hdsort.noise.ccolSubChanIdx(self.Covest.CCol, self.channelSets{t}, self.Tf-1);
+                    t_red_ = hdsort.util.embedTime2embedChan(t_red, nC_red);
+                    CCol_red = hdsort.noise.ccolSubChanIdx(self.Covest.CCol, self.channelSets{t}, self.Tf-1);
                     CCol_red(1:nC_red, 1:nC_red) = CCol_red(1:nC_red, 1:nC_red) + 0*diag(ones(1,nC_red));
                     f_red_ = matlabfilecentral.block_levinson(t_red_(:), CCol_red)';
-                    f_red = mysort.hdsort.util.embedChan2embedTime(f_red_, nC_red);
-                    t_red = mysort.wf.v2m(t_red, nC_red);
-                    f_red = mysort.wf.v2m(f_red, nC_red);
+                    f_red = hdsort.util.embedChan2embedTime(f_red_, nC_red);
+                    t_red = waveforms.v2m(t_red, nC_red);
+                    f_red = waveforms.v2m(f_red, nC_red);
                     if 0
                         figure;
-                        subhdsort.plot.4,1,1)
-                        hdsort.plot.t_red');
-                        subhdsort.plot.4,1,2)
-                        hdsort.plot.f_red');
-                        subhdsort.plot.4,1,3)
-                        xc = mysort.hdsort.util.mcfilt(t_red, f_red);
-                        hdsort.plot.xc);
-                        subhdsort.plot.4,1,4)
-                        xc = mysort.hdsort.util.mcfilt(t_red+40*randn(size(t_red)), f_red);
-                        hdsort.plot.xc);                        
+                        subplot.4,1,1)
+                        plot(t_red');
+                        subplot.4,1,2)
+                        plot(f_red');
+                        subplot.4,1,3)
+                        xc = hdsort.util.mcfilt(t_red, f_red);
+                        plot(xc);
+                        subplot.4,1,4)
+                        xc = hdsort.util.mcfilt(t_red+40*randn(size(t_red)), f_red);
+                        plot(xc);                        
                     end                
                 end                    
 %                 % get "reduced" covariance matrix
 %                 Cinv_red = self.NE.inv(self.Tf, self.channelSets{t});
 %                 % compute "reduced" filter
 %                 F_red = T_red*Cinv_red;
-%                 f_red = mysort.wf.v2m(F_red, length(self.channelSets{t}));
+%                 f_red = waveforms.v2m(F_red, length(self.channelSets{t}));
                 
                 % build the full filter
                 f = zeros(nC, self.Tf);
@@ -340,24 +340,24 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
                     end
                 end
                 
-                self.T(t,:) = mysort.wf.m2v(templ);
-                self.F(t,:) = mysort.wf.m2v(f);
+                self.T(t,:) = waveforms.m2v(templ);
+                self.F(t,:) = waveforms.m2v(f);
             end
 
             self.debugout('Done.', self.LEVEL_PROCESSING);            
             self.nF = size(self.F,1);
             % Calculate Priors            
-            self.hdsort.noise.rior = 1-self.nF * self.P.spikePrior; 
+            self.noisePrior = 1-self.nF * self.P.spikePrior; 
             self.priors = repmat(self.P.spikePrior, self.nF, 1); 
-            self.threshold = log(self.hdsort.noise.rior);
+            self.threshold = log(self.noisePrior);
             % Calculate confusion matrix
-            self.CONF    = mysort.hdsort.util.calculateXIvsF(self.T, self.F, nC, 0);
-            self.CONF_up = mysort.wf.tResample(self.CONF, self.P.upsample, 1);
-%             self.CONF_up = mysort.hdsort.util.resampleTensor(self.CONF, self.P.upsample, 1);
+            self.CONF    = hdsort.util.calculateXIvsF(self.T, self.F, nC, 0);
+            self.CONF_up = waveforms.tResample(self.CONF, self.P.upsample, 1);
+%             self.CONF_up = hdsort.util.resampleTensor(self.CONF, self.P.upsample, 1);
 
             self.Tf_up = self.Tf * self.P.upsample;
             self.blockLen = ceil(self.Tf_up/4);  
-            %mysort.hdsort.plot.XIvsF(mysort.hdsort.util.m2t(self.T, 4), mysort.hdsort.util.m2t(self.F, 4),'XIvsF', self.CONF);
+            %hdsort.plot.XIvsF(hdsort.util.m2t(self.T, 4), hdsort.util.m2t(self.F, 4),'XIvsF', self.CONF);
         end
 
         %%% ------------------------------------------------------   
@@ -367,7 +367,7 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
             % CHUNK is the original data with overlapping regions to the
             % left and right CHUNK.  
             [mPr c] = max(self.D,[],1);
-            spikeEpochs = mysort.hdsort.epoch.fromBinaryVectorMinLen(...
+            spikeEpochs = hdsort.epoch.fromBinaryVectorMinLen(...
                                     mPr>self.threshold, self.P.minEpochLength);
             chunk_sorting = self.processSpikeEpochs(spikeEpochs);
             if ~isempty(chunk_sorting)
@@ -380,7 +380,7 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
             chunk_gdf = [];
             if isempty(hdsort.epoch.); return; end
             nE = size(hdsort.epoch.,1);      
-            %  figure; hdsort.plot.self.D')
+            %  figure; plot(self.D')
             if self.P.storeSICvaluesForDebugging
                 self.SICvaluesForDebugging = [];
             end
@@ -397,7 +397,7 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
                     o2 = min(size(self.Y,2), hdsort.epoch.(e,2)+10) - hdsort.epoch.(e,2);
                     e1 = hdsort.epoch.(e,1)-o1;
                     e2 = hdsort.epoch.(e,2)+o2;
-                    Yup(1:self.nF,:) = mysort.hdsort.util.resampleMC(...
+                    Yup(1:self.nF,:) = hdsort.util.resampleMC(...
                         self.Y(1:self.nF,e1:e2), self.P.upsample, 1);
                     Yup = Yup(:, o1*self.P.upsample+1:end-o2*self.P.upsample);
                 else
@@ -425,14 +425,14 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
             % Detect and remove Spikes as long as discrimant functions
             % are larger than the hdsort.noise.prior
             % - uses SIC
-            D = mysort.hdsort.util.calculateDiscriminantFunctions(Y, M, p);
+            D = hdsort.util.calculateDiscriminantFunctions(Y, M, p);
             [maxD maxClasses] = max(D,[],1); 
             gdf = [];
             count = 0;
             debug = 0;
             if debug
                 close all
-                %mysort.hdsort.plot.XIvsF(randn(3,Tf-2), randn(3,Tf-2), 'XIvsF', self.CONF_up)
+                %hdsort.plot.XIvsF(randn(3,Tf-2), randn(3,Tf-2), 'XIvsF', self.CONF_up)
             end
             
             SICvals = struct();
@@ -473,7 +473,7 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
                         % Block double self detections?
                         subtractor(f,:) = -inf;
                     else                    
-                        subtractor(f,:) = mysort.hdsort.util.shiftSubtract(zeros(1,size(D,2)),...
+                        subtractor(f,:) = hdsort.util.shiftSubtract(zeros(1,size(D,2)),...
                                         sub, offset, false);
                     end
         
@@ -487,7 +487,7 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
                         norm(Y) > norm(Y+subtractor)
                     if debug
                         fig = mysort.hdsort.plot.figure();
-                        ah = mysort.hdsort.plot.subhdsort.plot.[3,1]);
+                        ah = mysort.hdsort.plot.subplot.[3,1]);
                         axes(ah(1));
                         title('X');
                         Margin = 200*self.P.upsample;
@@ -496,30 +496,30 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
                         
 %                         xrange = Margin_up:self.P.upsample:hdsort.epoch.2)-hdsort.epoch.1)+Margin_up;
                         x = self.DH(hdsort.epoch.1)-Margin_up:hdsort.epoch.2)+Margin_up,:)';
-                        hdsort.plot.x,...
+                        plot(x,...
                             'k', 'linewidth', 3);
                         
                         axes(ah(2));
                         title(['D' num2str(count)]);
-                        hdsort.plot.[1 size(D,2)], [0 0], ':k');
+                        plot([1 size(D,2)], [0 0], ':k');
                         hold on                                        
                         if ~isempty(subtractor_old)
-                            hdsort.plot.D_old','--', 'linewidth',3);
+                            plot(D_old','--', 'linewidth',3);
                         end   
-                        hdsort.plot.D','linewidth',3);
-%                         spacer = mysort.hdsort.plot.mc(D,'hdsort.plot.eroLine',1,...
+                        plot(D','linewidth',3);
+%                         spacer = hdsort.plot.mc(D,'plotZeroLine',1,...
 %                             'linewidth',3,'figure',0,'color',{'k'}, 'figure', 0);
         
                     end
                     D_old = D;
                     D = D + subtractor + log(p(maxC));
                     if debug
-                        %mysort.hdsort.plot.mc(D, 'spacer', spacer,'linewidth',2 , 'color', {'r'},'figure',0);
-                        hdsort.plot.D',':', 'linewidth',2);
+                        %hdsort.plot.mc(D, 'spacer', spacer,'linewidth',2 , 'color', {'r'},'figure',0);
+                        plot(D',':', 'linewidth',2);
                         axes(ah(3));                        
                         title('Subtractor');
-                        %mysort.hdsort.plot.mc(subtractor + log(self.priors(maxC)), 'spacer', spacer,'linewidth',2,'figure',0,'color', {'g'});
-                        hdsort.plot.(subtractor + log(self.priors(maxC)))', 'linewidth',2);
+                        %hdsort.plot.mc(subtractor + log(self.priors(maxC)), 'spacer', spacer,'linewidth',2,'figure',0,'color', {'g'});
+                        plot((subtractor + log(self.priors(maxC)))', 'linewidth',2);
                         linkaxes(ah, 'x');
                         axis tight
                     end
@@ -546,20 +546,20 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
         %%% ------------------------------------------------------
         %%% -------------------PLOTTER----------------------------
         %%% ------------------------------------------------------
-        function hdsort.plot.astChunkSorting(self, varargin)
+        function plotLastChunkSorting(self, varargin)
             import mysort.*
             P.start = [];
             P.stopp = [];
             P.titles = 1;
             P.srate = 1;
             P.figureTitle = [];
-            P.figureName = 'hdsort.plot.astChunkSorting';
+            P.figureName = 'plotLastChunkSorting';
             P.figureHandle = [];
             P.removeSpikesFromD = false;
             P.gui = false;
             P.gtGdf = [];
             P.X = [];
-            P = hdsort.util.parseInputs(P, 'hdsort.plot.astChunkSorting', varargin);
+            P = hdsort.util.parseInputs(P, 'plotLastChunkSorting', varargin);
             G = mysort.hdsort.plot.globals();
             if isempty(P.start)
                 P.start = self.chunk_start;
@@ -586,13 +586,13 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
                     fig1 = P.figureHandle;
                 end
             end
-            mysort.hdsort.plot.figureName('BOTM.hdsort.plot.astChunkSorting');
+            mysort.hdsort.plot.figureName('BOTM.plotLastChunkSorting');
             
             if ~isempty(P.figureName)
                 set(gcf, 'Name', P.figureName);
             end
             
-            ax = mysort.hdsort.plot.subhdsort.plot.([2,1], 'figureTitle', P.figureTitle,...
+            ax = mysort.hdsort.plot.subplot([2,1], 'figureTitle', P.figureTitle,...
                             'offsetY',.08);
             axes(ax(1));
             % Plot data
@@ -606,11 +606,11 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
                 if s1>P.stopp ||  s1<P.start
                     continue
                 end
-                hdsort.plot.mc(mysort.wf.v2m(self.T(self.chunk_sorting(i,1),:),size(self.DH,2)), 'figure', 0,...
+                hdsort.plot.mc(waveforms.v2m(self.T(self.chunk_sorting(i,1),:),size(self.DH,2)), 'figure', 0,...
                             'spacer',spacer,...
                             'linewidth', 2,...
                             'sampleOffset', self.chunk_sorting(i,2), ...
-                            'color' , {hdsort.plot.vectorColor(self.chunk_sorting(i,1))},...
+                            'color' , {hdsort.plot.PlotInterface.vectorColor(self.chunk_sorting(i,1))},...
                             'srate', P.srate);
             end
             % Plot single ground truth spikes if available
@@ -620,12 +620,12 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
                     if s1>P.stopp ||  s1<P.start
                         continue
                     end
-                    hdsort.plot.mc(mysort.wf.v2m(self.T(P.gtGdf(i,1),:),size(self.DH,2)), 'figure', 0,...
+                    hdsort.plot.mc(waveforms.v2m(self.T(P.gtGdf(i,1),:),size(self.DH,2)), 'figure', 0,...
                                 'spacer',spacer,...
                                 'linewidth', 3, ...
                                 'lineStyle', '--',...
                                 'sampleOffset', P.gtGdf(i,2), ...
-                                'color' , {hdsort.plot.vectorColor(P.gtGdf(i,1))},...
+                                'color' , {hdsort.plot.PlotInterface.vectorColor(P.gtGdf(i,1))},...
                                 'srate', P.srate);
                 end                
             end
@@ -643,7 +643,7 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
             % Plot Log Prior of single spikes
             for i=1:size(self.T,1)
                 hdsort.plot.mc(D(i,:), 'figure', 0, 'spacer',0,...
-                    'color', {hdsort.plot.vectorColor(i)},...
+                    'color', {hdsort.plot.PlotInterface.vectorColor(i)},...
                     'sampleOffset', P.start, 'linewidth', 2, 'srate', P.srate);
             end
 
@@ -661,7 +661,7 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
             end
 
             if P.gui
-                fprintf(' Paused because of hdsort.plot. Press button to continue.\n');
+                fprintf(' Paused because of plot. Press button to continue.\n');
                 pause
             end
         end

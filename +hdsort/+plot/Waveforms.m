@@ -1,9 +1,9 @@
-classdef Waveforms < hdsort.plot.PlotInterface
+classdef Waveforms < myplot.PlotInterface
     properties (SetAccess=protected)
         waveforms
         wfLength
         nWaveforms
-        subhdsort.plot.
+        subplots
     end
     
     properties
@@ -15,13 +15,13 @@ classdef Waveforms < hdsort.plot.PlotInterface
         IDs
         maxDist
         restrict2Class
-        hdsort.plot.axNWaveformsPerClass
+        plotMaxNWaveformsPerClass
 
         spacerY
         stacked
-        hdsort.plot.ean
-        hdsort.plot.edian
-        hdsort.plot.td
+        plotMean
+        plotMedian
+        plotStd
         meanColor
     end
     
@@ -30,8 +30,8 @@ classdef Waveforms < hdsort.plot.PlotInterface
         %%% ----------------CONSTRUCTOR------------------------------------
         function self = Waveforms(wavs, varargin)
             P.nChannels = 1;
-            P.hdsort.plot.ean = false;
-            P.hdsort.plot.edian = false;
+            P.plotMean = false;
+            P.plotMedian = false;
             P.channelWiseScaling = [];
             P.classes = []
             P.gdf = [];
@@ -43,15 +43,15 @@ classdef Waveforms < hdsort.plot.PlotInterface
             P.maxDist = [];
             P.restrict2Class = [];
             
-            P.hdsort.plot.axNWaveformsPerClass = 1000;
-            self = self@hdsort.plot.PlotInterface(P, varargin{:})
+            P.plotMaxNWaveformsPerClass = 1000;
+            self = self@myplot.PlotInterface(P, varargin{:})
             
             assert(~isempty(wavs), 'Input must not be empty!')
             
             
             if ndims(wavs) == 3
                 [self.wfLength self.nChannels self.nWaveforms] = size(wavs);
-                wavs = mysort.wf.t2v(wavs);
+                wavs = hdsort.waveforms.t2v(wavs);
             else
                 self.nWaveforms = size(wavs,1);
                 self.wfLength = size(wavs,2)/self.nChannels;
@@ -100,7 +100,7 @@ classdef Waveforms < hdsort.plot.PlotInterface
             
             
             %%
-            self.hdsort.waveforms.= wavs;
+            self.waveforms = wavs;
             
             self.show();
         end
@@ -109,13 +109,13 @@ classdef Waveforms < hdsort.plot.PlotInterface
         function show_(self)
             self.setColor(self.color, numel(self.classes));
             
-            wavs = mysort.wf.v4hdsort.plot.self.hdsort.waveforms. self.nChannels);
+            wavs = hdsort.waveforms.v4plot(self.waveforms, self.nChannels);
             
             if ~self.stacked
-                self.subhdsort.plot. = hdsort.plot.Subhdsort.plot.([length(self.classes) 1], 'spacerY', self.spacerY, 'ah', self.ah);
-                %self.subhdsort.plot. = mysort.hdsort.plot.subhdsort.plot.([length(self.classes) 1], 'spacerY', self.spacerY);
+                self.subplots = myplot.Subplots([length(self.classes) 1], 'spacerY', self.spacerY, 'ah', self.ah);
+                %self.subplots = hdsort.plot.subplots([length(self.classes) 1], 'spacerY', self.spacerY);
                 
-                ahs = self.subhdsort.plot..getSubhdsort.plot.andle();
+                ahs = self.subplots.getSubplotHandle();
                 
                 glob_min = inf;
                 glob_max = -inf;
@@ -123,58 +123,58 @@ classdef Waveforms < hdsort.plot.PlotInterface
                     glob_min = min(glob_min, min(min(wavs(self.IDs==self.classes(ii),:))));
                     glob_max = max(glob_max, max(max(wavs(self.IDs==self.classes(ii),:))));
                     
-                    p_ = self.hdsort.plot.neClass(ahs(ii), wavs, self.classes(ii), self.color(ii, :));
-                    self.hdsort.plot.bj = [self.hdsort.plot.bj; p_];
+                    p_ = self.plotOneClass(ahs(ii), wavs, self.classes(ii), self.color(ii, :));
+                    self.plotObj = [self.plotObj; p_];
                     
                     if ii<length(self.classes)
                         ahs(ii).XTick = []; ahs(ii).XTickLabel = [];
                     else
                         ahs(ii).XTick = ((1:self.nChannels)-0.5)*(self.wfLength + 1)
-                        ahs(ii).XTickLabel = hdsort.util.num2str((1:self.nChannels))';
+                        ahs(ii).XTickLabel = util.num2str((1:self.nChannels))';
                         xlabel(ahs(ii), 'electrodes');
                     end
                 end
                 set(ahs, 'ylim', [glob_min glob_max]);
                 linkaxes(ahs(ii), 'xy');
             else
-                self.hdsort.plot.bj = self.hdsort.plot.neClass(self.ah, wavs, self.classes, self.color)
+                self.plotObj = self.plotOneClass(self.ah, wavs, self.classes, self.color)
                 
                 self.XTick = ((1:self.nChannels)-0.5)*(self.wfLength + 1)
-                self.XTickLabel = hdsort.util.num2str((1:self.nChannels))';
+                self.XTickLabel = util.num2str((1:self.nChannels))';
                 self.xlabel = 'electrodes';
             end
         end
         
         % -----------------------------------------------------------------
-        function [hdsort.plot.bj] = hdsort.plot.neClass(self, ah, wavs, classes, color)
+        function [plotObj] = plotOneClass(self, ah, wavs, classes, color)
             %%
-            hdsort.plot.bj = [];
+            plotObj = [];
             for ii=1:length(classes)
                 idx = self.IDs == classes(ii);
-                if ~isempty(self.hdsort.plot.axNWaveformsPerClass) && sum(idx) > self.hdsort.plot.axNWaveformsPerClass
+                if ~isempty(self.plotMaxNWaveformsPerClass) && sum(idx) > self.plotMaxNWaveformsPerClass
                    idx_ = false & idx;
                     
-                    [selectedIdx, selectedLogical] = hdsort.util.samplePopulation(idx, self.hdsort.plot.axNWaveformsPerClass);
+                    [selectedIdx, selectedLogical] = util.samplePopulation(idx, self.plotMaxNWaveformsPerClass);
                     idx_(selectedIdx(selectedLogical)) = true;
                    idx = idx_;
                 end
                 
-                p_ = hdsort.plot.ah, wavs(idx,:)', 'color', color(ii, :), 'linewidth', self.LineWidth);
+                p_ = plot(ah, wavs(idx,:)', 'color', color(ii, :), 'linewidth', self.LineWidth);
                [p_.Color] = deal([color(ii, :), self.Transparency]);
-                hdsort.plot.bj = [hdsort.plot.bj; p_];
+                plotObj = [plotObj; p_];
                 
-                set(ah, 'nexthdsort.plot., 'add');
-                if self.hdsort.plot.ean
-                    hdsort.plot.ah, mean(wavs(self.IDs == classes(ii),:), 1), 'color', 'k', 'linewidth', 3);
+                set(ah, 'nextplot', 'add');
+                if self.plotMean
+                    plot(ah, mean(wavs(self.IDs == classes(ii),:), 1), 'color', 'k', 'linewidth', 3);
                 end
-                if self.hdsort.plot.edian
-                    hdsort.plot.ah, median(wavs(self.IDs == classes(ii),:), 1), 'color', 'k', 'linewidth', 3);
+                if self.plotMedian
+                    plot(ah, median(wavs(self.IDs == classes(ii),:), 1), 'color', 'k', 'linewidth', 3);
                 end
             end
             
             mima = [min(wavs(:)) max(wavs(:))];
             for ii=1:self.nChannels-1
-                hdsort.plot.ah, [ii*(self.wfLength+1) ii*(self.wfLength+1)], mima, ':', 'color', [.6 .6 .8]);
+                plot(ah, [ii*(self.wfLength+1) ii*(self.wfLength+1)], mima, ':', 'color', [.6 .6 .8]);
             end
             axis(ah, 'tight');
         end

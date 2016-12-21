@@ -39,11 +39,11 @@ end
 if false
     %%
     figure; hold on;
-    hdsort.plot.reshape(FP1, 1, []), 'b');
-    hdsort.plot.reshape(FP2, 1, []), 'r');
+    plot(reshape(FP1, 1, []), 'b');
+    plot(reshape(FP2, 1, []), 'r');
     
-    hdsort.plot.reshape( FP1_shifted, 1, [])+10, 'g');
-    hdsort.plot.reshape( FP2_shifted, 1, [])+10, 'm');
+    plot(reshape( FP1_shifted, 1, [])+10, 'g');
+    plot(reshape( FP2_shifted, 1, [])+10, 'm');
 end
 
 

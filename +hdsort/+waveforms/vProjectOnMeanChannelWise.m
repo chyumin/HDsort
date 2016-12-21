@@ -1,5 +1,5 @@
 function [P M] = vProjectOnMeanChannelWise(V, nC)
-    % Projects the hdsort.waveforms.in rows of V that are concatinated channel-wise
+    % Projects the waveforms in rows of V that are concatinated channel-wise
     % onto their mean waveform with respect to channel
     Tf = size(V,2)/nC;
     m = mean(V, 1);

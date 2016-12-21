@@ -1,4 +1,4 @@
-classdef Bar < hdsort.plot.PlotInterface
+classdef Bar < myplot.PlotInterface
     properties (SetAccess=protected)
         data
         edges
@@ -37,9 +37,9 @@ classdef Bar < hdsort.plot.PlotInterface
             P.highlightBars = [];
             P.horizontal = false;
             P.highlightColor = [1.0, 0.0, 0.0];
-            self = self@hdsort.plot.PlotInterface(P, varargin{:});
+            self = self@myplot.PlotInterface(P, varargin{:});
             
-            self.hdsort.plot.ame = 'Bar';
+            self.plotName = 'Bar';
             self.data = data;
             self.edges = edges;
             

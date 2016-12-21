@@ -10,5 +10,5 @@ function spikeEpochs = detectSpikeEpochs(X, thresholds, minLen)
     end
     
     for i=1:nC
-       spikeEpochs{i} = mysort.hdsort.epoch.fromBinaryVectorMinLen(abs(X(i,:))>=thresholds(i), minLen);
+       spikeEpochs{i} = hdsort.epoch.fromBinaryVectorMinLen(abs(X(i,:))>=thresholds(i), minLen);
     end

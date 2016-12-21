@@ -1,6 +1,6 @@
-classdef MultiScatter < hdsort.plot.PlotInterface
+classdef MultiScatter < myplot.PlotInterface
     properties (SetAccess=protected)
-        subhdsort.plot.
+        subplots
         labels
         data
     end
@@ -21,7 +21,7 @@ classdef MultiScatter < hdsort.plot.PlotInterface
             
             P.dims = [];
             P.dimLabel = '';
-            self = self@hdsort.plot.PlotInterface(P, varargin{:})
+            self = self@myplot.PlotInterface(P, varargin{:})
             self.data = data;
             self.labels = labels;
             
@@ -41,18 +41,18 @@ classdef MultiScatter < hdsort.plot.PlotInterface
             %self.setColor(self.color, numel(self.labels));
             
             nD = numel(self.dims);
-            self.subhdsort.plot. = hdsort.plot.Subhdsort.plot.((nD-1)*(nD-1), 'upperTriangle', 1, 'offsetY', .1, 'ah', self.ah);
+            self.subplots = myplot.Subplots((nD-1)*(nD-1), 'upperTriangle', 1, 'offsetY', .1, 'ah', self.ah);
             
             X = 1;
             Y = X + 1;
-            for ii = 1:numel(self.subhdsort.plot..subhdsort.plot.andles)
+            for ii = 1:numel(self.subplots.subplotHandles)
                 
-                sah = self.subhdsort.plot..getSubhdsort.plot.andle(ii);
-                p_ = hdsort.plot.Gscatter(self.data(:,X), self.data(:,Y), self.labels, 'ah', sah, ...
+                sah = self.subplots.getSubplotHandle(ii);
+                p_ = myplot.Gscatter(self.data(:,X), self.data(:,Y), self.labels, 'ah', sah, ...
                     'markerArea', self.markerArea, 'markerType', self.markerType , 'MarkerFaceAlpha', self.MarkerFaceAlpha, 'MarkerEdgeAlpha', self.MarkerEdgeAlpha, ...
                     'xlabel', [self.dimLabel num2str(X)], 'ylabel', [self.dimLabel num2str(Y)]);
                 
-                self.hdsort.plot.bj = [self.hdsort.plot.bj; p_];
+                self.plotObj = [self.plotObj; p_];
                 
                 Y = Y + 1;
                 if Y > nD
@@ -61,7 +61,7 @@ classdef MultiScatter < hdsort.plot.PlotInterface
                 end
             end
             
-            % This prevents that the axis labels of the last subhdsort.plot.are
+            % This prevents that the axis labels of the last subplot are
             % removed:
             self.setAh(self.ah);
         end
@@ -69,9 +69,9 @@ classdef MultiScatter < hdsort.plot.PlotInterface
         % -----------------------------------------------------------------
         function setAxisAll(self, varargin)
             self.setAxis(varargin{:});
-            self.subhdsort.plot..linkaxes();
-            self.hdsort.plot.bj(1).setAxis(self.axis);
-            self.hdsort.plot.bj(1).show();
+            self.subplots.linkaxes();
+            self.plotObj(1).setAxis(self.axis);
+            self.plotObj(1).show();
         end
         
     end

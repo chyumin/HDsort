@@ -1,12 +1,12 @@
 
-function C = hdsort.plot.h, lims, x, idx, tau, i1, i2, col, legendstr)
+function C = plot(h, lims, x, idx, tau, i1, i2, col, legendstr)
 set(h, 'fontsize', 14);
 if ~exist('col', 'var')
     col = 'k.';
 end
 
-hdsort.plot.1,1, '.w'); hold on
-hdsort.plot.x(i1,idx(1:end-tau)), x(i2,idx(1+tau:end)), col, 'markersize', 1);
+plot(1,1, '.w'); hold on
+plot(x(i1,idx(1:end-tau)), x(i2,idx(1+tau:end)), col, 'markersize', 1);
 set(h, 'xlim', lims, 'ylim', lims);
 if exist('legendstr', 'var')
     legend(legendstr, 'Location', 'SouthEast');

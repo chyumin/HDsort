@@ -13,41 +13,41 @@ classdef Covest2 < handle
             self.P.maxSamples = 100000;
             self.P.maxSamplesPerEpoch = 100000;
             self.P.isCCol = 0;
-            self.P.hdsort.noise.pochs = [];
+            self.P.noiseEpochs = [];
             self.P.forceMethod = 'xcorr'; % possible: 'xcorr', 'matmul'
-            self.P = mysort.hdsort.util.parseInputs(self.P, varargin, 'error');
+            self.P = hdsort.util.parseInputs(self.P, varargin, 'error');
             if isstruct(X)
                 self.fromStruct(X);
                 return
             end
             
             % remove short
-            self.P.hdsort.noise.pochs = mysort.hdsort.epoch.removeShort(self.P.hdsort.noise.pochs, self.P.maxLag);
+            self.P.noiseEpochs = hdsort.epoch.removeShort(self.P.noiseEpochs, self.P.maxLag);
             
-            if isempty(self.P.hdsort.noise.pochs)
-                self.P.hdsort.noise.pochs = [1 min(self.P.maxSamples, size(X,1))];
+            if isempty(self.P.noiseEpochs)
+                self.P.noiseEpochs = [1 min(self.P.maxSamples, size(X,1))];
             end
             
-            NoiseEpochLens = mysort.hdsort.epoch.length(self.P.hdsort.noise.pochs);
+            NoiseEpochLens = hdsort.epoch.length(self.P.noiseEpochs);
             csum = cumsum(NoiseEpochLens);
             lastidx = find(csum>self.P.maxSamples, 1);
             if isempty(lastidx)
-               lastidx = size(self.P.hdsort.noise.pochs,1);
+               lastidx = size(self.P.noiseEpochs,1);
             end
-            self.P.hdsort.noise.pochs = self.P.hdsort.noise.pochs(1:lastidx,:);
+            self.P.noiseEpochs = self.P.noiseEpochs(1:lastidx,:);
             
-            % Make sure there is not one very long hdsort.epoch.
-            self.P.hdsort.noise.pochs = mysort.hdsort.epoch.makeMaxLen(self.P.hdsort.noise.pochs, self.P.maxSamplesPerEpoch);
+            % Make sure there is not one very long epoch
+            self.P.noiseEpochs = hdsort.epoch.makeMaxLen(self.P.noiseEpochs, self.P.maxSamplesPerEpoch);
             
             if self.P.isCCol
                 self.CCol = X;
                 nC = size(self.CCol,2);
                 self.P.maxLag = min(size(X,1)/nC, self.P.maxLag);
             elseif ~isempty(X)
-%                 self.DS = mysort.ds.Matrix(X(1:self.P.hdsort.noise.pochs(end,2),:), X.getSampleRate(), X.MultiElectrode);
+%                 self.DS = mysort.ds.Matrix(X(1:self.P.noiseEpochs(end,2),:), X.getSampleRate(), X.MultiElectrode);
                 self.DS = X;
                 xcovs = self.calcXCovs();
-                self.CCol = mysort.hdsort.noise.xcov2ccol(xcovs, self.P.maxLag);
+                self.CCol = hdsort.noise.xcov2ccol(xcovs, self.P.maxLag);
             end
         end
         %------------------------------------------------------------------
@@ -69,7 +69,7 @@ classdef Covest2 < handle
                 xcovs = self.calcXCovsWithXCorr();
             elseif isempty(self.P.forceMethod)
                 if self.P.maxLag <= 30 % this is the break-even point. see 
-                                       % \mysortpackage\tests\tests\hdsort.noise.covestTest2.m
+                                       % \mysortpackage\tests\tests\noise\covestTest2.m
                     xcovs = self.calcXCovsWithMatMul();
                 else 
                     xcovs = self.calcXCovsWithXCorr();
@@ -84,7 +84,7 @@ classdef Covest2 < handle
             nC = size(self.DS,2);
             xcovs = cell(nC, nC);
             maxLag = self.P.maxLag;
-            totalNoiseEpochLength = sum(mysort.hdsort.epoch.length(self.P.hdsort.noise.pochs));
+            totalNoiseEpochLength = sum(hdsort.epoch.length(self.P.noiseEpochs));
             CP = ones(nC,nC);
             for c1 = 1:nC
                 for c2 = c1:nC
@@ -95,8 +95,8 @@ classdef Covest2 < handle
                 end
             end
             % only load data of one chunk once!
-            for e=1:size(self.P.hdsort.noise.pochs,1)
-                X = self.DS(self.P.hdsort.noise.pochs(e,1):self.P.hdsort.noise.pochs(e,2), :);
+            for e=1:size(self.P.noiseEpochs,1)
+                X = self.DS(self.P.noiseEpochs(e,1):self.P.noiseEpochs(e,2), :);
                 for c1=1:nC
                     for c2=c1:nC
                         if c1==c2
@@ -121,20 +121,20 @@ classdef Covest2 < handle
             nC = size(self.DS,2);
             xcovs = cell(nC, nC);
             maxlag = self.P.maxLag;
-            NEL = mysort.hdsort.epoch.length(self.P.hdsort.noise.pochs);
+            NEL = hdsort.epoch.length(self.P.noiseEpochs);
             totalNoiseEpochLength = sum(NEL);
             % do this only once since "isa" and getDistance are very slow 
             % when called often (50% of total computation time)
             bufferedChannelPairs = prepareChannelPairs();
             X = zeros(totalNoiseEpochLength, nC);
             s1 = 1;
-            for i=1:size(self.P.hdsort.noise.pochs,1)
-                X(s1:s1+NEL(i)-1,:) = self.DS(self.P.hdsort.noise.pochs(i,1):self.P.hdsort.noise.pochs(i,2),:);
+            for i=1:size(self.P.noiseEpochs,1)
+                X(s1:s1+NEL(i)-1,:) = self.DS(self.P.noiseEpochs(i,1):self.P.noiseEpochs(i,2),:);
                 s1 = s1+NEL(i);
             end
-            EL = mysort.hdsort.epoch.length(self.P.hdsort.noise.pochs);
+            EL = hdsort.epoch.length(self.P.noiseEpochs);
             ELcumsum = [0; cumsum(EL)];
-            for ne=1:size(self.P.hdsort.noise.pochs,1)
+            for ne=1:size(self.P.noiseEpochs,1)
                 for c1=1:nC
                     xcovs{c1,c1} = calcXCovBetweenChannelMatMul(...
                         X(ELcumsum(ne)+1:ELcumsum(ne+1), c1), ...

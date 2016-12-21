@@ -3,7 +3,7 @@ function [ali tau xvsf] = tAlignOnCorrelation(T,varargin)
     P.trunc = 0;
     P.debug = 0;
     P.absMax = false;
-    P = mysort.hdsort.util.parseInputs(P,'alignWaveformsOnMaxCorrelation',varargin);
+    P = hdsort.util.parseInputs(P,'alignWaveformsOnMaxCorrelation',varargin);
 
     [Tf nC nT] = size(T);
     if isempty(P.C)
@@ -14,7 +14,7 @@ function [ali tau xvsf] = tAlignOnCorrelation(T,varargin)
 %     F = hdsort.waveforms.v2t(vF, nC);
     
     zeroOutFilterArtefacts = true;
-    xvsf = mysort.hdsort.util.calculateXIvsF(vT,vF,nC,zeroOutFilterArtefacts);
+    xvsf = hdsort.util.calculateXIvsF(vT,vF,nC,zeroOutFilterArtefacts);
     if P.absMax
         [M I] = max(abs(xvsf),[], 1);
     else
@@ -30,20 +30,20 @@ function [ali tau xvsf] = tAlignOnCorrelation(T,varargin)
     
     
     XM = hdsort.waveforms.t2v(T);
-    XM = mysort.hdsort.util.shiftMCRows(XM, -tau, nC, P.trunc);
+    XM = hdsort.util.shiftMCRows(XM, -tau, nC, P.trunc);
     
     ali  = hdsort.waveforms.v2t(XM, nC);
     
     if P.debug
         F = hdsort.waveforms.v2t(vF, nC);
         FM = hdsort.waveforms.v2m(vF, nC);
-        FM = mysort.hdsort.util.shiftMCRows(FM, -tau, nC, P.trunc);
-        aliF = mysort.hdsort.util.m2t(FM, nC);
+        FM = hdsort.util.shiftMCRows(FM, -tau, nC, P.trunc);
+        aliF = hdsort.util.m2t(FM, nC);
         
         disp(I);
-        RES = mysort.hdsort.plot.XIvsF(T,F,'TvsF',xvsf,'title',0,'axistight',1);        
+        RES = mysort.plot.XIvsF(T,F,'TvsF',xvsf,'title',0,'axistight',1);        
         hold on
-        RES = mysort.hdsort.plot.XIvsF(ali,aliF,'title',0,'axistight',1,'figure',0,...
+        RES = mysort.plot.XIvsF(ali,aliF,'title',0,'axistight',1,'figure',0,...
             'axesHandles',RES.axesHandles,'color','g','holdOn',1);
 
         [M I] = max(RES.XIvsF,[], 1);

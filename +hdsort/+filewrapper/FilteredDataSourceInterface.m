@@ -1,4 +1,4 @@
-classdef FilteredDataSourceInterface < hdsort.hdsort.filewrapper.DataSourceInterface
+classdef FilteredDataSourceInterface < hdsort.filewrapper.DataSourceInterface
     properties
         filterFactory
         filterObject
@@ -13,7 +13,7 @@ classdef FilteredDataSourceInterface < hdsort.hdsort.filewrapper.DataSourceInter
     methods
         %------------------------------------------------------------------
         function self = FilteredDataSourceInterface(filterFactory, useFilter, varargin)
-            self = self@hdsort.hdsort.filewrapper.DataSourceInterface(varargin{:});
+            self = self@hdsort.filewrapper.DataSourceInterface(varargin{:});
             self.filterFactory = filterFactory;
             self.useFilter = useFilter;
         end

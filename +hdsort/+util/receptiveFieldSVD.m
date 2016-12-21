@@ -9,7 +9,7 @@ function [RF, T] = receptiveFieldSVD(rf3d, varargin)
 
 P.debug = false;
 %P.MaxIter = [];
-P = mysort.hdsort.util.parseInputs(P, varargin);
+P = hdsort.util.parseInputs(P, varargin);
 
 
 

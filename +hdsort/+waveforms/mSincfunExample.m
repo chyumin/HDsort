@@ -13,18 +13,18 @@ xi3 = 8+(0:.2:4*pi);
 yi3 = sf(xi3);
 
 figure;
-subhdsort.plot.2,1,1)
-hdsort.plot.x, y(1,:), '.-b');
+subplot(2,1,1)
+plot(x, y(1,:), '.-b');
 hold on
-hdsort.plot.xi1, yi1(1,:), '.-r');
-hdsort.plot.xi2, yi2(1,:), '.-c');
-hdsort.plot.xi3, yi3(1,:), '.-g');
-subhdsort.plot.2,1,2)
-hdsort.plot.x, y(2,:), '.-b');
+plot(xi1, yi1(1,:), '.-r');
+plot(xi2, yi2(1,:), '.-c');
+plot(xi3, yi3(1,:), '.-g');
+subplot(2,1,2)
+plot(x, y(2,:), '.-b');
 hold on
-hdsort.plot.xi1, yi1(2,:), '.-r');
-hdsort.plot.xi2, yi2(2,:), '.-c');
-hdsort.plot.xi3, yi3(2,:), '.-g');
+plot(xi1, yi1(2,:), '.-r');
+plot(xi2, yi2(2,:), '.-c');
+plot(xi3, yi3(2,:), '.-g');
 
 
 %%
@@ -42,21 +42,21 @@ xi3 = 8+(0:.2:4*pi);
 yi3 = sf(xi3);
 
 figure;
-subhdsort.plot.2,1,1)
-hdsort.plot.x, y(1,:), '.-b');
+subplot(2,1,1)
+plot(x, y(1,:), '.-b');
 hold on
-hdsort.plot.xi1, yi1(1,:), '.-r');
-hdsort.plot.xi2, yi2(1,:), '.-c');
-hdsort.plot.xi3, yi3(1,:), '.-g');
-subhdsort.plot.2,1,2)
-hdsort.plot.x, y(2,:), '.-b');
+plot(xi1, yi1(1,:), '.-r');
+plot(xi2, yi2(1,:), '.-c');
+plot(xi3, yi3(1,:), '.-g');
+subplot(2,1,2)
+plot(x, y(2,:), '.-b');
 hold on
-hdsort.plot.xi1, yi1(2,:), '.-r');
-hdsort.plot.xi2, yi2(2,:), '.-c');
-hdsort.plot.xi3, yi3(2,:), '.-g');
+plot(xi1, yi1(2,:), '.-r');
+plot(xi2, yi2(2,:), '.-c');
+plot(xi3, yi3(2,:), '.-g');
 
 %%
 figure
 x = -10:.05:10;
-y = mysort.hdsort.util.sinc0(x);
-hdsort.plot.x,y)
+y = hdsort.util.sinc0(x);
+plot(x,y)

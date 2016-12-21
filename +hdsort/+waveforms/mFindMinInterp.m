@@ -4,5 +4,5 @@ function [m idx] = mFindMinInterp(M)
     m = zeros(size(M,1),1);
     idx = m;
     for i=1:size(M,1)
-        [m(i) idx(i)] = mysort.hdsort.util.findMinInterp(M(i,:));
+        [m(i) idx(i)] = hdsort.util.findMinInterp(M(i,:));
     end

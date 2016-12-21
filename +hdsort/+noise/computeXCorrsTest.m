@@ -1,7 +1,7 @@
 maxSamples = 10000;
 nEpochs = 50000;
 nSamples = 1000000;
-hdsort.epoch.ength = 100;
+epochLength = 100;
 maxLag = 4;
 nC = 10;
 
@@ -23,12 +23,12 @@ cp = [1 1
       2 2];
       
 eStarts = floor(linspace(1, ceil(nSamples/2), nEpochs))';
-hdsort.epoch. = [eStarts eStarts+repmat(hdsort.epoch.ength-1, nEpochs, 1)]; 
+epochs = [eStarts eStarts+repmat(epochLength-1, nEpochs, 1)]; 
 
 X = randn(nSamples, nC);
 X(2:end, 3) = X(2:end, 3) + X(1:end-1, 2);
 X(:,4) = X(:,4)*2;
 tic
-xc = mysort.hdsort.noise.computeXCorrs(X, cp, maxLag, hdsort.epoch., maxSamples);
+xc = hdsort.noise.computeXCorrs(X, cp, maxLag, epochs, maxSamples);
 toc
 

@@ -18,6 +18,6 @@ cutLeft = 3;
 [x y] = hdsort.waveforms.templateSpikeTrainData(T, gdf, cutLeft); 
 
 figure;
-hdsort.plot.x,y(1,:), 'b')
+plot(x,y(1,:), 'b')
 hold on
-hdsort.plot.x,y(2,:), 'g')
+plot(x,y(2,:), 'g')

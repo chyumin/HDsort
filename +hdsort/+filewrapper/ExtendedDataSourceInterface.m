@@ -1,4 +1,4 @@
-classdef ExtendedDataSourceInterface < hdsort.hdsort.filewrapper.DataSourceInterface
+classdef ExtendedDataSourceInterface < hdsort.filewrapper.DataSourceInterface
     properties
         memoryBufferNoiseSmad
         spikeTrains
@@ -11,7 +11,7 @@ classdef ExtendedDataSourceInterface < hdsort.hdsort.filewrapper.DataSourceInter
     methods
         %------------------------------------------------------------------
         function self = ExtendedDataSourceInterface(varargin)
-            self = self@hdsort.hdsort.filewrapper.DataSourceInterface(varargin{:});
+            self = self@hdsort.filewrapper.DataSourceInterface(varargin{:});
             self.memoryBufferNoiseSmad = [];
         end
         
@@ -33,10 +33,10 @@ classdef ExtendedDataSourceInterface < hdsort.hdsort.filewrapper.DataSourceInter
             [times pks] = self.detectSpikes();
             times = double(cell2mat(times))';
             spikeEpochs = hdsort.epoch.merge([times(:)-50 times(:)+50]);
-            hdsort.noise.pochs = hdsort.epoch.flip(spikeEpochs, size(self,1));
+            noiseEpochs = hdsort.epoch.flip(spikeEpochs, size(self,1));
             t1 = tic;
             Cest = hdsort.noise.Covest2(self, 'maxLag', maxlag, ...
-                'maxSamples', maxsamples, 'hdsort.noise.pochs', hdsort.noise.pochs,...
+                'maxSamples', maxsamples, 'noiseEpochs', noiseEpochs,...
                 'maxDist', maxdist, 'forceMethod', forceMethod);
             t2 = toc(t1);
             disp('Done.'); disp(t2);
@@ -53,8 +53,8 @@ classdef ExtendedDataSourceInterface < hdsort.hdsort.filewrapper.DataSourceInter
         end
         
         %------------------------------------------------------------------
-        function [smad] = hdsort.noise.td(self, varargin)
-            % Calculate channel wise hdsort.noise.standard deviation with the median
+        function [smad] = noiseStd(self, varargin)
+            % Calculate channel wise noise standard deviation with the median
             % absolute deviation (MAD), invert data to ignore negative peaks
             % for that calculation
             P.channelIdx = 1:self.size(2);
@@ -81,7 +81,7 @@ classdef ExtendedDataSourceInterface < hdsort.hdsort.filewrapper.DataSourceInter
             if any(notCalcIdx)
                 cidx = P.channelIdx(notCalcIdx);
                 fullcidx = fullChanIdx(cidx);
-                disp('Computing hdsort.noise.std...'); tic
+                disp('Computing noise std...'); tic
                 smadL = min(Len, P.maxLen);
                 smad = hdsort.noise.estimateSigma(...
                         self.getData(1:smadL, cidx), P.Tf, P.thr);
@@ -104,8 +104,8 @@ classdef ExtendedDataSourceInterface < hdsort.hdsort.filewrapper.DataSourceInter
                 P.Len = self.size(1);
             end
             
-            % get hdsort.noise.std
-            smad = self.hdsort.noise.td('channelIdx', P.channelIdx);
+            % get noise std
+            smad = self.noiseStd('channelIdx', P.channelIdx);
             
             % Detect spikes in the beginning of the file
             disp('Detecting spikes...'); tic

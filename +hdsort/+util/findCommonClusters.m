@@ -5,7 +5,7 @@ function [out occurences idx_occurences out_idx] = findCommonClusters(II, vararg
 assert(size(II, 2) > 1, 'Input vector must have at least two columns!');
 
 P.doPlot = false;
-P = mysort.hdsort.util.parseInputs(P, varargin, 'error');
+P = hdsort.util.parseInputs(P, varargin, 'error');
 
 [Uq Nq Gq] = unique(II, 'rows'); % Uq: unique rows, Uq = II(Nq,:), II = Uq(Gq,:)
 [occurences_ x] = hist(Gq, length(Uq));

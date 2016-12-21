@@ -1,5 +1,5 @@
 function V = vSubChanSel(V, nC, chan_idx)
-    % subselects the channel index into multi channel hdsort.waveforms.on every
+    % subselects the channel index into multi channel waveforms on every
     % channel specified in chan_idx 
     if numel(V)>5000
         % This is faster for large matrices

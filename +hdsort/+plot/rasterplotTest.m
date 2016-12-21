@@ -1,4 +1,4 @@
-% Test Rasterhdsort.plot.
+% Test Rasterplot:
 gdf = [1 20000;
        1 40000;
        1 48000;
@@ -8,15 +8,15 @@ gdf = [1 20000;
        3 34000;
        3 80000]
 
-rp = hdsort.plot.Rasterhdsort.plot.gdf);
+rp = myplot.Rasterplot(gdf);
 
 %%
 SPS = lsa.SpikeSorting(gdf)
-rp = hdsort.plot.Rasterhdsort.plot.SPS.Units)
+rp = myplot.Rasterplot(SPS.Units)
 
 %%
-rp = hdsort.plot.Rasterhdsort.plot.gdf, ...
-    'title', 'Rasterhdsort.plot.,...
+rp = myplot.Rasterplot(gdf, ...
+    'title', 'Rasterplot',...
     'interval', [10000, 60000], ...
     'unitIds', [1, 3])
 

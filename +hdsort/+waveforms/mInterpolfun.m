@@ -1,6 +1,6 @@
 function sf = mInterpolfun(x,Y, method)
     % this function returns a functional for the multi channel waveform in
-    % Y  (individual rows are hdsort.waveforms. that can interpolate at arbirary
+    % Y  (individual rows are waveforms) that can interpolate at arbirary
     % timepoints.
     %
     % sf = sincfun(Y) returns a functional that interpolates the waveform
@@ -17,7 +17,7 @@ function sf = mInterpolfun(x,Y, method)
     % Example:
     %      sf = mInterpolfun(sin(0:.1:pi));
     %      figure;
-    %      hdsort.plot.sf(0:.01:pi));
+    %      plot(sf(0:.01:pi));
     if nargin < 3
         method = 'pchip'; 
         if nargin < 2

@@ -1,8 +1,8 @@
 function V = m2v(M, nC)
-    % converts hdsort.waveforms.in matrix representation (i.e. every row of M is a
+    % converts waveforms in matrix representation (i.e. every row of M is a
     % single channel waveform. if a waveform has multiple channels these
     % are in individual rows below each other in m) into the vector
-    % representation where the single channel hdsort.waveforms.are concatenated
+    % representation where the single channel waveforms are concatenated
     %
     % if nC is not supplied it is assumed, that m contains only one
     % waveform and all rows of m are concatenated

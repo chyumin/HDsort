@@ -123,14 +123,14 @@ end
 
 fprintf('Merging double Templates...');
 if strcmp(P.newPostProcFunc, '')
-    G = mysort.HDSorting.mergeLocalSortings(G, meanNoiseStd);
+    G = hdsort.leg.mergeLocalSortings(G, meanNoiseStd);
 else
     disp(['Postprocessing function: ' P.newPostProcFunc]);
     fh = str2func(P.newPostProcFunc);
     G = fh(G, meanNoiseStd);
 end
 
-%     G = mysort.HDSorting.combineLocalSortings(G, meanNoiseStd);
+%     G = hdsort.leg.combineLocalSortings(G, meanNoiseStd);
 for i=1:length(G)
     assert(length(unique(G(i).gdf(:,1))) == size(G(i).templates.wfs,3), ['must be identical - ' str_])
 end
@@ -156,11 +156,11 @@ R.G = G;
 %     for i=1:size(TT,1)
 %         T{i} = G(TT(i,1)).templates.wfs(:,:,TT(i,2));
 %     end
-%     mysort.plot.figure();
+%     hdsort.plot.figure();
 %     ah = axes();
 %     hold on
 %     for i=1:size(TT,1)
-%         mysort.plot.templates2D(T{i}, el, 100, 2, 'IDs', i, 'ah', ah)
+%         hdsort.plot.templates2D(T{i}, el, 100, 2, 'IDs', i, 'ah', ah)
 %     end
 
 %     idx = {};
@@ -175,9 +175,9 @@ R.G = G;
 %     ovpDist = 1;
 %     for i=1:size(TT,1)
 %         for j=i+1:size(TT,1);
-%             [O nO] = mysort.spiketrain.checkForOverlaps({gdfs{i}(:,2), gdfs{j}(:,2)}, ovpDist);
+%             [O nO] = hdsort.spiketrain.checkForOverlaps({gdfs{i}(:,2), gdfs{j}(:,2)}, ovpDist);
 %             nO
 %         end
 %     end
-%     mysort.plot.xcorr(gdf, 'binSize', .5);
+%     hdsort.plot.xcorr(gdf, 'binSize', .5);
 

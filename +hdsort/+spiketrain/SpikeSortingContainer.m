@@ -20,7 +20,7 @@ classdef SpikeSortingContainer < handle
             P.nMaxSpikesForTemplateCalc = 100;
             if isstruct(name)
                 self.fromStruct(name);
-                P = mysort.hdsort.util.parseInputs(P, varargin, 'error');
+                P = hdsort.util.parseInputs(P, varargin, 'error');
                 self.wfDataSource = P.wfDataSource;
                 return
             end
@@ -30,10 +30,10 @@ classdef SpikeSortingContainer < handle
             P.templateWfs = [];
             P.templateCutLeft = [];
             P.templateCutLength = [];
-            P = mysort.hdsort.util.parseInputs(P, varargin, 'error');
+            P = hdsort.util.parseInputs(P, varargin, 'error');
             self.name = name;
             if iscell(gdf)
-                self.gdf = mysort.hdsort.spiketrain.toGdf(gdf);
+                self.gdf = hdsort.spiketrain.toGdf(gdf);
             else
                 self.gdf = gdf;
             end
@@ -70,7 +70,7 @@ classdef SpikeSortingContainer < handle
                 self.templateWfs = [];
             else
                 nC = S.details.templateNC;
-                self.templateWfs = mysort.wf.v2t(S.details.templateWfs, nC);
+                self.templateWfs = waveforms.v2t(S.details.templateWfs, nC);
             end
             self.templateCutLeft = S.details.templateCutLeft;            
         end
@@ -82,7 +82,7 @@ classdef SpikeSortingContainer < handle
             S.details.tMinMax = self.tMinMax;
             S.details.isGroundTruth = self.bIsGroundTruth;
             S.details.templateNC = size(self.templateWfs, 2);
-            S.details.templateWfs = mysort.wf.t2v(self.templateWfs);
+            S.details.templateWfs = waveforms.t2v(self.templateWfs);
             S.details.templateCutLeft = self.templateCutLeft;
             S.date_ = date();
             S.version = 1;
@@ -91,7 +91,7 @@ classdef SpikeSortingContainer < handle
         %------------------------------------------------------------------
         function save2File(self, fname, h5path)
             S = self.toStruct();
-            mysort.h5.recursiveSave(fname, S, h5path);
+            hdsort.filewrapper.hdf5.recursiveSave(fname, S, h5path);
         end
         %------------------------------------------------------------------
         function name = getName(self)
@@ -184,7 +184,7 @@ classdef SpikeSortingContainer < handle
                 if isempty(wfs)
                     continue
                 end
-                T(:,:,i) = mysort.wf.v2m(median(wfs,1), nC)';
+                T(:,:,i) = waveforms.v2m(median(wfs,1), nC)';
             end
             self.templateCutLeft = cutLeft;
             self.templateCutLength = cutLength;
@@ -238,7 +238,7 @@ classdef SpikeSortingContainer < handle
         function SSC = getSubSpikeSortingContainer4UnitIdx(self, unitIdx, varargin)
             gdf = self.getGdf4UnitIdx(unitIdx, varargin{:});
             unitNames = self.unitNames(unitIdx);
-            SSC = mysort.hdsort.spiketrain.SpikeSortingContainer(...
+            SSC = hdsort.spiketrain.SpikeSortingContainer(...
                 self.name, gdf, 'unitNames', unitNames,...
                 'templateWfs', self.templateWfs, ...
                 'templateCutLeft', self.templateCutLeft,...

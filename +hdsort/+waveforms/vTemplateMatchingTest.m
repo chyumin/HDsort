@@ -17,17 +17,17 @@ X = hdsort.waveforms.vShift(X, nC, tau, 1);
 nX = X +randn(size(X))*.02;
 %%
 figure;
-subhdsort.plot.5,1,1)
-hdsort.plot.T');
+subplot(5,1,1)
+plot(T');
 title('original full templates with zero paddings');
-subhdsort.plot.5,1,2)
-hdsort.plot.subT');
+subplot(5,1,2)
+plot(subT');
 title('original templates without zero paddings');
-subhdsort.plot.5,1,3)
-hdsort.plot.X');
+subplot(5,1,3)
+plot(X');
 title('instances of templates');
-subhdsort.plot.5,1,4)
-hdsort.plot.nX');
+subplot(5,1,4)
+plot(nX');
 title('noisy instances of templates');
 
 %%
@@ -46,10 +46,10 @@ tauMax_(IDs_==2) = maxTaus(IDs_==2,2);
 
 %%
 figure;
-hdsort.plot.DISCR(1:2:end,1), DISCR(1:2:end,2), 'b.');
+plot(DISCR(1:2:end,1), DISCR(1:2:end,2), 'b.');
 hold on
-hdsort.plot.DISCR(2:2:end,1), DISCR(2:2:end,2), 'r.');
-hdsort.plot.[0 6], [0 6], 'k-');
+plot(DISCR(2:2:end,1), DISCR(2:2:end,2), 'r.');
+plot([0 6], [0 6], 'k-');
 
 %%
 offset = 4;
@@ -64,10 +64,10 @@ tauMax_(IDs_==2) = maxTaus(IDs_==2,2);
 
 %[IDs IDs_ tauMax_ tau]
 
-hdsort.plot.DISCR(1:2:end,1), DISCR(1:2:end,2), 'g.');
+plot(DISCR(1:2:end,1), DISCR(1:2:end,2), 'g.');
 hold on
-hdsort.plot.DISCR(2:2:end,1), DISCR(2:2:end,2), 'm.');
-hdsort.plot.[0 6], [0 6], 'k-');
+plot(DISCR(2:2:end,1), DISCR(2:2:end,2), 'm.');
+plot([0 6], [0 6], 'k-');
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -85,21 +85,21 @@ X = repmat(T,100,1);
 IDs = repmat([1:2]', 100,1);
 tau = -4 + 8.*rand(200,1);
 % tau = zeros(200,1);
-X = mysort.hdsort.util.shiftRowsInterpolated(X, tau, nC);
+X = hdsort.util.shiftRowsInterpolated(X, tau, nC);
 nX = X +randn(size(X))*.01;
 %%
 figure;
-subhdsort.plot.5,1,1)
-hdsort.plot.T');
+subplot(5,1,1)
+plot(T');
 title('original full templates with zero paddings');
-subhdsort.plot.5,1,2)
-hdsort.plot.subT');
+subplot(5,1,2)
+plot(subT');
 title('original templates without zero paddings');
-subhdsort.plot.5,1,3)
-hdsort.plot.X');
+subplot(5,1,3)
+plot(X');
 title('instances of templates');
-subhdsort.plot.5,1,4)
-hdsort.plot.nX');
+subplot(5,1,4)
+plot(nX');
 title('noisy instances of templates');
 
 %%
@@ -117,17 +117,17 @@ tauMax_(IDs_==2) = maxTaus(IDs_==2,2);
 
 %%
 figure;
-ah = subhdsort.plot.1,2,1)
-hdsort.plot.DISCR(1:2:end,1), DISCR(1:2:end,2), 'b.');
+ah = subplot(1,2,1)
+plot(DISCR(1:2:end,1), DISCR(1:2:end,2), 'b.');
 hold on
-hdsort.plot.DISCR(2:2:end,1), DISCR(2:2:end,2), 'r.');
-hdsort.plot.[0 6], [0 6], 'k-');
+plot(DISCR(2:2:end,1), DISCR(2:2:end,2), 'r.');
+plot([0 6], [0 6], 'k-');
 
-subhdsort.plot.1,2,2);
-hdsort.plot.tau(1:2:end), tauMax_(1:2:end), 'bx');
+subplot(1,2,2);
+plot(tau(1:2:end), tauMax_(1:2:end), 'bx');
 hold on
-hdsort.plot.tau(2:2:end), tauMax_(2:2:end), 'rx');
-hdsort.plot.[-5 5], [-5 5], 'k-');
+plot(tau(2:2:end), tauMax_(2:2:end), 'rx');
+plot([-5 5], [-5 5], 'k-');
 xlabel('real tau');
 ylabel('estimated tau');
 
@@ -144,9 +144,9 @@ tauMax_(IDs_==2) = maxTaus(IDs_==2,2);
 
 %[IDs IDs_ tauMax_ tau]
 axes(ah)
-hdsort.plot.DISCR(1:2:end,1), DISCR(1:2:end,2), 'g.');
+plot(DISCR(1:2:end,1), DISCR(1:2:end,2), 'g.');
 hold on
-hdsort.plot.DISCR(2:2:end,1), DISCR(2:2:end,2), 'm.');
-hdsort.plot.[0 6], [0 6], 'k-');
+plot(DISCR(2:2:end,1), DISCR(2:2:end,2), 'm.');
+plot([0 6], [0 6], 'k-');
 
 

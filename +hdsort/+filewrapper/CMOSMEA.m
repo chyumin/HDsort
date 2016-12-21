@@ -1,4 +1,4 @@
-classdef CMOSMEA < hdsort.hdsort.filewrapper.MultiSessionInterface
+classdef CMOSMEA < hdsort.filewrapper.MultiSessionInterface
     properties
         P
         h5info
@@ -26,10 +26,10 @@ classdef CMOSMEA < hdsort.hdsort.filewrapper.MultiSessionInterface
             s_per_sec = hdf5read(fnames{1}, '/Sessions/Session0/sr');  
             assert(length(s_per_sec)==1, 'samples per second is an array!?');
             
-            filterFactory_ = hdsort.hdsort.filewrapper.FilterWrapper(P.hpf, ...
+            filterFactory_ = hdsort.filewrapper.FilterWrapper(P.hpf, ...
                 P.lpf, s_per_sec, P.filterOrder, P.filterType);
             
-            sessionList_ = hdsort.hdsort.filewrapper.CMOSMEASession.empty(); 
+            sessionList_ = hdsort.filewrapper.CMOSMEASession.empty(); 
             currentSessionCount = 0;
             nSessions = 0;
             for f=1:length(fnames)
@@ -41,13 +41,13 @@ classdef CMOSMEA < hdsort.hdsort.filewrapper.MultiSessionInterface
                 nSessions = nSessions+nSessions_;
                 for i=1:nSessions_
                     currentSessionCount = currentSessionCount+1;
-                    sessionList_(currentSessionCount) = hdsort.hdsort.filewrapper.CMOSMEASession(fname, h5info_,...
+                    sessionList_(currentSessionCount) = hdsort.filewrapper.CMOSMEASession(fname, h5info_,...
                         filterFactory_, i-1, P.useFilter);
                 end
             end
 
-            self = self@hdsort.hdsort.filewrapper.MultiSessionInterface(P.name, s_per_sec, sessionList_);
-%             self = self@hdsort.hdsort.filewrapper.ExtendedDataSourceInterface(P.name, s_per_sec, sessionList_(1).getMultiElectrode());
+            self = self@hdsort.filewrapper.MultiSessionInterface(P.name, s_per_sec, sessionList_);
+%             self = self@hdsort.filewrapper.ExtendedDataSourceInterface(P.name, s_per_sec, sessionList_(1).getMultiElectrode());
             
             for i=1:nSessions
                 self.sessionList(i).parent = self;
@@ -87,7 +87,7 @@ classdef CMOSMEA < hdsort.hdsort.filewrapper.MultiSessionInterface
         function x = isBinaryFile(self)
             assert(~isempty(self.sessionList), 'Session list empty');
             s = self.sessionList(1);
-            x = isa( s.h5matrix_raw, 'hdsort.hdsort.filewrapper.binaryFileMatrix');
+            x = isa( s.h5matrix_raw, 'hdsort.filewrapper.binaryFileMatrix');
         end
         
         %------------------------------------------------------------------

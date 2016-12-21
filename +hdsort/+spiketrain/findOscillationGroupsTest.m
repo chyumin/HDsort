@@ -7,7 +7,7 @@ mergeSpikesMaxDist = 10;
 minGroupSize = 3;
 minAmplitude = 20;
                      
-[spike_times_amps_chan keepspikes] = mysort.hdsort.spiketrain.findOscillationGroups(spike_times_amps_chan, ...
+[spike_times_amps_chan keepspikes] = hdsort.spiketrain.findOscillationGroups(spike_times_amps_chan, ...
     mergeSpikesMaxDist, minGroupSize, minAmplitude)
 
 spike_times_amps_chan = [ 80 -80 1
@@ -24,7 +24,7 @@ mergeSpikesMaxDist = 10;
 minGroupSize = 3;
 minAmplitude = 20;
                      
-[spike_times_amps_chan keepspikes] = mysort.hdsort.spiketrain.findOscillationGroups(spike_times_amps_chan, ...
+[spike_times_amps_chan keepspikes] = hdsort.spiketrain.findOscillationGroups(spike_times_amps_chan, ...
     mergeSpikesMaxDist, minGroupSize, minAmplitude)
 
 spike_times_amps_chan = [ 80 -80 1
@@ -41,5 +41,5 @@ mergeSpikesMaxDist = 10;
 minGroupSize = 4;
 minAmplitude = 20;
                      
-[spike_times_amps_chan keepspikes] = mysort.hdsort.spiketrain.findOscillationGroups(spike_times_amps_chan, ...
+[spike_times_amps_chan keepspikes] = hdsort.spiketrain.findOscillationGroups(spike_times_amps_chan, ...
     mergeSpikesMaxDist, minGroupSize, minAmplitude)

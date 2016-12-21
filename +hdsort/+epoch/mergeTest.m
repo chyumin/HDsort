@@ -29,20 +29,20 @@ hdsort.epoch. = [ 1 10
           15 20
           35 40];
       
-mysort.hdsort.epoch.merge(hdsort.epoch.)
+hdsort.epoch.merge(hdsort.epoch.)
 
 hdsort.epoch. = [ 1 16
           15 20
           35 40];
       
-mysort.hdsort.epoch.merge(hdsort.epoch.)
+hdsort.epoch.merge(hdsort.epoch.)
 
 
 hdsort.epoch. = [15 16
            1 36
           35 40];
       
-mysort.hdsort.epoch.merge(hdsort.epoch.)
+hdsort.epoch.merge(hdsort.epoch.)
 
 hdsort.epoch. = [1324        1370
           1327        1374
@@ -50,5 +50,5 @@ hdsort.epoch. = [1324        1370
           2059        2105
           2062        2111]
     
-mysort.hdsort.epoch.merge(hdsort.epoch.)
+hdsort.epoch.merge(hdsort.epoch.)
 

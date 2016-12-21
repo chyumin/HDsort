@@ -66,7 +66,7 @@ classdef SortJob < grid.GridJob
             warning('grid.SortJob.createBOTMGroups() deprecated!')
             
             disp('Create DataStructure object...');
-            DSFull = mysort.mea.CMOSMEA(self.files.data, 'useFilter', self.sortJobP.useFilter, 'name', self.jobName);%'PREFILT');
+            DSFull = hdsort.filewrapper.CMOSMEA(self.files.data, 'useFilter', self.sortJobP.useFilter, 'name', self.jobName);%'PREFILT');
             self.MES = DSFull.MultiElectrode.toStruct();
             
             %% Create groups based on the electrode positions and save them to a file:
@@ -82,7 +82,7 @@ classdef SortJob < grid.GridJob
                 disp('Create groups...');
                 electrodePositions = DSFull.MultiElectrode.electrodePositions;
                 electrodeNumbers   = DSFull.MultiElectrode.electrodeNumbers;
-                [groupsidx nGroupsPerElectrode] = mysort.mea.constructLocalElectrodeGroups(electrodePositions(:,1), electrodePositions(:,2), 'maxElPerGroup', 9);
+                [groupsidx nGroupsPerElectrode] = hdsort.leg.constructLocalElectrodeGroups(electrodePositions(:,1), electrodePositions(:,2), 'maxElPerGroup', 9);
                 
                 %% Limit number of groups if necessary:
                 if ~isempty(self.sortJobP.nGroups)
@@ -124,7 +124,7 @@ classdef SortJob < grid.GridJob
             taskParameters.sortingParameters.botm.run = 0;
             taskParameters.sortingParameters.spikeCutting.maxSpikes = 200000000000; % Set this to basically inf
             
-            taskParameters.sortingParameters.hdsort.noise.stimation.minDistFromSpikes = 80;
+            taskParameters.sortingParameters.noiseEstimation.minDistFromSpikes = 80;
             
             taskParameters.sortingParameters.spikeAlignment.initAlignment = '-';
             taskParameters.sortingParameters.spikeAlignment.maxSpikes = 50000;     % so many spikes will be clustered
@@ -164,7 +164,7 @@ classdef SortJob < grid.GridJob
         
         % -----------------------------------------------------------------
         function postprocessBOTMSorting(self, newPostProcFunc)
-            warning('This function is deprecated and should not be used anymore. Use mysort.HDSorting.Sorting()')
+            warning('This function is deprecated and should not be used anymore. Use hdsort.Sorting()')
             
             % Process all local sortings into a final sorting.
             
@@ -187,7 +187,7 @@ classdef SortJob < grid.GridJob
                 
                 disp('Start postprocessing...');
                 %                 [gdf_merged, T_merged, localSorting, localSortingID, G] =
-                [R, P] = mysort.HDSorting.processLocalSortings(...
+                [R, P] = hdsort.leg.processLocalSortings(...
                     self.folders.groups,...
                     self.jobName, GF.groups, GF.groupsidx, ...
                     'groupPaths', self.destinationlocation.files.groupPaths, ...
@@ -227,7 +227,7 @@ classdef SortJob < grid.GridJob
         %                     %[dir_exists,mess,messid] = mkdir(self.folders.main, 'qchdsort.plot.');
         %                     %self.folders.qchdsort.plot. = fullfile( self.folders.main, 'qchdsort.plot.');
         %
-        %                     %DSFull = mysort.mea.CMOSMEA(self.files.data);%, 'useFilter', self.sortJobP.useFilter, 'name', self.jobName);
+        %                     %DSFull = hdsort.filewrapper.CMOSMEA(self.files.data);%, 'useFilter', self.sortJobP.useFilter, 'name', self.jobName);
         %                     %MES = DSFull.MultiElectrode.toStruct();
         %                     save(self.destinationlocation.files.summary, 'units', 'nUnits');
         %
@@ -247,7 +247,7 @@ classdef SortJob < grid.GridJob
                 [dir_exists,mess,messid] = mkdir(self.folders.main, 'qchdsort.plot.');
                 self.folders.qchdsort.plot. = fullfile( self.folders.main, 'qchdsort.plot.');
                 
-                DSFull = mysort.mea.CMOSMEA(self.files.data);%, 'useFilter', self.sortJobP.useFilter, 'name', self.jobName);
+                DSFull = hdsort.filewrapper.CMOSMEA(self.files.data);%, 'useFilter', self.sortJobP.useFilter, 'name', self.jobName);
                 MES = DSFull.MultiElectrode.toStruct();
                 
             catch
@@ -279,7 +279,7 @@ classdef SortJob < grid.GridJob
                 for i = 1:length(res.localSorting)
                     id = res.localSortingID(i);
                     lu = res.localSorting(i);
-                    P = mysort.hdsort.plot.hdsort.waveforms.D(0.1*res.T_merged(:,:,i), MES.electrodePositions, 'IDs', (1000*id+lu), 'maxNumberOfChannels', 10, 'AxesHandle', P.AxesHandle, 'hdsort.plot.rgs', {'color', mysort.hdsort.plot.vectorColor(i)});
+                    P = mysort.hdsort.plot.hdsort.waveforms.D(0.1*res.T_merged(:,:,i), MES.electrodePositions, 'IDs', (1000*id+lu), 'maxNumberOfChannels', 10, 'AxesHandle', P.AxesHandle, 'hdsort.plot.rgs', {'color', hdsort.plot.PlotInterface.vectorColor(i)});
                 end
                 mysort.hdsort.plot.savefig(F.figureHandle, self.destinationlocation.files.footprints2)
             end
@@ -387,7 +387,7 @@ classdef SortJob < grid.GridJob
             for i = 1:length(self.files.data)
                 
                 %% Check if the data (the first file at least) is binary:
-                m_test = mysort.mea.CMOSMEA(self.files.data{i});
+                m_test = hdsort.filewrapper.CMOSMEA(self.files.data{i});
                 
                 if ~m_test.isBinaryFile()
                     [pathstr,name,ext] = fileparts(self.files.data{i});
@@ -447,10 +447,10 @@ classdef SortJob < grid.GridJob
             T = load(taskFile);
             
             %% Write "taskParameters" to struct "taskP" and "sortP":
-            sortP = mysort.hdsort.util.mergeStructs(sortP, T.taskParameters.sortingParameters);
+            sortP = hdsort.util.mergeStructs(sortP, T.taskParameters.sortingParameters);
             taskParameters = rmfield(T.taskParameters,'sortingParameters');
             
-            taskP = mysort.hdsort.util.mergeStructs(taskP, T.taskParameters);
+            taskP = hdsort.util.mergeStructs(taskP, T.taskParameters);
             clear T;
             
             %% Check necessary parameters:
@@ -464,7 +464,7 @@ classdef SortJob < grid.GridJob
             assert( isfield(taskP, 'taskID'), 'Task aborted: field taskParameters.taskID not specified!');
             
             %% (Re-)Set reporting file:
-            rep = mysort.ds.binaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);
+            rep = hdsort.filewrapper.binaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);
             rep(:,:) = [0 0];
             
             if ~debugFlag
@@ -480,7 +480,7 @@ classdef SortJob < grid.GridJob
             function mainBlock()
                 disp('Creating DS...')
                 %% Sort:
-                DS = mysort.mea.CMOSMEA(taskP.dataFiles, 'useFilter', 0, 'name', 'PREFILT');
+                DS = hdsort.filewrapper.CMOSMEA(taskP.dataFiles, 'useFilter', 0, 'name', 'PREFILT');
                 MES = DS.MultiElectrode.toStruct();
                 
                 DS.restrictToChannels(taskP.groupidx);
@@ -492,21 +492,21 @@ classdef SortJob < grid.GridJob
                 %% RELEASE CHANNEL RESTRICTIONS FOR TEMPLATE ESTIMATION
                 DS.restrictToChannels();
                 disp('Starting template estimation...')
-                mysort.HDSorting.startHDSortingTemplateEstimation(taskP.outputPath, taskP.groupPath, taskP.runName, sortP.botm.Tf, sortP.botm.cutLeft, DS, taskP.groupidx, MES);
+                hdsort.leg.startHDSortingTemplateEstimation(taskP.outputPath, taskP.groupPath, taskP.runName, sortP.botm.Tf, sortP.botm.cutLeft, DS, taskP.groupidx, MES);
                 
                 %% Write to reporter file:
                 disp('Writing results...')
-                rep = mysort.ds.binaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);
+                rep = hdsort.filewrapper.binaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);
                 rep(:,:) = [1 0];
             end
             
             function errorHandling(ME)
                 
                 disp('Catch error...')
-                errStr = mysort.hdsort.util.buildLastErrString(ME);
+                errStr = hdsort.util.buildLastErrString(ME);
                 disp(errStr)
                 
-                rep = mysort.ds.binaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);
+                rep = hdsort.filewrapper.binaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);
                 rep(:,:) = [0 1];
                 rethrow(ME)
             end

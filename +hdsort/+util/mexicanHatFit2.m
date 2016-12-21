@@ -9,7 +9,7 @@ function [out P] = mexicanHatFit2(RF, varargin)
 
 P.debug = false;
 P.MaxIter = [];
-P = mysort.hdsort.util.parseInputs(P, varargin);
+P = hdsort.util.parseInputs(P, varargin);
 
 xrange = 1:size(RF,1);
 yrange = 1:size(RF,2);
@@ -24,7 +24,7 @@ end
 
 EH = @(params) E(params, RF, xrange, yrange);
 
-[max_x max_y] = mysort.hdsort.util.matrixArgMax(abs(RF));
+[max_x max_y] = hdsort.util.matrixArgMax(abs(RF));
 ampmax = RF(max_x,max_y);
 %params0 = [max_x max_y 10*rand(1) 10*rand(1) 10*rand(1) ampmax];
 params0 = [max_x max_y var(sum(RF)) var(sum(RF')) rand(1)*2*pi ampmax];
@@ -76,10 +76,10 @@ end
         if P.debug
             Amplitude
             %e
-            subhdsort.plot.2,1,1)
+            subplot.2,1,1)
             %imagesc(reshape(RF_fit(:), size(RF,1), size(RF,2)) )
             imagesc(RF_fit)
-            subhdsort.plot.2,1,2)
+            subplot.2,1,2)
             %imagesc(reshape(RF(:), size(RF,1), size(RF,2)) )
             imagesc(RF)
             pause(0.1)
@@ -98,8 +98,8 @@ out.RF = RFmodel(xrange, yrange, mu_opt, C_opt, a_opt);
 
 if P.debug
     figure;
-    subhdsort.plot.2,1,1); imagesc(RF);
-    subhdsort.plot.2,1,2); imagesc(out.RF)
+    subplot.2,1,1); imagesc(RF);
+    subplot.2,1,2); imagesc(out.RF)
 end
 
 out.mu = mu_opt;

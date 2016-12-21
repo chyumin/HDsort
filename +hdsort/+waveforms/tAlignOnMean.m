@@ -7,7 +7,7 @@ function [T, tau, mMPmask] = tAlignOnMean(T, varargin)
     P.maxShiftPerIter = 3;
     P.maxShift = [];
     P.useMedian = 0;
-    P = mysort.hdsort.util.parseInputs(P, varargin, 'error');
+    P = hdsort.util.parseInputs(P, varargin, 'error');
     [Tf nC N] = size(T);
     mMPmask = [];
     if isempty(P.restrictToChannels)
@@ -48,24 +48,24 @@ function [T, tau, mMPmask] = tAlignOnMean(T, varargin)
             mMPmask2 = [(mMPmask(:,1) | mMPmask(:,2)) mMPmask(:,1:end-2) | mMPmask(:,2:end-1) | mMPmask(:,3:end) (mMPmask(:,end-1) | mMPmask(:,end)) ];
             % make at least len 5:
             mMPmask2 = [(mMPmask2(:,1) | mMPmask2(:,2)) mMPmask2(:,1:end-2) | mMPmask2(:,2:end-1) | mMPmask2(:,3:end) (mMPmask2(:,end-1) | mMPmask2(:,end)) ];
-%             figure; hdsort.plot.mMPmask(1,:)); hold on; hdsort.plot.mMPmask2(1,:)+.1, 'g');
+%             figure; plot(mMPmask(1,:)); hold on; plot(mMPmask2(1,:)+.1, 'g');
             for c = 1:size(mMPmask2,1)
-                e = mysort.hdsort.epoch.fromBinaryVector(mMPmask2(c,:));
-                eL = mysort.hdsort.epoch.length(e);
+                e = hdsort.epoch.fromBinaryVector(mMPmask2(c,:));
+                eL = hdsort.epoch.length(e);
                 e(eL < P.meanMaskMinLen+4,:) = [];
-%                 assert(~isempty(e), 'Could not find a single mask hdsort.epoch.');
-                be = mysort.hdsort.epoch.toIdx(e);
+%                 assert(~isempty(e), 'Could not find a single mask epoch!');
+                be = hdsort.epoch.toIdx(e);
                 mMPmask(c,:) = 0;
                 mMPmask(c,be)= 1;
             end
-%             hold on; hdsort.plot.mMPmask(1,:)+.2, 'r');
+%             hold on; plot(mMPmask(1,:)+.2, 'r');
             if any(mMPmask)
                 MPmask = hdsort.waveforms.m2v(mMPmask);
             end
         end
         MP = M;
         MP(~MPmask) = 0;
-        % figure; hdsort.plot.M); hold on; hdsort.plot.MP, 'r');
+        % figure; plot(M); hold on; plot(MP, 'r');
         MP = hdsort.waveforms.vShift(repmat(MP,length(shiftRange),1), nC, shiftRange, CTRUNC);
         
         % project every waveform on all shifted versions of the mean to find
@@ -87,9 +87,9 @@ function [T, tau, mMPmask] = tAlignOnMean(T, varargin)
         if 0
             figure
             iidx = find(taui>7 | taui<-7);
-            hdsort.plot.MP', 'k');
+            plot(MP', 'k');
             hold on
-            hdsort.plot.Vi(iidx(1),:))
+            plot(Vi(iidx(1),:))
         end
         
         % always use originals for shifting!

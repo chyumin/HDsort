@@ -1,6 +1,6 @@
 classdef FilterBasedSpikeSorterInterface < botm.OnlineSpikeSorterInterface ...
                                          & botm.GaussianNoiseSpikeSorterInterface ...
-                                         & hdsort.hdsort.filewrapper.DataSourceInterface
+                                         & hdsort.filewrapper.DataSourceInterface
     properties 
         T
         F
@@ -19,9 +19,9 @@ classdef FilterBasedSpikeSorterInterface < botm.OnlineSpikeSorterInterface ...
             self = self@botm.OnlineSpikeSorterInterface(varargin{:});            
             self = self@botm.GaussianNoiseSpikeSorterInterface(Covest, Tf, varargin{:});
             nC = size(Covest.CCol, 2);
-            ME = hdsort.hdsort.filewrapper.MultiElectrode((1:nC)', (1:nC)');
-            self = self@hdsort.hdsort.filewrapper.DataSourceInterface('FilterBasedSpikeSorterInterface', [], ME);
-            mysort.hdsort.util.checkForForbiddenParameter(varargin, {'Tf'});
+            ME = hdsort.filewrapper.MultiElectrode((1:nC)', (1:nC)');
+            self = self@hdsort.filewrapper.DataSourceInterface('FilterBasedSpikeSorterInterface', [], ME);
+            hdsort.util.checkForForbiddenParameter(varargin, {'Tf'});
             self.P.dummy = [];
             self.P = hdsort.util.parseInputs(self.P, varargin);
             
@@ -81,15 +81,15 @@ classdef FilterBasedSpikeSorterInterface < botm.OnlineSpikeSorterInterface ...
         
         
         %%% ------------------------------------------------------
-        function hdsort.plot.emplates(self)
+        function plotTemplates(self)
             mysort.hdsort.plot.spikes(self.T, 'classes', 1:self.nF, 'nC', size(self.DH,2));
             mysort.hdsort.plot.figureName('Templates');
         end
         
         %%% ------------------------------------------------------
-        function RES = hdsort.plot.onfusionMatrix(self)
+        function RES = plotConfusionMatrix(self)
             mysort.hdsort.plot.figure('color','w');%'ymax', 1000, 'ymin', -1000,
-            RES = mysort.hdsort.plot.XIvsF(mysort.wf.v2t(self.T,size(self.DH,2)), mysort.wf.v2t(self.F,size(self.DH,2)),...
+            RES = mysort.hdsort.plot.XIvsF(waveforms.v2t(self.T,size(self.DH,2)), waveforms.v2t(self.F,size(self.DH,2)),...
                              'figure', 0, ...
                             'XIvsF',self.CONF,'title',0,'axistight',0, 'nC', size(self.DH,2));    
             mysort.hdsort.plot.figureName('ConfusionMatrix');                        

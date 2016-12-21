@@ -50,7 +50,7 @@ function [A, gamma_y, Sigma_u_hat] = AR_from_C(C, nC, max_order)
     % This corresponds to eq.31 in Neumaier&Schneider2001, left side
     % B = (inv(R11) * R12)'; but B also containes the intercept terms
 
-    Gamma_y0 = mysort.hdsort.noise.lagCfromTimeC(C, nC, 0);
+    Gamma_y0 = hdsort.noise.lagCfromTimeC(C, nC, 0);
     % compute sigma u hat by eq.3.2.23, p.80 and eq. 3.4.11, p.90
     % YY' - YZ'inv(ZZ')ZY' which is (with (YZ')' = ZY'):
     % GY0 - YX'inv(XX')(YX')'

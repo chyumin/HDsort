@@ -155,7 +155,7 @@ classdef GridJob < handle
                 
                 % Only create new report files when it doesn't exist yet:
                 if exist(self.files.report{ii}, 'file') ~= 2
-                    rep = mysort.ds.binaryFileMatrix(self.files.report{ii}, [1 2], 'writable', true);
+                    rep = hdsort.filewrapper.binaryFileMatrix(self.files.report{ii}, [1 2], 'writable', true);
                     rep(:,:) = [0 0];
                 end
             end
@@ -229,7 +229,7 @@ classdef GridJob < handle
             end
             for ii = 1:self.nTasks
                 try
-                    rep = mysort.ds.binaryFileMatrix(self.files.report{ii}, [1 2], 'writable', false);
+                    rep = hdsort.filewrapper.binaryFileMatrix(self.files.report{ii}, [1 2], 'writable', false);
                 catch
                     myDisp([self.jobName ': Binary file for task ' num2str( self.taskIDs(ii) ) ' threw exception!']);
                     rep = [0 1];
@@ -308,7 +308,7 @@ classdef GridJob < handle
             summary.completedTasks = zeros(1, self.nTasks);
             summary.times = {};
             for ii = 1:self.nTasks
-                rep = mysort.ds.binaryFileMatrix(self.files.report{ii}, [1 2], 'writable', false);
+                rep = hdsort.filewrapper.binaryFileMatrix(self.files.report{ii}, [1 2], 'writable', false);
                 if rep(1,2) > 0
                     summary.tasksError = [summary.tasksError self.taskIDs(ii)];
                 end
@@ -746,9 +746,9 @@ classdef GridJob < handle
                         move_str   = sprintf('mv %s %s', token_file, submit_token_file);
                         
                         cd('~')
-                        mysort.hdsort.util.logToFile(log_file, submit_str)
+                        hdsort.util.logToFile(log_file, submit_str)
                         [status, result] = system(submit_str);
-                        mysort.hdsort.util.logToFile(log_file, result)
+                        hdsort.util.logToFile(log_file, result)
                         cd(tokenFolder)
                         
                         if status == 0
@@ -758,9 +758,9 @@ classdef GridJob < handle
                             disp('Submit failed')
                         end
                         
-                        mysort.hdsort.util.logToFile(log_file, move_str)
+                        hdsort.util.logToFile(log_file, move_str)
                         [status, result] = system(move_str);
-                        mysort.hdsort.util.logToFile(log_file, result)
+                        hdsort.util.logToFile(log_file, result)
                         pause(2.5)
                         disp('Done processing. Waiting...')
                     end

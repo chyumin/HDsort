@@ -3,13 +3,13 @@ function [aliV tau mx] = vAlignOnMax(V, nC, varargin)
     P.truncate = 1;
     P.maxIdx = [];
     P.restrictToIdx = [];
-    P = mysort.hdsort.util.parseInputs(P, 'alignWaveforms', varargin);
+    P = hdsort.util.parseInputs(P, 'alignWaveforms', varargin);
     Tf = size(V,2)/nC;
     assert(round(Tf)==Tf, 'Number of channels does not match!');
     
     % convert to tensor
     T = hdsort.waveforms.v2t(V, nC);
-    % Check if we have to ignore some parts of the hdsort.waveforms.
+    % Check if we have to ignore some parts of the waveforms
     offset = 0;
     if ~isempty(P.restrictToIdx)
         idx = setdiff(1:size(T,1), P.restrictToIdx);
@@ -40,9 +40,9 @@ function [aliV tau mx] = vAlignOnMax(V, nC, varargin)
     aliV = hdsort.waveforms.vShift(V, nC, tau, P.truncate);
     
     if P.debug
-        mysort.hdsort.plot.spikes(V,'nC',nC);
+        mysort.plot.spikes(V,'nC',nC);
         title('Raw Spikes');
-        mysort.hdsort.plot.spikes(MT,'nC',1);
+        mysort.plot.spikes(MT,'nC',1);
         title('Preprocessed Spikes');            
     end
 end

@@ -1,4 +1,4 @@
-classdef Pie < hdsort.plot.PlotInterface
+classdef Pie < myplot.PlotInterface
     properties (SetAccess=protected)
         pie
     end
@@ -21,9 +21,9 @@ classdef Pie < hdsort.plot.PlotInterface
             P.explode = {};
             P.labels = {};
             P.width = 500;
-            self = self@hdsort.plot.PlotInterface(P, varargin{:});
+            self = self@myplot.PlotInterface(P, varargin{:});
             
-            self.hdsort.plot.ame = 'Pie';
+            self.plotName = 'Pie';
             self.numbers = numbers;
             
             self.show();

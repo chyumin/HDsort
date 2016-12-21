@@ -5,7 +5,7 @@ if ~iscell(hdsort.spiketrain.)
 %    end
 %    assert( size(hdsort.spiketrain., 2) == 1, 'Input must be a single column vector!')
     if size(hdsort.spiketrain., 2) > 1
-        hdsort.spiketrain. = mysort.hdsort.spiketrain.fromGdf(hdsort.spiketrain.);
+        hdsort.spiketrain. = hdsort.spiketrain.fromGdf(hdsort.spiketrain.);
     else
         [isih times_ms P] = hdsort.util.isih({hdsort.spiketrain.}, varargin{:});
         return

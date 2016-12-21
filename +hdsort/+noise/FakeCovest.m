@@ -1,4 +1,4 @@
-classdef FakeCovest < mysort.hdsort.noise.Covest
+classdef FakeCovest < hdsort.noise.Covest
     properties
         iC
         bInvertWholeMatrix
@@ -7,7 +7,7 @@ classdef FakeCovest < mysort.hdsort.noise.Covest
     methods
         %------------------------------------------------------------------
         function self = FakeCovest(X, bInvertWholeMatrix, varargin)
-            self = self@mysort.hdsort.noise.Covest(X, 'delayComputation', 1, varargin{:});
+            self = self@hdsort.noise.Covest(X, 'delayComputation', 1, varargin{:});
             self.bInvertWholeMatrix = bInvertWholeMatrix;
             self.xcovs = self.calcXCovs();
         end
@@ -17,12 +17,12 @@ classdef FakeCovest < mysort.hdsort.noise.Covest
             nC = self.dataSource.getNChannel();
             xcovs = zeros(nC, nC);
             maxlag = 0;
-            totalNoiseEpochLength = sum(mysort.hdsort.epoch.length(self.P.hdsort.noise.pochs));
+            totalNoiseEpochLength = sum(hdsort.epoch.length(self.P.noiseEpochs));
             % do this only once since "isa" and getDistance are very slow 
             % when called often (50% of total computation time)
             bIsMea = isa(self.dataSource, 'mysort.datasource.MultiElectrodeInterface');
 %             bufferedChannelPairs = prepareChannelPairs();
-            X = self.dataSource.getData(self.P.hdsort.noise.pochs);
+            X = self.dataSource.getData(self.P.noiseEpochs);
             disp('Computing Cov...'); tic
             xcovs = cov(X');
             toc
@@ -92,7 +92,7 @@ classdef FakeCovest < mysort.hdsort.noise.Covest
             nT = size(y,1);
             x = zeros(size(y));
             for i=1:nT
-                x(i,:) = mysort.wf.m2v(self.iC*mysort.wf.v2m(y(i,:), nC), nC);
+                x(i,:) = hdsort.waveforms.m2v(self.iC*hdsort.waveforms.v2m(y(i,:), nC), nC);
             end
         end
         

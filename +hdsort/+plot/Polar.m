@@ -1,4 +1,4 @@
-classdef Polar < hdsort.plot.PlotInterface
+classdef Polar < myplot.PlotInterface
     properties (SetAccess=protected)
         compass
         polar
@@ -16,10 +16,10 @@ classdef Polar < hdsort.plot.PlotInterface
         closeCurve
         %yShift
         
-        %hdsort.plot.ll
-        %hdsort.plot.ean
-        %hdsort.plot.edian
-        %hdsort.plot.td
+        %plotAll
+        %plotMean
+        %plotMedian
+        %plotStd
         %meanColor
     end
     
@@ -64,17 +64,17 @@ classdef Polar < hdsort.plot.PlotInterface
             
             % 
             %P.yShift = 0.0;
-            %P.hdsort.plot.ll = true;
-            %P.hdsort.plot.ean = false;
-            %P.hdsort.plot.edian = false;
-            %P.hdsort.plot.td = false;
+            %P.plotAll = true;
+            %P.plotMean = false;
+            %P.plotMedian = false;
+            %P.plotStd = false;
             %P.meanColor = [0,0,0];
             P.vectors = VECTORS;
             P.normalize = true;
             P.closeCurve = true;
-            self = self@hdsort.plot.PlotInterface(P, varargin{:});
+            self = self@myplot.PlotInterface(P, varargin{:});
             
-            self.hdsort.plot.ame = 'Polar';
+            self.plotName = 'Polar';
             
             if any(THETA > 2*pi)
                 THETA = deg2rad(THETA);
@@ -115,10 +115,10 @@ classdef Polar < hdsort.plot.PlotInterface
                     if isempty(self.vectors)
                         try
                             self.polar = ezpolar(theta, rho(ii,:), 'Color', self.color(ii, :) );
-                            %self.polar = polarhdsort.plot.theta, rho(ii,:), 'Color', self.color(ii, :) );
+                            %self.polar = polarplot(theta, rho(ii,:), 'Color', self.color(ii, :) );
                             hold on;
                             fallback = false;
-%                            self.polar = polarhdsort.plot.theta, rho(ii,:), 'r');
+%                            self.polar = polarplot(theta, rho(ii,:), 'r');
                         catch
                             fallback = true
                         end

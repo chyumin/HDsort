@@ -23,16 +23,16 @@ T(:,:,3) = x3;
 
 %% ---
 figure; hold on;
-hdsort.plot.reshape(x1, 1, []), 'b');
-hdsort.plot.reshape(x2, 1, []), 'r');
-hdsort.plot.reshape(x3, 1, []), 'm');
+plot(reshape(x1, 1, []), 'b');
+plot(reshape(x2, 1, []), 'r');
+plot(reshape(x3, 1, []), 'm');
 
 n2 = S(2,1);
 x2_shifted = [x2((n2+1):end, :); zeros(n2,size(x2, 2))];
-hdsort.plot.reshape( x2_shifted, 1, [])+0.01, 'g');
+plot(reshape( x2_shifted, 1, [])+0.01, 'g');
 
 n3 = S(3,1);
 x3_shifted = [x3((n3+1):end, :); zeros(n3,size(x3, 2))];
-hdsort.plot.reshape( x3_shifted, 1, [])+0.02, 'c');
+plot(reshape( x3_shifted, 1, [])+0.02, 'c');
 
 

@@ -34,14 +34,14 @@ function [xc A S maxAbsDist maxAbsRelDist] = tXDiff(T)
             ti = T(i,:);
             for j=i+1:nT
                 tj = T(j,:);
-%                 figure; hdsort.plot.[ti; tj]')
+%                 figure; plot([ti; tj]')
                 if abs(shifts(count)) <= 2
-                    tj = mysort.hdsort.util.shiftMCRows(tj, shifts(count), nC,1);
+                    tj = hdsort.util.shiftMCRows(tj, shifts(count), nC,1);
                     t = hdsort.waveforms.vSubsel([tj; ti], nC, abs(shifts(count))+1:Tf-abs(shifts(count)));
                 else
                     t = [tj; ti];
                 end
-%                 figure; hdsort.plot.t')
+%                 figure; plot(t')
                 A(i,j) = mins(count);
                 S(i,j) = shifts(count);
                 A(j,i) = mins(count);

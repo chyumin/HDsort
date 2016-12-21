@@ -4,4 +4,4 @@ hdsort.epoch. = [1 15
           22 33
           45 60
           88 89];
-fp = mysort.hdsort.epoch.findPointsInEpochs(points, hdsort.epoch.)
+fp = hdsort.epoch.findPointsInEpochs(points, hdsort.epoch.)

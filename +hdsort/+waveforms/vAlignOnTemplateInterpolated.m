@@ -19,5 +19,5 @@ function [X tau] = vAlignOnTemplateInterpolated(X,nC,t,maxShift)
         [tau(i), k] = fminbnd(fun, -maxShift, maxShift, opt);
     end
 
-    X   = mysort.hdsort.util.shiftRowsInterpolated(X, tau, nC);
+    X   = hdsort.util.shiftRowsInterpolated(X, tau, nC);
 end

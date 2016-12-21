@@ -14,7 +14,7 @@ function Cte = ccol2Cte(Ccol, Tf_aim)
         error('not implemented! Dont do this, zero padding gives bad results!');
     end
     
-    xc = mysort.hdsort.noise.ccol2xcorr(Ccol);
-    Cte = mysort.hdsort.noise.xcorr2Cte(xc);
+    xc = hdsort.noise.ccol2xcorr(Ccol);
+    Cte = hdsort.noise.xcorr2Cte(xc);
     
     

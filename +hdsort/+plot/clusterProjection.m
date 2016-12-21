@@ -4,17 +4,17 @@ function [ ] = clusterProjection(spikesX, classes, templates, C, varargin)
     P.figure = 1;
     P.figureHandle = [];
     P.axesHandles = [];
-    P.hdsort.plot.nlyDiag = 0;
-    P.hdsort.plot.itleIDs = 0;
-    P.hdsort.plot.itleDiff = 0;
-    P.hdsort.plot.itleRsq = 0;
+    P.plotOnlyDiag = 0;
+    P.plotTitleIDs = 0;
+    P.plotTitleDiff = 0;
+    P.plotTitleRsq = 0;
     P.IDs = [];
     P.iU = [];
     P.colors = {};
     P.binning  = -40:1:40;
     P.xbinning = -40:1:40;
     
-    P = mysort.hdsort.util.parseInputs(P,varargin, 'error');     
+    P = hdsort.util.parseInputs(P,varargin, 'error');     
     if isempty(P.IDs)
         P.IDs = unique(classes);
     end
@@ -23,7 +23,7 @@ function [ ] = clusterProjection(spikesX, classes, templates, C, varargin)
         return
     end
     if nT > 25%12
-        disp('Warning, too many clusters to hdsort.plot.Projections!')
+        disp('Warning, too many clusters to plot Projections!')
         return
     end
     if nargin <= 3 || isempty(C)
@@ -39,7 +39,7 @@ function [ ] = clusterProjection(spikesX, classes, templates, C, varargin)
     end
     
     if nargin < 3 || isempty(templates)
-        templates = mysort.hdsort.util.calculateClassMeans(spikesX, classes);
+        templates = hdsort.util.calculateClassMeans(spikesX, classes);
     end
     
     
@@ -47,10 +47,10 @@ function [ ] = clusterProjection(spikesX, classes, templates, C, varargin)
         if ~isempty(P.figureHandle)
             fh = P.figureHandle;
         elseif P.figure
-            fh = mysort.hdsort.plot.figure('name', 'Cluster Projections');
+            fh = hdsort.plot.figure('name', 'Cluster Projections');
         end
-        mp = hdsort.plot.Subhdsort.plot.((nT-1)*(nT-1), 'upperTriangle', 1, 'offsetY', .1, 'spacerY', 0);
-        ah = mp.getSubhdsort.plot.andle();
+        mp = myplot.Subplots((nT-1)*(nT-1), 'upperTriangle', 1, 'offsetY', .1, 'spacerY', 0);
+        ah = mp.getSubplotHandle();
     else
         ah = P.axesHandles;
     end
@@ -59,9 +59,9 @@ function [ ] = clusterProjection(spikesX, classes, templates, C, varargin)
         P.colors = cell(nT,1);
         for i=1:nT
             if ~isempty(P.IDs)
-                P.colors{i} = mysort.hdsort.plot.vectorColor(P.IDs(i)); 
+                P.colors{i} = hdsort.plot.vectorColor(P.IDs(i)); 
             else
-                P.colors{i} = mysort.hdsort.plot.vectorColor(i);
+                P.colors{i} = hdsort.plot.vectorColor(i);
             end
         end
     end
@@ -78,7 +78,7 @@ function [ ] = clusterProjection(spikesX, classes, templates, C, varargin)
             myPwTemplate1 = templates(t1,:);
         end 
         
-        if P.hdsort.plot.nlyDiag == 0
+        if P.plotOnlyDiag == 0
             t2Set = t1+1:nT;
         else
             t2Set = t1+1;
@@ -121,27 +121,27 @@ function [ ] = clusterProjection(spikesX, classes, templates, C, varargin)
             ssTot2 = sum(( h2-mean(h2) ).^2);
             rsq2 = 1 - ssErr2/ssTot2;
             
-            set(ah(i), 'nexthdsort.plot., 'add');
+            set(ah(i), 'nextplot', 'add');
             bar(ah(i), P.binning, h1); bar(ah(i),P.binning, h2);
             axis(ah(i), [bStart bEnd 0 .45*normfactor]);
             
             h = findobj(ah(i),'Type','patch');
-            % Warning, the ordering of bar hdsort.plot. and pathes in "h" is
+            % Warning, the ordering of bar plots and pathes in "h" is
             % reversed!! 
             %set(h(2),'FaceColor', P.colors{t1})%,'EdgeColor','w')   
             %set(h(1),'FaceColor', P.colors{t2})%,'EdgeColor','w')               
             
-            hdsort.plot.ah(i), P.xbinning, normfactor*normpdf_inline(P.xbinning,m1,std1),'-k','lineWidth',1.5);
-            hdsort.plot.ah(i), P.xbinning, normfactor*normpdf_inline(P.xbinning,m2,std2),'-k','lineWidth',1.5);     
+            plot(ah(i), P.xbinning, normfactor*normpdf_inline(P.xbinning,m1,std1),'-k','lineWidth',1.5);
+            plot(ah(i), P.xbinning, normfactor*normpdf_inline(P.xbinning,m2,std2),'-k','lineWidth',1.5);     
             titleStr = '';
             set(ah(i), 'yticklabel', []);
-            if P.hdsort.plot.itleIDs
+            if P.plotTitleIDs
                 titleStr = sprintf('%d|%d', myTID1, myTID2);
             end
-            if P.hdsort.plot.itleDiff
+            if P.plotTitleDiff
                 titleStr = [titleStr sprintf('|%.1f', D)];
             end
-            if P.hdsort.plot.itleRsq
+            if P.plotTitleRsq
                 titleStr = [titleStr sprintf(' (%.1f|%.1f)', rsq1, rsq2)];
             end
             if ~isempty(titleStr)

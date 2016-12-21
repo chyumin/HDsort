@@ -28,23 +28,23 @@ T = wfs;
 
 
 %%
-X = hdsort.waveforms.v4hdsort.plot.hdsort.waveforms.t2v(T(:,1:2:end,1:4:end)), size(T,2)/2)';
-Y = hdsort.waveforms.v4hdsort.plot.hdsort.waveforms.t2v(ali(:,1:2:end,1:4:end)), size(T,2)/2)';
+X = hdsort.waveforms.v4plot(hdsort.waveforms.t2v(T(:,1:2:end,1:4:end)), size(T,2)/2)';
+Y = hdsort.waveforms.v4plot(hdsort.waveforms.t2v(ali(:,1:2:end,1:4:end)), size(T,2)/2)';
 
-mysort.hdsort.plot.figure([1400 800]);
-ah = subhdsort.plot.2,1,1);
-hdsort.plot.X, 'color', [.5 .5 .5]);
+mysort.plot.figure([1400 800]);
+ah = subplot(2,1,1);
+plot(X, 'color', [.5 .5 .5]);
 hold on
-hdsort.plot.mean(X,2), 'k', 'linewidth', 2);
+plot(mean(X,2), 'k', 'linewidth', 2);
 title('Before Alignment');
 
-ah(2) = subhdsort.plot.2,1,2);
-hdsort.plot.Y, 'color', [.5 .5 .5]);
+ah(2) = subplot(2,1,2);
+plot(Y, 'color', [.5 .5 .5]);
 hold on
-hdsort.plot.mean(Y,2), 'k', 'linewidth', 2);
+plot(mean(Y,2), 'k', 'linewidth', 2);
 title('After Alignment');
 linkaxes(ah, 'xy');
 
-% xvsf = mysort.hdsort.util.calculateXIvsF(hdsort.waveforms.t2v(T),hdsort.waveforms.t2v(T),1,1);
-% mysort.hdsort.plot.XIvsF(T, T)
-% mysort.hdsort.plot.XIvsF(ali, ali)
+% xvsf = hdsort.util.calculateXIvsF(hdsort.waveforms.t2v(T),hdsort.waveforms.t2v(T),1,1);
+% mysort.plot.XIvsF(T, T)
+% mysort.plot.XIvsF(ali, ali)

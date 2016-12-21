@@ -64,7 +64,7 @@ classdef DummyJob < grid.GridJob
             assert( isfield(taskP, 'taskID'), 'Task aborted: field taskParameters.taskID not specified!');
             
             %% (Re-)Set reporting file:
-            rep = mysort.ds.binaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);
+            rep = hdsort.filewrapper.binaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);
             rep(:,:) = [0 0];
             
             if ~debugFlag
@@ -82,17 +82,17 @@ classdef DummyJob < grid.GridJob
                 
                 %% Write to reporter file:
                 disp('Writing results...')
-                rep = mysort.ds.binaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);
+                rep = hdsort.filewrapper.binaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);
                 rep(:,:) = [1 0];
             end
             
             function errorHandling(ME)
                 
                 disp('Catch error...')
-                errStr = mysort.hdsort.util.buildLastErrString(ME);
+                errStr = hdsort.util.buildLastErrString(ME);
                 disp(errStr)
                 
-                rep = mysort.ds.binaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);
+                rep = hdsort.filewrapper.binaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);
                 rep(:,:) = [0 1];
                 rethrow(ME)
             end

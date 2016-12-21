@@ -1,4 +1,4 @@
-classdef MultiSessionInterface < hdsort.hdsort.filewrapper.ExtendedDataSourceInterface
+classdef MultiSessionInterface < hdsort.filewrapper.ExtendedDataSourceInterface
     properties
         sessionList
         activeSessionIdx
@@ -17,11 +17,11 @@ classdef MultiSessionInterface < hdsort.hdsort.filewrapper.ExtendedDataSourceInt
         %% CONSTRUCTOR
         %------------------------------------------------------------------
         function self = MultiSessionInterface(name, s_per_sec, sessionList)
-            assert(isa(sessionList, 'hdsort.hdsort.filewrapper.DataSourceInterface'), 'sessionList must contain objects derived from type hdsort.hdsort.filewrapper.DataSourceInterface!');
+            assert(isa(sessionList, 'hdsort.filewrapper.DataSourceInterface'), 'sessionList must contain objects derived from type hdsort.filewrapper.DataSourceInterface!');
             if isempty(name)
                 name = 'MutliSessionInterface';
             end
-            self = self@hdsort.hdsort.filewrapper.ExtendedDataSourceInterface(name, s_per_sec, sessionList(1).getMultiElectrode());
+            self = self@hdsort.filewrapper.ExtendedDataSourceInterface(name, s_per_sec, sessionList(1).getMultiElectrode());
             self.sessionList = sessionList; 
             self.allSessionLengths = [];
             self.size_buffer = [];
@@ -135,7 +135,7 @@ classdef MultiSessionInterface < hdsort.hdsort.filewrapper.ExtendedDataSourceInt
         %------------------------------------------------------------------
         function restrictToChannels(self, varargin)
             self.size_buffer = [];
-            restrictToChannels@hdsort.hdsort.filewrapper.DataSourceInterface(self, varargin{:});
+            restrictToChannels@hdsort.filewrapper.DataSourceInterface(self, varargin{:});
             for i=1:length(self.sessionList)
                 self.sessionList(i).restrictToChannels(varargin{:});
             end
@@ -187,13 +187,13 @@ classdef MultiSessionInterface < hdsort.hdsort.filewrapper.ExtendedDataSourceInt
         function me = getSelectedSessionsMergedMultiElectrode(self)
             sidx = self.getSelectedSessionIdx();
             mes = self.getSelectedSessionsMultiElectrodes();
-            me = hdsort.hdsort.filewrapper.MultiSessionMultiElectrode(mes, sidx);
+            me = hdsort.filewrapper.MultiSessionMultiElectrode(mes, sidx);
             me.dataSource = self;
         end
         %------------------------------------------------------------------
         function mes = getSelectedSessionsMultiElectrodes(self)
             i = self.getSelectedSessionIterator();
-            mes = hdsort.hdsort.filewrapper.MultiElectrode.empty();
+            mes = hdsort.filewrapper.MultiElectrode.empty();
             while i.hasNext()
                 s = i.next();
                 mes(i.idx) = s.getMultiElectrode();
@@ -202,13 +202,13 @@ classdef MultiSessionInterface < hdsort.hdsort.filewrapper.ExtendedDataSourceInt
         %------------------------------------------------------------------
         function me = getMergedMultiElectrode4Sessions(self, sidx)
             mes = self.getMultiElectrodes4Sessions(sidx);
-            me = hdsort.hdsort.filewrapper.MultiSessionMultiElectrode(mes, sidx);
+            me = hdsort.filewrapper.MultiSessionMultiElectrode(mes, sidx);
             me.dataSource = self;
         end           
         %------------------------------------------------------------------
         function mes = getMultiElectrodes4Sessions(self, sidx)
             i = hdsort.util.Iterator(self.sessionList(sidx));
-            mes = hdsort.hdsort.filewrapper.MultiElectrode.empty();
+            mes = hdsort.filewrapper.MultiElectrode.empty();
             while i.hasNext()
                 s = i.next();
                 mes(i.idx) = s.getMultiElectrode();
@@ -243,7 +243,7 @@ classdef MultiSessionInterface < hdsort.hdsort.filewrapper.ExtendedDataSourceInt
         end   
         %------------------------------------------------------------------
         function mes = getAllSessionsMultiElectrodes(self)
-            mes = hdsort.hdsort.filewrapper.MultiElectrode.empty();
+            mes = hdsort.filewrapper.MultiElectrode.empty();
             for i=1:length(self.sessionList)
                 mes(i) = self.sessionList(i).getMultiElectrode();
             end
@@ -253,7 +253,7 @@ classdef MultiSessionInterface < hdsort.hdsort.filewrapper.ExtendedDataSourceInt
             if ~isempty(self.allSessionsMergedMultiElectrode)
                 me = self.allSessionsMergedMultiElectrode;
             else
-                me = hdsort.hdsort.filewrapper.MultiSessionMultiElectrode(self.sessionList(1).getMultiElectrode(), 1);
+                me = hdsort.filewrapper.MultiSessionMultiElectrode(self.sessionList(1).getMultiElectrode(), 1);
                 for i=2:length(self.sessionList)
                     me.merge(self.sessionList(i).getMultiElectrode(), i);
                 end
