@@ -19,7 +19,7 @@ function [b subH5info Dims bIsArray] = exist(filename, h5path, h5infoStruct)
             if nargin < 3 || isempty(h5infoStruct)
                 h5infoStruct = hdf5info(filename);
             end
-            subH5info = mysort.h5.findSubH5info(h5infoStruct, h5path);
+            subH5info = hdsort.filewrapper.hdf5.findSubH5info(h5infoStruct, h5path);
             b = ~isempty(subH5info);            
             if ~isempty(subH5info)
                 bIsArray = isfield(subH5info, 'Dims') && max(subH5info.Dims) > 1;
