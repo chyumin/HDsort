@@ -14,7 +14,7 @@
 %     sj.runQC()
 % end
 
-classdef SortJob < grid.GridJob
+classdef SortJob < hdsort.grid.GridJob
     properties (SetAccess=private)
     end
     
@@ -27,7 +27,7 @@ classdef SortJob < grid.GridJob
     methods
         %%% ----------------CONSTRUCTOR------------------------------------
         function self = SortJob(jobName, rootFolder, dataFiles, varargin)
-            self = self@grid.GridJob(['sort_' jobName], rootFolder, varargin{:});
+            self = self@hdsort.grid.GridJob(['sort_' jobName], rootFolder, varargin{:});
             self.taskType = 'SortJob';
             
             p = struct;
@@ -142,8 +142,8 @@ classdef SortJob < grid.GridJob
             
             if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
                 %warning('Sorting not started from a linux machine might cause problems!')
-                taskParameters.outputPath = grid.GridJob.convertToLinux(taskParameters.outputPath);
-                taskParameters.dataFiles = grid.GridJob.convertToLinux(taskParameters.dataFiles);
+                taskParameters.outputPath = hdsort.grid.GridJob.convertToLinux(taskParameters.outputPath);
+                taskParameters.dataFiles = hdsort.grid.GridJob.convertToLinux(taskParameters.dataFiles);
             end
             
             disp('Create task files from groups...');

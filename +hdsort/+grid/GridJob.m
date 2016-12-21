@@ -50,7 +50,7 @@ classdef GridJob < handle
             % calls on a series of config files. Each individual matlab task
             % will load a config file which is unique for this task and run
             % the same script as all other tasks as well.
-            self.gc = grid.config();
+            self.gc = hdsort.grid.config();
             
             is_letter = isstrprop(job_name, 'alpha');
             assert(is_letter(1), 'Job name must begin with a letter!')
@@ -139,8 +139,8 @@ classdef GridJob < handle
                 taskParameters.reportFolder = self.folders.report;
                 
                 if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
-                    taskParameters.reportFile = grid.GridJob.convertToLinux(taskParameters.reportFile);
-                    taskParameters.reportFolder = grid.GridJob.convertToLinux(taskParameters.reportFolder);
+                    taskParameters.reportFile = hdsort.grid.GridJob.convertToLinux(taskParameters.reportFile);
+                    taskParameters.reportFolder = hdsort.grid.GridJob.convertToLinux(taskParameters.reportFolder);
                 end
                 
                 taskType = self.taskType;
@@ -388,7 +388,7 @@ classdef GridJob < handle
                 
                 if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
                     warning('Sorting not started from a linux machine might cause problems!')
-                    logFolder = grid.GridJob.convertToLinux(self.folders.log);
+                    logFolder = hdsort.grid.GridJob.convertToLinux(self.folders.log);
                     str = [str '#$ -o ' logFolder '\n'];
                     str = [str '#$ -e ' logFolder '\n'];
                 else
@@ -408,10 +408,10 @@ classdef GridJob < handle
                 end
                 str = [str sprintf('#$ -t %d-%d\n', self.startIndex, self.endIndex)];
                 if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
-                    taskFile = grid.GridJob.convertToLinux(self.files.tasks)
-                    str = [str sprintf('matlab -nodisplay -r "grid.GridJob.runQSubTask(''%s\''); exit();"', taskFile)];
+                    taskFile = hdsort.grid.GridJob.convertToLinux(self.files.tasks)
+                    str = [str sprintf('matlab -nodisplay -r "hdsort.grid.GridJob.runQSubTask(''%s\''); exit();"', taskFile)];
                 else
-                    str = [str sprintf('matlab -nodisplay -r "grid.GridJob.runQSubTask(''%s\''); exit();"', self.files.tasks)];
+                    str = [str sprintf('matlab -nodisplay -r "hdsort.grid.GridJob.runQSubTask(''%s\''); exit();"', self.files.tasks)];
                 end
                 
             elseif strcmp(self.gridType, 'euler')
@@ -429,7 +429,7 @@ classdef GridJob < handle
                 if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
                     error('You cannot create a bsub on a windows or mac machine yet!')
                 else
-                    str = [str sprintf('matlab -nodisplay -r "grid.GridJob.runBSubTask(''%s\''); exit();"', self.files.tasks) '\n'];
+                    str = [str sprintf('matlab -nodisplay -r "hdsort.grid.GridJob.runBSubTask(''%s\''); exit();"', self.files.tasks) '\n'];
                 end
             else
                 error(['GridType ' self.gridType ' unknown!'])
@@ -518,7 +518,7 @@ classdef GridJob < handle
                 catch
                 end
                 mkdir(jobFolder);
-                grid.GridJob.runTask(self.files.tasks, false);
+                hdsort.grid.GridJob.runTask(self.files.tasks, false);
             else
                 task_id_str = num2str(task_id);
                 job_id_str = '0';
@@ -529,7 +529,7 @@ classdef GridJob < handle
                 catch
                 end
                 mkdir(jobFolder);
-                grid.GridJob.runTask(self.files.tasks, task_id_str, job_id_str, debugFlag);
+                hdsort.grid.GridJob.runTask(self.files.tasks, task_id_str, job_id_str, debugFlag);
             end
         end
         
@@ -556,7 +556,7 @@ classdef GridJob < handle
         
         % -----------------------------------------------------------------
         function createAutoSubmitToken(self)
-            pd = pdefs();
+            pd = hdsort.pathDefinitions();
             
             if strcmp(self.gridType, 'euler')
                 tokenFolder = fullfile( pd.eulerRoot, 'tokens');
@@ -569,7 +569,7 @@ classdef GridJob < handle
             
             shFile = fullfile(self.folders.main, [self.jobName '_job.sh']);
             if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
-                shFile = grid.GridJob.convertToLinux(shFile);
+                shFile = hdsort.grid.GridJob.convertToLinux(shFile);
             end
             
             save(token_file, 'shFile');
@@ -596,12 +596,12 @@ classdef GridJob < handle
             if iscell(path)
                 linuxPath = {};
                 for ii = 1:numel(path)
-                    linuxPath{ii} = grid.GridJob.convertToLinux(path{ii});
+                    linuxPath{ii} = hdsort.grid.GridJob.convertToLinux(path{ii});
                 end
                 return
             end
             
-            pd = pdefs();
+            pd = hdsort.pathDefinitions();
             p = regexp(path, filesep, 'split');
             while ~strcmp(p{2}, 'Mea1k')
                 p = {p{2:end}};
@@ -620,12 +620,12 @@ classdef GridJob < handle
             if iscell(path)
                 localPath = {};
                 for ii = 1:numel(path)
-                    localPath{ii} = grid.GridJob.convertToLocal(path{ii});
+                    localPath{ii} = hdsort.grid.GridJob.convertToLocal(path{ii});
                 end
                 return
             end
             
-            pd = pdefs();
+            pd = hdsort.pathDefinitions();
             p = regexp(path, filesep, 'split');
             while ~strcmp(p{2}, 'Mea1k')
                 p = {p{2:end}};
@@ -645,7 +645,7 @@ classdef GridJob < handle
             task_id_str = getenv('SGE_TASK_ID')
             job_id_str = getenv('JOB_ID')
             taskName
-            out = grid.GridJob.runTask(taskName, task_id_str, job_id_str, debugFlag)
+            out = hdsort.grid.GridJob.runTask(taskName, task_id_str, job_id_str, debugFlag)
         end
         
         % -----------------------------------------------------------------
@@ -653,16 +653,16 @@ classdef GridJob < handle
             if nargin < 2 debugFlag = false; end
             task_id_str = getenv('LSB_JOBINDEX');
             job_id_str = getenv('LSB_JOBID');
-            out = grid.GridJob.runTask(taskName, task_id_str, job_id_str, debugFlag);
+            out = hdsort.grid.GridJob.runTask(taskName, task_id_str, job_id_str, debugFlag);
         end
         
         % -----------------------------------------------------------------
         function out = runTask(taskName, task_id_str, job_id_str, debugFlag)
             %Static function of GridJob called by each node on the grid.
-            % OUT = grid.GridJob.runTask(TASKNAME, DEBUGFLAG)
+            % OUT = hdsort.grid.GridJob.runTask(TASKNAME, DEBUGFLAG)
             %
             % OUT is boolean indicating success or failure of task.
-            disp(['Starting grid.GridJob.runTask(' taskName ', ' task_id_str ', ' job_id_str ') ...'])
+            disp(['Starting hdsort.grid.GridJob.runTask(' taskName ', ' task_id_str ', ' job_id_str ') ...'])
             
             if nargin < 4
                 debugFlag = false;
@@ -679,8 +679,8 @@ classdef GridJob < handle
             uniqueProcessFile = fullfile( processFolder, ['task' task_id_str 'exists.dat'])
             
             if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
-                uniqueProcessFile = grid.GridJob.convertToLocal(uniqueProcessFile);
-                f.taskParameters.reportFolder = grid.GridJob.convertToLocal(f.taskParameters.reportFolder);
+                uniqueProcessFile = hdsort.grid.GridJob.convertToLocal(uniqueProcessFile);
+                f.taskParameters.reportFolder = hdsort.grid.GridJob.convertToLocal(f.taskParameters.reportFolder);
             end
             
             if exist(uniqueProcessFile, 'file') == 2
@@ -699,7 +699,7 @@ classdef GridJob < handle
             save(  fullfile(f.taskParameters.reportFolder, ['startTime' job_id_str '_' task_id_str '.mat']), 'startTime' );
             disp(['startTime' task_id_str '.mat file created.'])
             
-            grid.(f.taskType).run(taskFile, debugFlag)
+            hdsort.grid.(f.taskType).run(taskFile, debugFlag)
             out = true;
             
             %% Create a file that stores the current time vector:
@@ -707,7 +707,7 @@ classdef GridJob < handle
             save(  fullfile(f.taskParameters.reportFolder, ['endTime'  job_id_str '_'  task_id_str '.mat']), 'endTime' );
             disp(['endTime' task_id_str '.mat file created.'])
             
-            disp('grid.GridJob.runTask() finished.')
+            disp('hdsort.grid.GridJob.runTask() finished.')
         end
         
         
@@ -717,7 +717,7 @@ classdef GridJob < handle
             end
             
             cd('~/trunk/matlab')
-            pd = pdefs();
+            pd = hdsort.pathDefinitions();
             if strcmp(self.gridType, 'euler')
                 tokenFolder = fullfile( pd.eulerRoot, 'tokens');
             elseif strcmp(self.gridType, 'BSSE')

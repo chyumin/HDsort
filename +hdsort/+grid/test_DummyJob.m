@@ -1,5 +1,5 @@
 %%
-pd = pdefs();
+pd = hdsort.pathDefinitions();
 
 rootFolder = pd.eulerRoot
 
@@ -25,7 +25,7 @@ dj.waitForTasksToFinish(5);
 % #BSUB -o output.%J.hybrid     # output file name in which %J is replaced by the job ID
 % #BSUB -R "rusage[mem=MMMM]"   # memort in MB MMMM
 %
-% matlab -nojvm -singleCompThread -nodisplay -r "grid.GridJob.runBSubTask('~/data/dummyjob01/taskFile/taskFile'); exit();"
+% matlab -nojvm -singleCompThread -nodisplay -r "hdsort.grid.GridJob.runBSubTask('~/data/dummyjob01/taskFile/taskFile'); exit();"
 % 
 % #!/bin/bash
 % #
@@ -38,6 +38,6 @@ dj.waitForTasksToFinish(5);
 % # #BSUB -R "rusage[mem=MMMM]"   # memort in MB MMMM
 % 
 % 
-% matlab -nojvm -singleCompThread -nodisplay -r "grid.GridJob.runBSubTask('~/data/dummyjob01/taskFiles/taskFile'); exit();"
+% matlab -nojvm -singleCompThread -nodisplay -r "hdsort.grid.GridJob.runBSubTask('~/data/dummyjob01/taskFiles/taskFile'); exit();"
 
 

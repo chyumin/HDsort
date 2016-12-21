@@ -104,7 +104,7 @@ classdef CMOSMEA < hdsort.filewrapper.MultiSessionInterface
             end
             
             L = cutright+cutleft+1;
-            assert(L>0, 'cant cut negative hdsort.epoch. length!');
+            assert(L>0, 'cant cut negative epoch length!');
             nConnectedChannels = self.getNChannels(); % NConnectedChannels();
             if isempty(P.channels);
                 P.channels = 1:nConnectedChannels;
@@ -126,15 +126,9 @@ classdef CMOSMEA < hdsort.filewrapper.MultiSessionInterface
             t1 = max(1, min(timepoints)-cutleft);
             t2 = min(self.size_(1, P.session), max(timepoints)+cutright);
             X = self.getData(t1:t2, P.channels, P.session)';
-            hdsort.epoch. = [timepoints-cutleft timepoints+cutright]-t1 + 1;
-%             eL = hdsort.epoch.length(hdsort.epoch.);
-%             cL = [0; cumsum(eL)];
-%             IDX = zeros(1, cL(end));            
-%             for i=1:size(hdsort.epoch.,1)
-%                 IDX(cL(i)+1:cL(i+1)) = hdsort.epoch.(i,1):hdsort.epoch.(i,2);
-%             end
-%             Xs = X(:,IDX);
-            W = hdsort.epoch.extractWaveform(X, hdsort.epoch.);
+            epoch = [timepoints-cutleft timepoints+cutright]-t1 + 1;
+
+            W = hdsort.epoch.extractWaveform(X, epoch);
         end
   
         %------------------------------------------------------------------

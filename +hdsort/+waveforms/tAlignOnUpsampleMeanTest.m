@@ -16,7 +16,7 @@ T(:,2,:) = T(:,1,:);
 T = T +randn(size(T))*.5;
 
 %%
-pd = pdefs();
+pd = hdsort.pathDefinitions();
 ff = fullfile(pd.networkTempShare, 'Derk', 'wfs_ForDebuggingAlignment.mat');
 wfs = load(ff);
 nC = 102;

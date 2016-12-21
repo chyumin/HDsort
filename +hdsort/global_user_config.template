@@ -1,0 +1,28 @@
+function user_config =  global_user_config()
+    % This is a template for the global user configuration.
+    % NEEDS TO BE UPDATED ONCE AFTER THE FIRST CHECKOUT OF THE SVN
+    % 1. Copy this file within the same folder.
+    % 2. Rename the file to global_user_config.m
+    % 3. Set the following user variable to your user name
+    user_config.user_name = '';
+    % 4. Tell your SVN to NEVER check-in this file. You do not want to have
+    % conflicts with all the other users that have the same file but a
+    % different user_name.
+    % To ignore a file
+    %   - Under Linux type: 
+    %     svn propset svn:ignore "global_user_config.m" .
+    %     You can run this also from your Matlab prompt if you are in the
+    %     root of the project which is the /cmosmea/trunk/matlab simply
+    %     type 
+    %     !svn propset svn:ignore "global_user_config.m" .
+    %     into your Matlab prompt.
+    %     You will get this message back "property 'svn:ignore' set on '.'"
+    %
+    %   - Under Windows using Tortoise SVN:
+    %     Right click file -> TortoiseSVN -> Unversion and add to ignore
+    %     list -> Topmost item just listing the file name
+    
+    
+    
+    
+    

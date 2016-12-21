@@ -1,4 +1,4 @@
-classdef DummyJob < grid.GridJob
+classdef DummyJob < hdsort.grid.GridJob
     properties (SetAccess=private)
     end
     
@@ -9,7 +9,7 @@ classdef DummyJob < grid.GridJob
     methods
         %%% ----------------CONSTRUCTOR------------------------------------
         function self = DummyJob(name, rootFolder, varargin)
-            self = self@grid.GridJob(name, rootFolder, varargin{:});
+            self = self@hdsort.grid.GridJob(name, rootFolder, varargin{:});
             self.taskType = 'DummyJob';
             
             p = struct;
@@ -30,7 +30,7 @@ classdef DummyJob < grid.GridJob
             taskParameters.runName = self.jobName;
              
 %             if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
-%                 	 taskParameters.destinationFolder =grid.GridJob.convertToLinux(self.folders.destination);
+%                 	 taskParameters.destinationFolder =hdsort.grid.GridJob.convertToLinux(self.folders.destination);
 %                 else
 %                      taskParameters.destinationFolder = self.folders.destination;
 %                 end

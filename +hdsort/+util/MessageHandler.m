@@ -11,7 +11,7 @@ classdef MessageHandler < handle
     methods
         %%% ----------------CONSTRUCTOR------------------------------------
         function self = MessageHandler(varargin)
-            gc = global_user_config();
+            gc = hdsort.global_user_config();
             
             P = struct;
             P.doSend = true;

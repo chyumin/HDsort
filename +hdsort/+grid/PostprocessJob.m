@@ -1,4 +1,4 @@
-classdef PostprocessJob < grid.GridJob
+classdef PostprocessJob < hdsort.grid.GridJob
     properties (SetAccess=private)
     end
     
@@ -13,7 +13,7 @@ classdef PostprocessJob < grid.GridJob
     methods
         %%% ----------------CONSTRUCTOR------------------------------------
         function self = PostprocessJob(sortingName, rootFolder, groupFile, groupsFolder, sortingResult, varargin)
-            self = self@grid.GridJob(['postprocess_' sortingName], rootFolder, varargin{:});
+            self = self@hdsort.grid.GridJob(['postprocess_' sortingName], rootFolder, varargin{:});
             self.taskType = 'PostprocessJob';
             
             p = struct;
@@ -52,9 +52,9 @@ classdef PostprocessJob < grid.GridJob
             %%
             if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
                 warning('Sorting not started from a linux machine might cause problems!')
-                taskParameters.groupFile    = grid.GridJob.convertToLinux(self.files.group);
-                taskParameters.groupsFolder = grid.GridJob.convertToLinux(self.folders.groups);
-                taskParameters.sortingResult = grid.GridJob.convertToLinux(self.sortingResult);
+                taskParameters.groupFile    = hdsort.grid.GridJob.convertToLinux(self.files.group);
+                taskParameters.groupsFolder = hdsort.grid.GridJob.convertToLinux(self.folders.groups);
+                taskParameters.sortingResult = hdsort.grid.GridJob.convertToLinux(self.sortingResult);
             end
             
             disp('Create task files from groups...');
@@ -87,9 +87,9 @@ classdef PostprocessJob < grid.GridJob
             assert( isfield(taskP, 'groupFile'), 'Task aborted: field taskParameters.rawFile not specified!');
             
             if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
-                taskP.groupFile = grid.GridJob.convertToLocal(taskP.groupFile);
-                taskP.groupsFolder = grid.GridJob.convertToLocal(taskP.groupsFolder);
-                taskP.reportFile = grid.GridJob.convertToLocal(taskP.reportFile);
+                taskP.groupFile = hdsort.grid.GridJob.convertToLocal(taskP.groupFile);
+                taskP.groupsFolder = hdsort.grid.GridJob.convertToLocal(taskP.groupsFolder);
+                taskP.reportFile = hdsort.grid.GridJob.convertToLocal(taskP.reportFile);
             end
             
             assert( exist(taskP.groupFile, 'file') == 2, ['Task aborted: groupFile ' taskP.groupFile ' not found!']);

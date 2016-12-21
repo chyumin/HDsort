@@ -1,4 +1,4 @@
-classdef PreprocessJob < grid.GridJob
+classdef PreprocessJob < hdsort.grid.GridJob
     properties (SetAccess=private)
     end
     
@@ -13,7 +13,7 @@ classdef PreprocessJob < grid.GridJob
     methods
         %%% ----------------CONSTRUCTOR------------------------------------
         function self = PreprocessJob(sortingName, rootFolder, rawFiles, varargin)
-            self = self@grid.GridJob(['preprocess_' sortingName], rootFolder, varargin{:});
+            self = self@hdsort.grid.GridJob(['preprocess_' sortingName], rootFolder, varargin{:});
             self.taskType = 'PreprocessJob';
             
             p = struct;
@@ -95,8 +95,8 @@ classdef PreprocessJob < grid.GridJob
             
             if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
                 warning('Sorting not started from a linux machine might cause problems!')
-                taskParameters.destinationFolder = grid.GridJob.convertToLinux(taskParameters.destinationFolder);
-                taskParameters.configFile = grid.GridJob.convertToLinux(taskParameters.configFile);             
+                taskParameters.destinationFolder = hdsort.grid.GridJob.convertToLinux(taskParameters.destinationFolder);
+                taskParameters.configFile = hdsort.grid.GridJob.convertToLinux(taskParameters.configFile);             
             end
             
             disp('Create task files from groups...');
@@ -105,7 +105,7 @@ classdef PreprocessJob < grid.GridJob
                 taskParameters.taskID = self.taskIDs(ii);
                 
                 if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
-                	taskParameters.rawFile = grid.GridJob.convertToLinux(self.rawFiles{ii});
+                	taskParameters.rawFile = hdsort.grid.GridJob.convertToLinux(self.rawFiles{ii});
                 else
                     taskParameters.rawFile = self.rawFiles{ii};
                 end
@@ -128,9 +128,13 @@ classdef PreprocessJob < grid.GridJob
                 debugFlag = false;
             end
             
+            
             %% Load taskFile:
+            taskP = struct;
+            taskP.fileWrapper = 'MeaRecording';
+            
             T = load(taskFile);
-            taskP = T.taskParameters
+            taskP = hdsort.util.mergeStructs(taskP, T.taskParameters);
             clear T;
             
             %% Check necessary parameters:
@@ -156,13 +160,13 @@ classdef PreprocessJob < grid.GridJob
             end
             
             function mainBlock()
-                if isfield(taskP, 'oldMea1kFiles')
-                    preprocessedFiles = mysort.mea.preprocessAllMea1kH5Files(taskP.rawFile, ...
-                        taskP.configFile, taskP.destinationFolder)
-                else
-                    fileDS = mysort.mea.MeaRecording(taskP.rawFile);
+                %if isfield(taskP, 'oldMea1kFiles')
+                %    preprocessedFiles = mysort.mea.preprocessAllMea1kH5Files(taskP.rawFile, ...
+                %        taskP.configFile, taskP.destinationFolder)
+                %else
+                    fileDS = hdsort.filewrapper.(taskP.fileWrapper)(taskP.rawFile);
                     preprocessedFiles = fileDS.preprocessFile(taskP.destinationFolder);
-                end
+                %end
                 
                 %% Write to reporter file:
                 disp('Writing results...')

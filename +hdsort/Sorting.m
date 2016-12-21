@@ -599,7 +599,7 @@ classdef Sorting < handle
     %         function submit_daemon()
     %             error('function deprecated!')
     %             cd('~/trunk/matlab')
-    %             pd = pdefs();
+    %             pd = hdsort.pathDefinitions();
     %             tokenFolder = fullfile( pd.tokenFiles );
     %             log_file = '~/submit_demon.log';
     %             cd(tokenFolder)
