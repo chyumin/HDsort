@@ -12,4 +12,4 @@ function [ids clustCent] = MeanShiftClusterBundleResult(X, cluster2dataCell, min
         end
     end
     fprintf('Spikes in Cluster 0: %d \n', sum(ids==0));
-    clustCent = mysort.util.calculateClassMeans(X, ids);
+    clustCent = hdsort.util.calculateClassMeans(X, ids);
