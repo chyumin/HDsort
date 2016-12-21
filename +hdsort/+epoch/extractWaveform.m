@@ -1,19 +1,19 @@
 
-function spikesX = extractWaveform(X, hdsort.epoch.)  
+function spikesX = extractWaveform(X, epochs)  
     spikesX =  [];
-    if isempty(hdsort.epoch.)
+    if isempty(epochs)
         return
     end
-    assert(size(hdsort.epoch.,2) == 2, 'hdsort.epoch. must be a two column matrix!');
-    nSpikes = size(hdsort.epoch.,1);
+    assert(size(epochs,2) == 2, 'epochs must be a two column matrix!');
+    nSpikes = size(epochs,1);
     nC = size(X,1);
-    Tf = hdsort.epoch.(1,2)-hdsort.epoch.(1,1)+1;
+    Tf = epochs(1,2)-epochs(1,1)+1;
     spikesX = zeros(nSpikes, nC*Tf);
 
     
-    for i=1:size(hdsort.epoch.,1)
-        startSample = hdsort.epoch.(i,1);
-        endSample = hdsort.epoch.(i,2);       
+    for i=1:size(epochs,1)
+        startSample = epochs(i,1);
+        endSample = epochs(i,2);       
         zL = 0;
         if startSample<=0 
             zL = -startSample+1;

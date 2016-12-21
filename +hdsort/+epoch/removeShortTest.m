@@ -24,31 +24,14 @@
 % This program is distributed without any warranty,
 % without even the implied warranty of fitness for a particular purpose.
 %@_________________________________________________________________________
-display('--------------------------')
 epochs = [ 1 10
-          15 20
-          35 40];
+          101 200
+          201 220
+          300 401];
       
-mysort.epoch.merge(epochs)
-
-epochs = [ 1 16
-          15 20
-          35 40];
-      
-mysort.epoch.merge(epochs)
+mysort.epoch.removeShort(epochs, 20)
 
 
-epochs = [15 16
-           1 36
-          35 40];
-      
-mysort.epoch.merge(epochs)
+mysort.epoch.removeShort(epochs, 99)
 
-epochs = [1324        1370
-          1327        1374
-          1332        1377
-          2059        2105
-          2062        2111]
-    
-mysort.epoch.merge(epochs)
-
+mysort.epoch.removeShort(epochs, 101)

@@ -1,19 +1,19 @@
 
-function merged = merge(hdsort.epoch.) 
+function merged = merge(epochs) 
     merged = [];
-    if isempty(hdsort.epoch.)
+    if isempty(epochs)
         return
     end
     
-    hdsort.epoch. = sortrows(hdsort.epoch.);
+    epochs = sortrows(epochs);
     
-    merged(1,:) = hdsort.epoch.(1,:);
+    merged(1,:) = epochs(1,:);
     k = 1;
-    for i=2:size(hdsort.epoch.,1)
-        if hdsort.epoch.(i,1) <= merged(k,2)
-            merged(k,:) = [min(hdsort.epoch.(i,1), merged(k,1)) max(hdsort.epoch.(i,2), merged(k,2))];
+    for i=2:size(epochs,1)
+        if epochs(i,1) <= merged(k,2)
+            merged(k,:) = [min(epochs(i,1), merged(k,1)) max(epochs(i,2), merged(k,2))];
         else
             k = k+1;
-            merged(k,:) = hdsort.epoch.(i,:);
+            merged(k,:) = epochs(i,:);
         end
     end
