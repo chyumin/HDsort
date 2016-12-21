@@ -1,26 +1,26 @@
-function fp = findPointsInEpochs(points, hdsort.epoch.)
-    % finds all points in points that happen during an hdsort.epoch.in hdsort.epoch.
+function fp = findPointsInEpochs(points, epochs)
+    % finds all points in points that happen during an epoch in epochs
     pointPtr = 1;
-    hdsort.epoch.tr = 1;
+    epochPtr = 1;
     
     points = sort(points);
-    hdsort.epoch. = sortrows(hdsort.epoch.);
+    epochs = sortrows(epochs);
     
     nP = length(points);
-    nE = size(hdsort.epoch.,1);
+    nE = size(epochs,1);
     
     fp = zeros(nP,1);
-    while pointPtr<=nP && hdsort.epoch.tr<=nE
-        if points(pointPtr) < hdsort.epoch.(hdsort.epoch.tr,1)
-            % current point is before hdsort.epoch.
+    while pointPtr<=nP && epochPtr<=nE
+        if points(pointPtr) < epochs(epochPtr,1)
+            % current point is before epoch
             pointPtr = pointPtr+1;
-        elseif points(pointPtr) <= hdsort.epoch.(hdsort.epoch.tr,2)
-            % current point is in current hdsort.epoch.
-            fp(pointPtr) = hdsort.epoch.tr;
+        elseif points(pointPtr) <= epochs(epochPtr,2)
+            % current point is in current epoch
+            fp(pointPtr) = epochPtr;
             pointPtr = pointPtr+1;
         else
-            % current point is behind current hdsort.epoch.
-            hdsort.epoch.tr = hdsort.epoch.tr+1;
+            % current point is behind current epoch
+            epochPtr = epochPtr+1;
         end        
     end        
 end
