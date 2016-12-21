@@ -22,7 +22,7 @@
 %     mysort.plot.spikes(Y,'nC',nC);
 %     title('Aligned Spikes');
     
-    [tau Y] = mysort.wf.vAlignOnAverageMaxSample(X, nC, 'maxIdx', 22, 'nMaxChannelsForWeighting', 5);
+    [tau Y] = waveforms.vAlignOnAverageMaxSample(X, nC, 'maxIdx', 22, 'nMaxChannelsForWeighting', 5);
     fprintf('Shift Error: %.4f\n', sum(abs(-tau-stau)));
     figure; plot(stau, -tau, '.');
     xlabel('real tau');

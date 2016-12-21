@@ -15,7 +15,7 @@ gdf = [1 10
        2 105
        3 110];
 cutLeft = 3;
-[x y] = mysort.wf.templateSpikeTrainData(T, gdf, cutLeft); 
+[x y] = waveforms.templateSpikeTrainData(T, gdf, cutLeft); 
 
 figure;
 plot(x,y(1,:), 'b')

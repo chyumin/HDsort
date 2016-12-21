@@ -4,7 +4,7 @@ T = [0 1 2 3 0 0 1 2 3 0
 nC = 2;
 
     
-vT = mysort.wf.vComputeSubsampleShiftedVersions(T, nC, 3);
+vT = waveforms.vComputeSubsampleShiftedVersions(T, nC, 3);
 
 figure;
 subplot(2,1,1);
@@ -21,7 +21,7 @@ T = [sin(xrange) sin(xrange)
      cos(xrange*2) cos(xrange*2)];
 nC = 2;
     
-vT = mysort.wf.vComputeSubsampleShiftedVersions(T, nC, 20);
+vT = waveforms.vComputeSubsampleShiftedVersions(T, nC, 20);
 
 figure;
 subplot(2,1,1);

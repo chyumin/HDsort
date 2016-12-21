@@ -5,5 +5,5 @@ function V = vSubsel(V, nC, idx)
     if isempty(V)
         return
     end
-    vidx = mysort.wf.vSubIdx(V,nC,idx);
+    vidx = waveforms.vSubIdx(V,nC,idx);
     V = V(:,vidx);

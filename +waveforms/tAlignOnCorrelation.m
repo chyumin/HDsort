@@ -9,9 +9,9 @@ function [ali tau xvsf] = tAlignOnCorrelation(T,varargin)
     if isempty(P.C)
         P.C = eye(Tf*nC);
     end
-    vT = mysort.wf.t2v(T);
+    vT = waveforms.t2v(T);
     vF = vT/P.C;
-%     F = mysort.wf.v2t(vF, nC);
+%     F = waveforms.v2t(vF, nC);
     
     zeroOutFilterArtefacts = true;
     xvsf = mysort.util.calculateXIvsF(vT,vF,nC,zeroOutFilterArtefacts);
@@ -29,14 +29,14 @@ function [ali tau xvsf] = tAlignOnCorrelation(T,varargin)
     tau = I(min_shift_idx,:);
     
     
-    XM = mysort.wf.t2v(T);
+    XM = waveforms.t2v(T);
     XM = mysort.util.shiftMCRows(XM, -tau, nC, P.trunc);
     
-    ali  = mysort.wf.v2t(XM, nC);
+    ali  = waveforms.v2t(XM, nC);
     
     if P.debug
-        F = mysort.wf.v2t(vF, nC);
-        FM = mysort.wf.v2m(vF, nC);
+        F = waveforms.v2t(vF, nC);
+        FM = waveforms.v2m(vF, nC);
         FM = mysort.util.shiftMCRows(FM, -tau, nC, P.trunc);
         aliF = mysort.util.m2t(FM, nC);
         

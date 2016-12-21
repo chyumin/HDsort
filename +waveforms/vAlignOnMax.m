@@ -8,7 +8,7 @@ function [aliV tau mx] = vAlignOnMax(V, nC, varargin)
     assert(round(Tf)==Tf, 'Number of channels does not match!');
     
     % convert to tensor
-    T = mysort.wf.v2t(V, nC);
+    T = waveforms.v2t(V, nC);
     % Check if we have to ignore some parts of the waveforms
     offset = 0;
     if ~isempty(P.restrictToIdx)
@@ -37,7 +37,7 @@ function [aliV tau mx] = vAlignOnMax(V, nC, varargin)
     end
     
 
-    aliV = mysort.wf.vShift(V, nC, tau, P.truncate);
+    aliV = waveforms.vShift(V, nC, tau, P.truncate);
     
     if P.debug
         mysort.plot.spikes(V,'nC',nC);

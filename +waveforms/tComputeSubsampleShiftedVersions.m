@@ -3,7 +3,7 @@ function [Ts tau] = tComputeSubsampleShiftedVersions(tT, upsample)
     % Then, each possible subsample shifted version is downsampled again
     % and returned in T. 
     % Upsampling is done with Matlabs resample function, but also
-    % mysort.wf.mSincfun would be possible
+    % waveforms.mSincfun would be possible
     %
     % Input:
     %    tT       - 
@@ -16,7 +16,7 @@ function [Ts tau] = tComputeSubsampleShiftedVersions(tT, upsample)
     [Tf nC nT] = size(tT);
     downsample = 1;
     doNotCutTail = 1;
-    tTup = mysort.wf.tResample(tT, upsample, downsample, doNotCutTail);
+    tTup = waveforms.tResample(tT, upsample, downsample, doNotCutTail);
     
     Ts = zeros(Tf, nC, nT, upsample);
     Ts(:,:,:,1) = tT;

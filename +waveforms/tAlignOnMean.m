@@ -11,9 +11,9 @@ function [T, tau, mMPmask] = tAlignOnMean(T, varargin)
     [Tf nC N] = size(T);
     mMPmask = [];
     if isempty(P.restrictToChannels)
-        V = mysort.wf.t2v(T);
+        V = waveforms.t2v(T);
     else
-        V = mysort.wf.t2v(T(:,P.restrictToChannels,:));
+        V = waveforms.t2v(T(:,P.restrictToChannels,:));
         nC = length(P.restrictToChannels);
     end
     if isempty(P.restrictMeanToItems)
@@ -37,13 +37,13 @@ function [T, tau, mMPmask] = tAlignOnMean(T, varargin)
         else
             [maxis maxidx] = sort(abs(M));
             maxidx = maxidx(end-P.restrictToNMaximalValues+1:end);
-%             idx = mysort.wf.vSubIdx(M, nC, maxIdx);
+%             idx = waveforms.vSubIdx(M, nC, maxIdx);
         end
         shiftRange = -P.maxShiftPerIter:P.maxShiftPerIter;
         MPmask = zeros(size(M));
         MPmask(:,maxidx) = 1;
         if ~isempty(P.meanMaskMinLen)
-            mMPmask = mysort.wf.v2m(MPmask, nC);
+            mMPmask = waveforms.v2m(MPmask, nC);
             % make at least len 3:
             mMPmask2 = [(mMPmask(:,1) | mMPmask(:,2)) mMPmask(:,1:end-2) | mMPmask(:,2:end-1) | mMPmask(:,3:end) (mMPmask(:,end-1) | mMPmask(:,end)) ];
             % make at least len 5:
@@ -60,13 +60,13 @@ function [T, tau, mMPmask] = tAlignOnMean(T, varargin)
             end
 %             hold on; plot(mMPmask(1,:)+.2, 'r');
             if any(mMPmask)
-                MPmask = mysort.wf.m2v(mMPmask);
+                MPmask = waveforms.m2v(mMPmask);
             end
         end
         MP = M;
         MP(~MPmask) = 0;
         % figure; plot(M); hold on; plot(MP, 'r');
-        MP = mysort.wf.vShift(repmat(MP,length(shiftRange),1), nC, shiftRange, CTRUNC);
+        MP = waveforms.vShift(repmat(MP,length(shiftRange),1), nC, shiftRange, CTRUNC);
         
         % project every waveform on all shifted versions of the mean to find
         % best match
@@ -93,10 +93,10 @@ function [T, tau, mMPmask] = tAlignOnMean(T, varargin)
         end
         
         % always use originals for shifting!
-        Vi(taui~=0,:) = mysort.wf.vShift(V(taui~=0,:), nC, tau(taui~=0,:), CTRUNC);        
+        Vi(taui~=0,:) = waveforms.vShift(V(taui~=0,:), nC, tau(taui~=0,:), CTRUNC);        
         nShifts = sum(taui~=0);
         fprintf('alignWaveforms: %d shifted\n', nShifts);
     end
     
-    T = mysort.wf.tShift(T, tau, CTRUNC);
+    T = waveforms.tShift(T, tau, CTRUNC);
 end

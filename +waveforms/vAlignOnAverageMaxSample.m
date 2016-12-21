@@ -9,7 +9,7 @@ function [tau aliX] = vAlignOnAverageMaxSample(X, nC, varargin)
     Tf = size(X,2)/nC;
     assert(round(Tf)==Tf, 'Number of channels does not match!');
     
-    XX = mysort.wf.v2t(X, nC);
+    XX = waveforms.v2t(X, nC);
     if ~isempty(P.restrictToIdx)
         idx = setdiff(1:size(XX,1), P.restrictToIdx);
         XX(idx,:,:) = 0;
@@ -50,8 +50,8 @@ function [tau aliX] = vAlignOnAverageMaxSample(X, nC, varargin)
     
     if nargout > 1
 %         aliX = mysort.util.shiftMCRows(X, round(tau), nC);
-        XX = mysort.wf.v2t(X, nC);
-        aliX = mysort.wf.t2v(XX);
+        XX = waveforms.v2t(X, nC);
+        aliX = waveforms.t2v(XX);
         aliX = mysort.util.shiftRowsInterpolated(aliX, tau , nC);
     end
     if P.debug

@@ -37,5 +37,5 @@ function [A tau mx] = tAlignOnMax(T, varargin)
         tau = (-(idx - P.maxIdx))';
     end
     tau = tau(:);
-    A = mysort.wf.tShift(T, tau, P.truncate);
+    A = waveforms.tShift(T, tau, P.truncate);
 end

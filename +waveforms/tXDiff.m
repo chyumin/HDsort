@@ -22,7 +22,7 @@ function [xc A S maxAbsDist maxAbsRelDist] = tXDiff(T)
     end
     
     if nargout > 1
-        T = mysort.wf.t2v(T);
+        T = waveforms.t2v(T);
         A = zeros(nT);
         S = zeros(nT);
         maxAbsDist = zeros(nT);
@@ -37,7 +37,7 @@ function [xc A S maxAbsDist maxAbsRelDist] = tXDiff(T)
 %                 figure; plot([ti; tj]')
                 if abs(shifts(count)) <= 2
                     tj = mysort.util.shiftMCRows(tj, shifts(count), nC,1);
-                    t = mysort.wf.vSubsel([tj; ti], nC, abs(shifts(count))+1:Tf-abs(shifts(count)));
+                    t = waveforms.vSubsel([tj; ti], nC, abs(shifts(count))+1:Tf-abs(shifts(count)));
                 else
                     t = [tj; ti];
                 end

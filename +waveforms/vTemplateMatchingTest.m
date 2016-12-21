@@ -8,12 +8,12 @@ T = [[0 0 0 0:5 4:-1:-5 -4:0]/5 0 0 0 0 0 0 [0:5 4:-1:-5 -4:0]/5 0 0 0
       0 0 0 sin((0:subTf-1)*2*pi/subTf) 0 0 0 0 0 0 sin((0:subTf-1)*2*pi/subTf) 0 0 0];
 Tf = size(T,2)/nC;
 offset = 4;
-subT = T(:, mysort.wf.vSubIdx(Tf, nC, offset:offset+subTf-1));
+subT = T(:, waveforms.vSubIdx(Tf, nC, offset:offset+subTf-1));
 X = repmat(T,100,1);
 IDs = repmat([1:2]', 100,1);
 tau = repmat([0; 0; repmat([-3:3]', 14, 1)], 2, 1);
 % tau = zeros(200,1);
-X = mysort.wf.vShift(X, nC, tau, 1);
+X = waveforms.vShift(X, nC, tau, 1);
 nX = X +randn(size(X))*.02;
 %%
 figure;
@@ -33,7 +33,7 @@ title('noisy instances of templates');
 %%
 
 
-[D maxTaus TupShiftDown FupShiftDown tauRange] = mysort.wf.vTemplateMatching(nX, subT, nC, offset, 'maxShift', 5, 'upsample', 5);
+[D maxTaus TupShiftDown FupShiftDown tauRange] = waveforms.vTemplateMatching(nX, subT, nC, offset, 'maxShift', 5, 'upsample', 5);
 tauRange
 EF = diag(T*T');                     % compute energies
 DISCR = D - .5 * repmat(EF', size(X,1), 1)  + log(.01);  % compute botm dicriminant
@@ -53,8 +53,8 @@ plot([0 6], [0 6], 'k-');
 
 %%
 offset = 4;
-subT = T(:, mysort.wf.vSubIdx(Tf, nC, offset:offset+subTf-1));
-[D maxTaus TupShiftDown FupShiftDown tauRange] = mysort.wf.vTemplateMatching(nX, subT, nC, offset, 'maxShift', 0, 'upsample', 5);
+subT = T(:, waveforms.vSubIdx(Tf, nC, offset:offset+subTf-1));
+[D maxTaus TupShiftDown FupShiftDown tauRange] = waveforms.vTemplateMatching(nX, subT, nC, offset, 'maxShift', 0, 'upsample', 5);
 EF = diag(T*T');                     % compute energies
 DISCR = D - .5 * repmat(EF', size(X,1), 1)  + log(.01);  % compute botm dicriminant
 
@@ -80,7 +80,7 @@ T = [[0 0 0 0 0 0:5 4:-1:-5 -4:0]/5 0 0 0 0 0 0 0 0 0 0 [0:5 4:-1:-5 -4:0]/5 0 0
       0 0 0 0 0 sin((0:subTf-1)*2*pi/subTf) 0 0 0 0 0 0 0 0 0 0 sin((0:subTf-1)*2*pi/subTf) 0 0 0 0 0];
 Tf = size(T,2)/nC;
 offset = 6;
-subT = T(:, mysort.wf.vSubIdx(Tf, nC, offset:offset+subTf-1));
+subT = T(:, waveforms.vSubIdx(Tf, nC, offset:offset+subTf-1));
 X = repmat(T,100,1);
 IDs = repmat([1:2]', 100,1);
 tau = -4 + 8.*rand(200,1);
@@ -104,7 +104,7 @@ title('noisy instances of templates');
 
 %%
 
-[D maxTaus TupShiftDown FupShiftDown tauRange] = mysort.wf.vTemplateMatching(nX, subT, nC, offset, 'maxShift', 5, 'upsample', 5);
+[D maxTaus TupShiftDown FupShiftDown tauRange] = waveforms.vTemplateMatching(nX, subT, nC, offset, 'maxShift', 5, 'upsample', 5);
 tauRange
 EF = diag(T*T');                     % compute energies
 DISCR = D - .5 * repmat(EF', size(X,1), 1)  + log(.01);  % compute botm dicriminant
@@ -133,8 +133,8 @@ ylabel('estimated tau');
 
 %%
 offset = 4;
-subT = T(:, mysort.wf.vSubIdx(Tf, nC, offset:offset+subTf-1));
-[D maxTaus TupShiftDown FupShiftDown tauRange] = mysort.wf.vTemplateMatching(nX, subT, nC, offset, 'maxShift', 0, 'upsample', 1);
+subT = T(:, waveforms.vSubIdx(Tf, nC, offset:offset+subTf-1));
+[D maxTaus TupShiftDown FupShiftDown tauRange] = waveforms.vTemplateMatching(nX, subT, nC, offset, 'maxShift', 0, 'upsample', 1);
 EF = diag(T*T');                     % compute energies
 DISCR = D - .5 * repmat(EF', size(X,1), 1)  + log(.01);  % compute botm dicriminant
 

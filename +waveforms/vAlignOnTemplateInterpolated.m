@@ -9,12 +9,12 @@ function [X tau] = vAlignOnTemplateInterpolated(X,nC,t,maxShift)
     
     nS = size(X,1);
 
-    mt = mysort.wf.v2m(t, nC);
+    mt = waveforms.v2m(t, nC);
     range = 1:size(mt,2);
     
     tau = zeros(nS, 1);
     for i=1:nS
-        xsinc = mysort.wf.mSincfun(mysort.wf.v2m(X(i,:), nC));            
+        xsinc = waveforms.mSincfun(waveforms.v2m(X(i,:), nC));            
         fun = @(t)   -sum(sum(mt.*xsinc(range-t)));
         [tau(i), k] = fminbnd(fun, -maxShift, maxShift, opt);
     end

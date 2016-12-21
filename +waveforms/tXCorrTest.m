@@ -19,7 +19,7 @@ T = [];
 T(:,:,1) = x1;
 T(:,:,2) = x2;
 T(:,:,3) = x3;
-[xc A S] = mysort.wf.tXCorr(T);
+[xc A S] = waveforms.tXCorr(T);
 
 %% ---
 figure; hold on;

@@ -18,6 +18,6 @@ function Vs = vShift(V, nC, tau, trunc)
     
     tau_ = repmat(tau, nC, 1);
     tau_ = tau_(:);
-    M = mysort.wf.v2m(V,nC);
+    M = waveforms.v2m(V,nC);
     Ms = mysort.util.shiftRows(M, tau_, trunc);
-    Vs = mysort.wf.m2v(Ms, nC);   
+    Vs = waveforms.m2v(Ms, nC);   

@@ -17,11 +17,11 @@ function [T, tau, mMPmask] = tAlignOnUpsampleMean(T, varargin)
 %     T = mysort.util.resampleTensor(T, P.upsample, 1);
     if ~isempty(P.upsample) && P.upsample > 1
         disp('Upsampling Waveforms...')
-        T = mysort.wf.tResample(T, P.upsample, 1, 1);
+        T = waveforms.tResample(T, P.upsample, 1, 1);
     end
     if 0
         %%
-        vT = mysort.wf.t2v(T); 
+        vT = waveforms.t2v(T); 
         figure, plot(vT(1:1000,:)')
     end
     % figure; plot(squeeze(T))
@@ -30,13 +30,13 @@ function [T, tau, mMPmask] = tAlignOnUpsampleMean(T, varargin)
         if isnumeric(P.initAlignment)
             tau_init = round(P.initAlignment*P.upsample);
             tau_init = tau_init(:);
-            T = mysort.wf.tShift(T, tau_init, 1);
+            T = waveforms.tShift(T, tau_init, 1);
         elseif strcmp(P.initAlignment, '+')
-            [T tau_init] = mysort.wf.tAlignOnMax(T, 'truncate', 1, ...
+            [T tau_init] = waveforms.tAlignOnMax(T, 'truncate', 1, ...
                 'restrictToIdx', P.restrictToIdx, ...
                 'restrictToChannels', P.restrictToChannels, 'maxIdx', P.maxIdx*P.upsample);
         elseif strcmp(P.initAlignment, '-')
-            [T tau_init] = mysort.wf.tAlignOnMax(-T, 'truncate', 1, ...
+            [T tau_init] = waveforms.tAlignOnMax(-T, 'truncate', 1, ...
                 'restrictToIdx', P.restrictToIdx, ...
                 'restrictToChannels', P.restrictToChannels, 'maxIdx', P.maxIdx*P.upsample);
             T = -T;
@@ -46,7 +46,7 @@ function [T, tau, mMPmask] = tAlignOnUpsampleMean(T, varargin)
     end
     % figure; plot(squeeze(T))
     % align on mean
-    [T, tau_m, mMPmask] = mysort.wf.tAlignOnMean(T, 'maxIter', P.maxIter, ...
+    [T, tau_m, mMPmask] = waveforms.tAlignOnMean(T, 'maxIter', P.maxIter, ...
         'useMedian', P.useMedian, ...
         'restrictToNMaximalValues', P.restrictToNMaximalValues*P.upsample,...
         'restrictToChannels', P.restrictToChannels,...

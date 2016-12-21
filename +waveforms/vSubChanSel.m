@@ -8,7 +8,7 @@ function V = vSubChanSel(V, nC, chan_idx)
         idx = idx(:, chan_idx);
         V = V(:, idx(:));
     else
-        T = mysort.wf.v2t(V, nC);
+        T = waveforms.v2t(V, nC);
         T = T(:,chan_idx,:);
-        V = mysort.wf.t2v(T);
+        V = waveforms.t2v(T);
     end

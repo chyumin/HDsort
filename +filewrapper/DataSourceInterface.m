@@ -188,7 +188,7 @@ classdef DataSourceInterface < filewrapper.WaveformDataSourceInterface
             X = self.getData_(IDX, channelindex);
             X = reshape(X, [cutLength nCut length(channelindex)]);
             for i = 1:nCut
-                wf(i,:) = mysort.wf.m2v(squeeze(X(:, i, :))');
+                wf(i,:) = waveforms.m2v(squeeze(X(:, i, :))');
             end
         end
     
@@ -220,14 +220,14 @@ classdef DataSourceInterface < filewrapper.WaveformDataSourceInterface
                     if ~isempty(gdf)
                         %                         unitNames = unique(gdf(:,1));
                         T = S.getTemplateWaveforms();
-                        %                         T = mysort.wf.pruneTemplates(T, ...
+                        %                         T = waveforms.pruneTemplates(T, ...
                         %                             'maxChannels', self.maxTemplateChannelsToPlot,...
                         %                             'minChannels', 1, ...
                         %                             'absThreshold', self.templateChannelThreshold,...
                         %                             'setInvalidChannelsTo', nan);
                         cutLeft = S.getTemplateCutLeft();
                         gdf(:,2) = gdf(:,2) - timeindex(1)+1;
-                        [x Y] = mysort.wf.templateSpikeTrainData(T, gdf, cutLeft);
+                        [x Y] = waveforms.templateSpikeTrainData(T, gdf, cutLeft);
                         removeidx = isnan(x) | x < 1 | x > size(X,1);
                         x(removeidx) = [];
                         Y(:,removeidx) = [];

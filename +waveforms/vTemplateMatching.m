@@ -81,7 +81,7 @@ function [D maxTaus TupShiftDown FupShiftDown tauRange tauIdx subTauRange subTau
     if isempty(P.FupShiftDown) 
         if isempty(P.TupShiftDown)
             % compute the subsample shifted versions of T
-            [TupShiftDown subTauRange] = mysort.wf.vComputeSubsampleShiftedVersions(T, nC, P.upsample);
+            [TupShiftDown subTauRange] = waveforms.vComputeSubsampleShiftedVersions(T, nC, P.upsample);
         else
             TupShiftDown = P.TupShiftDown;
             upsample = size(TupShiftDown,3);
@@ -114,7 +114,7 @@ function [D maxTaus TupShiftDown FupShiftDown tauRange tauIdx subTauRange subTau
         for taui = 1:length(tauRange)
             tau = tauRange(taui);
             % get index into X for shifts tau of T
-            idx_tau = mysort.wf.vSubIdx(TfX, nC, (idxstart:idxstop)+tau);
+            idx_tau = waveforms.vSubIdx(TfX, nC, (idxstart:idxstop)+tau);
 
             % compute for each template individually all subshift matchings                
             for k = 1:nT
