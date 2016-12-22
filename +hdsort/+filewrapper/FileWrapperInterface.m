@@ -9,9 +9,7 @@ classdef FileWrapperInterface < handle
         
         
         memoryBufferNoiseSmad
-    end
-    
-    properties(Abstract)
+        
         info
     end
     

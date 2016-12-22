@@ -1,24 +1,31 @@
 classdef CMOSMEAFile < hdsort.filewrapper.SingleFileWrapper
     
     properties
-        info
         
         %parent
         %fileName
         sourceFname
         %message
+        dataSets
+        filter_settings
+        
         h5matrix_raw
         %session_idx
         session_str
         size_buffer
         CL
         connected_channels
+        
         lsb
     end
     
     methods
         %------------------------------------------------------------------
         function self = CMOSMEAFile(fileName, varargin) %parent, file_idx)
+            if nargin == 1
+                warning('Not recommended to use this object. Better use multi-file supporting hdsort.filewrapper.CMOSMEA!')
+            end
+            
             session_str_ = '/Sessions/Session0/'; % This wrapper only supports one session per file!
             samplesPerSecond = hdf5read(fileName, [session_str_ 'sr']);   
             samplesPerSecond = samplesPerSecond(1);
@@ -99,25 +106,61 @@ classdef CMOSMEAFile < hdsort.filewrapper.SingleFileWrapper
             %end
             self.MultiElectrode.setDataSource(self);
 
-            % get lsb:
+            %% Get LSB:
             self.lsb = self.getLSB_();
             self.connected_channels = find(connectedChannels);
+            
+            %% Read filter settings:
+            self.dataSets.filter_settings.name = [self.session_str 'filter'];
+            self.readFilterSettings();
             
             self.info = ['This object is intended to wrap a single preprocessed CMOSMEA datafile. ' ...
                          'It can be used as a standalone object, but it is recommended to use it ' ...
                          'within hdsort.filewrapper.CMOSMEA, an object that provides the same functionality ' ...
                          'but for multiple files at the same time.'];
         end
-
+        
+        %------------------------------------------------------------------
+        function [out] = tryReadingDataset(self, dsName, displayError)
+            if nargin < 3
+                displayError = true;
+            end
+            try
+                out = h5read(self.fileName, dsName);
+            catch
+                if displayError
+                    str = hdsort.util.buildLastErrString();
+                    disp(str);
+                end
+                out = [];
+            end
+        end
+        
+        %------------------------------------------------------------------
+        function readFilterSettings(self)
+            fsinfo = h5info(self.fileName, self.dataSets.filter_settings.name);
+            fs_names = {fsinfo.Datasets.Name};
+            
+            for f_ = fs_names
+                fs_name = [self.dataSets.filter_settings.name '/' f_{1}];
+                self.filter_settings.(f_{1}) = self.tryReadingDataset(fs_name);
+            end
+        end
+        
         %------------------------------------------------------------------
         function FR = getFrameNumbers(self)
             FR = hdsort.filewrapper.hdf5.recursiveLoad(self.fileName, [self.session_str 'frame_numbers']);
         end
         
         %------------------------------------------------------------------
+        function x = isBinaryFile(self)
+            x = isa( self.h5matrix_raw, 'hdsort.filewrapper.binaryFileMatrix');
+        end
+        
+        %------------------------------------------------------------------
         function gain = getGain(self)
             gain = hdf5read(self.fileName, [self.session_str 'gain']);
-            assert(length(gain) == 4, 'Gain must have 4 values!'); 
+            assert(length(gain) == 4, 'Gain must have 4 values!');
             try
                 gainmultiplier = hdf5read(self.fileName, [self.session_str 'filter/gainmultiplier']);
             catch
