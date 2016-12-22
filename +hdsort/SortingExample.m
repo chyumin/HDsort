@@ -48,3 +48,36 @@ sorting.postprocessGridSorting()
 
 %% Alternate:
 [gdf_merged, T_merged, localSorting, localSortingID, sessionLengths] = hdsort.startHDSorting(preprocessedFiles, preprocessedFolder, 'testGrid_startHDSorting')
+
+
+% -------------------------------------------------------------------------
+%% Test hdsort.filewrapper.CMOSMEA
+folder = '/Volumes/hierlemann/intermediate_data/Mea1k/rolandd/160513/preprocessed';
+fileList = {[folder '/Trace_20160513_11_32_04.h5'], [folder '/Trace_20160513_11_34_21.h5']}
+
+%%
+DS = hdsort.filewrapper.CMOSMEA(fileList{1});
+covest_old = DS.getCovest();
+
+%%
+DSList = hdsort.filewrapper.CMOSMEA(fileList);
+covest_listold = DSList.getCovest();
+
+%% Test single file hdsort.filewrapper.CMOSMEAFile
+cmosmeafile = hdsort.filewrapper.CMOSMEAFile(fileList{1});
+clist = cmosmeafile.getChannelList();
+covest = cmosmeafile.getCovest();
+
+%% Test multifile hdsort.filewrapper.CMOSMEAnew
+cmoslist = hdsort.filewrapper.CMOSMEAnew(fileList);
+%covest_list = cmoslist.getCovest();
+
+%%
+sorting = hdsort.Sorting(cmoslist, preprocessedFolder, sortingName)
+
+%%
+dc = diag(covest.CCol);
+dc_old = diag(covest_old.CCol);
+
+figure; plot(dc); hold on; plot(dc_old+1000)
+
