@@ -56,11 +56,8 @@ classdef MultiFileWrapper < hdsort.filewrapper.FileWrapperInterface
             SL = self.getAllFileLength();
             fileOffsets = cumsum([0 SL]);
             
-            fileFirstIndex = 1;
-            if idx > 1
-                fileFirstIndex = fileOffsets(fileIdx-1)+1;
-            end
-            fileLastIndex  = fileOffsets(fileIdx);
+            fileFirstIndex = fileOffsets(idx)+1;
+            fileLastIndex  = fileOffsets(idx+1);
         end
         
         %------------------------------------------------------------------
@@ -78,55 +75,20 @@ classdef MultiFileWrapper < hdsort.filewrapper.FileWrapperInterface
         end
         
         %------------------------------------------------------------------
-        function X = getData_(self, timeIndex, channelIndex, fileIndex)
-            if nargin == 4 && length(fileIndex) > 1
-                X = zeros(size(timeIndex,1), size(channelIndex, 1));
-                %X = self.getData_(timeIndex, channelIndex, fileIndex(1));
-                for ii = 1:numel(fileIndex)
-                    [fileFirstIndex, fileLastIndex] = self.getFileIndices(fileIndex(ii));
-                    X(fileFirstIndex:fileLastIndex) = self.getData_(timeIndex, channelIndex, fileIndex(ii));
-                    %X = [X; self.getData_(timeIndex, channelIndex, fileIndex(ii))];
-                end
-                return
-            end
+        function X = getData_(self, timeIndex, channelIndex) 
             
-            if nargin < 4
-                fileIndex = self.getActiveFileIndex();
-                if nargin < 3
-                    channelIndex = 1:self.size_(2);
-                    if nargin < 2
-                        timeIndex = 1:self.size_(1);
-                    end
-                end
-            end
-            
-            if strcmp(timeIndex, ':')
-                timeIndex = 1:self.fileWrapperList(fileIndex).size(1);
-            end                    
-            if strcmp(channelIndex, ':')
-                channelIndex = 1:self.fileWrapperList(fileIndex).size(2);
-            end
-            X = self.fileWrapperList(fileIndex).getData(timeIndex, channelIndex);
-        end
-        
-        
-        %------------------------------------------------------------------
-        function X = getDataConcatenated_(self, timeIndex, channelIndex) 
-            error('Not tested!')
             if nargin < 3 || strcmp(channelIndex, ':')
                 channelIndex = 1:self.size(2);
             end
             
-            SL = self.getAllFileLength();
+            
             if strcmp(timeIndex, ':')
+                SL = self.getAllFileLength();
                 timeIndex = 1:sum(SL);
             end
             
-            fileOffsets = cumsum([0 SL]);
-            
+            %fileOffsets = cumsum([0 SL]);
             X = zeros(length(timeIndex), length(channelIndex));
-            
-            
             
             totalLength = 0;
             for ii = 1:self.nFiles
@@ -141,7 +103,7 @@ classdef MultiFileWrapper < hdsort.filewrapper.FileWrapperInterface
                 if ~isempty(timeIndexInThisSession)
 %                     assert(min(timeIndexInThisSession) > 0, 'Invalid Time Index! (<1)');
 %                     assert(max(timeIndexInThisSession) <= size(self.fileWrapperList(i),1), 'Invalid Time Index! (>end)');                    
-                    tmp = self.getData_(timeIndexInThisSession, channelIndex, ii);
+                    tmp = self.fileWrapperList(ii).getData_(timeIndexInThisSession, channelIndex, ii);
                     X(totalLength+1:totalLength+length(timeIndexInThisSession),:) = tmp;
                     totalLength = totalLength+length(timeIndexInThisSession);
                 end

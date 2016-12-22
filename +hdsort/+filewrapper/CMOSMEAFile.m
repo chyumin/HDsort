@@ -211,11 +211,14 @@ classdef CMOSMEAFile < hdsort.filewrapper.SingleFileWrapper
         end
         
         %------------------------------------------------------------------
-        function X = getData_(self, timeIndex, channelIndex, varargin)
-            P.channels = []; %set channels to 'all' to also get unconnected channels
-            P = hdsort.util.parseInputs(P, '', varargin);
+        function X = getData_(self, timeIndex, channelIndex, channels)
+            %P.channels = []; %set channels to 'all' to also get unconnected channels
+            %P = hdsort.util.parseInputs(P, '', varargin);
+            if nargin < 4
+                channels = [];
+            end
             
-            if isempty(P.channels) || strcmp(P.channels, 'connected')
+            if isempty(channels) || strcmp(channels, 'connected')
                 assert(max(channelIndex)<=length(self.connected_channels), 'channel index out of bounds')
                 channelIndex = self.connected_channels(channelIndex);
             end
