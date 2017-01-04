@@ -1,4 +1,4 @@
-classdef Plot < myplot.PlotInterface
+classdef Plot < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         xData
         yData
@@ -47,7 +47,7 @@ classdef Plot < myplot.PlotInterface
             P.plotStd = false;
             P.meanColor = [0,0,0];
             
-            self = self@myplot.PlotInterface(P, varargin{:});
+            self = self@hdsort.plot.PlotInterface(P, varargin{:});
             
             self.plotName = 'Plot';
             
@@ -65,12 +65,9 @@ classdef Plot < myplot.PlotInterface
             self.setColor(self.color, self.nLines);
             
             if self.plotAll
-               % if size(self.xData, 2) == 1
-                
-               
                 for ii = 1:self.nLines
                     p_ = plot(self.xData(:,ii), self.yData(:,ii) + self.yShift * ii, self.LineSpec, ...
-                        'Color', self.color(ii,:), ...
+                        'Color', self.color(ii,:), 'marker', self.Marker, ...
                         'LineWidth', self.LineWidth);
                     
                     [p_.Color] = deal([self.color(ii, :), self.Transparency]);

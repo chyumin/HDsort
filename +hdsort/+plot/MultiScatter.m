@@ -1,4 +1,4 @@
-classdef MultiScatter < myplot.PlotInterface
+classdef MultiScatter < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         subplots
         labels
@@ -21,7 +21,7 @@ classdef MultiScatter < myplot.PlotInterface
             
             P.dims = [];
             P.dimLabel = '';
-            self = self@myplot.PlotInterface(P, varargin{:})
+            self = self@hdsort.plot.PlotInterface(P, varargin{:})
             self.data = data;
             self.labels = labels;
             

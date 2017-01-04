@@ -1,4 +1,4 @@
-classdef Gscatter < myplot.PlotInterface
+classdef Gscatter < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         labels
         xData
@@ -9,7 +9,6 @@ classdef Gscatter < myplot.PlotInterface
         plotGroupsTogether
         defaultLegend
         markerArea
-        markerType
     end
     
     methods
@@ -20,10 +19,10 @@ classdef Gscatter < myplot.PlotInterface
             P.markerArea = [];
             P.plotGroupsTogether = false;
             P.defaultLegend = false;
-            P.markerType = '';
+            P.Marker = '';
             P.color = '';
             
-            self = self@myplot.PlotInterface(P, varargin{:})
+            self = self@hdsort.plot.PlotInterface(P, varargin{:})
             
             self.plotName = 'Gscatter';
             
@@ -45,27 +44,27 @@ classdef Gscatter < myplot.PlotInterface
             nGroups = numel(uLabels);
             
             
-            if isempty(self.color) && isempty(self.markerType)
-                [colorVec markerType] = self.vectorColor(1:nGroups);
+            if isempty(self.color) && isempty(self.Marker)
+                [colorVec Marker] = self.vectorColor(1:nGroups);
                 self.color = colorVec;
-                self.markerType = markerType;
+                self.Marker = Marker;
                 
-            elseif ~isempty(self.color) && isempty(self.markerType)
-                [~, markerType] = self.vectorColor(1:nGroups);
+            elseif ~isempty(self.color) && isempty(self.Marker)
+                [~, Marker] = self.vectorColor(1:nGroups);
                 self.color = repmat(self.color, nGroups, 1);
-                self.markerType = markerType;
-            elseif isempty(self.color) && ~isempty(self.markerType)
+                self.Marker = Marker;
+            elseif isempty(self.color) && ~isempty(self.Marker)
                 self.color = self.vectorColor(1:nGroups);
-                self.markerType = repmat({self.markerType}, 1, nGroups);
-            elseif numel(self.markerType) == 1
-                self.markerType = repmat({self.markerType}, 1, nGroups);
+                self.Marker = repmat({self.Marker}, 1, nGroups);
+            elseif numel(self.Marker) == 1
+                self.Marker = repmat({self.Marker}, 1, nGroups);
             end
             
             if self.plotGroupsTogether
                 %for g = 1:nGroups
                 %idx = self.labels == uLabels(g);
                 axes(self.ah)
-                p_ = gscatter(self.xData, self.yData, self.labels, self.color, self.markerType{1}, self.markerArea, self.defaultLegend);
+                p_ = gscatter(self.xData, self.yData, self.labels, self.color, self.Marker{1}, self.markerArea, self.defaultLegend);
                 
                 for ii = 1:numel(p_)
                     [p_(ii).Color] = deal([self.color(ii, :), self.Transparency]);
@@ -76,7 +75,7 @@ classdef Gscatter < myplot.PlotInterface
             else
                 for g = 1:nGroups
                     idx = self.labels == uLabels(g);
-                    p_ = scatter(self.ah, self.xData(idx), self.yData(idx), self.markerArea, self.color(g,:), self.markerType{g});
+                    p_ = scatter(self.ah, self.xData(idx), self.yData(idx), self.markerArea, self.color(g,:), self.Marker{g});
                     self.plotObj = [self.plotObj; p_];
                 end
             end

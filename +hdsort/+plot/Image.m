@@ -1,4 +1,4 @@
-classdef Image < myplot.PlotInterface
+classdef Image < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         xData
         yData
@@ -59,7 +59,7 @@ classdef Image < myplot.PlotInterface
             %P.meanColor = [0,0,0];
             P.colormap = gray; 
             P.normalize = true;
-            self = self@myplot.PlotInterface(P, varargin{:});
+            self = self@hdsort.plot.PlotInterface(P, varargin{:});
             
             self.plotName = 'Image';
             

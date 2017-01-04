@@ -1,4 +1,4 @@
-classdef Boxplot < myplot.PlotInterface
+classdef Boxplot < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         boxplot
         
@@ -40,7 +40,7 @@ classdef Boxplot < myplot.PlotInterface
             P.displayN = true;
             P.subgroupnames = {};
             P.groupnames = {};
-            self = self@myplot.PlotInterface(P, varargin{:})
+            self = self@hdsort.plot.PlotInterface(P, varargin{:})
             
             self.plotName = 'Boxplot';
             

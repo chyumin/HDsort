@@ -1,4 +1,4 @@
-classdef Generic < myplot.PlotInterface
+classdef Generic < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         %xData
         %yData
@@ -48,7 +48,7 @@ classdef Generic < myplot.PlotInterface
             %P.plotStd = false;
             %P.meanColor = [0,0,0];
             
-            self = self@myplot.PlotInterface(P, varargin{:});
+            self = self@hdsort.plot.PlotInterface(P, varargin{:});
             
             self.plotName = 'Generic';
             

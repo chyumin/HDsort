@@ -1,4 +1,4 @@
-classdef Rasterplot < myplot.PlotInterface
+classdef Rasterplot < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         gdf
         nUnits
@@ -20,7 +20,7 @@ classdef Rasterplot < myplot.PlotInterface
             P.timeToZero = false;
             P.xlabel = 'time [s]';
             P.interval = [];
-            self = self@myplot.PlotInterface(P, varargin{:})
+            self = self@hdsort.plot.PlotInterface(P, varargin{:})
             
             self.plotName = 'Rasterplot';
             

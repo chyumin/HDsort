@@ -1,4 +1,4 @@
-classdef Subplots < myplot.PlotInterface
+classdef Subplots < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         nSubplots
         nRows
@@ -40,7 +40,7 @@ classdef Subplots < myplot.PlotInterface
             P.matrix = 0;
             P.holdOn = 1;
             P.upperTriangle = false;
-            self = self@myplot.PlotInterface(P, varargin{:});
+            self = self@hdsort.plot.PlotInterface(P, varargin{:});
             
             self.plotName = 'Subplots';
             

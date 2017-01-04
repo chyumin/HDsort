@@ -1,4 +1,4 @@
-classdef ISIH < myplot.PlotInterface
+classdef ISIH < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         spiketrains
         isih
@@ -37,7 +37,7 @@ classdef ISIH < myplot.PlotInterface
             P.maxlag_ms = 20.0;
             P.xlabel = 'ISI [ms]';
             %P.title = 'ISI refractory period violations';
-            self = self@myplot.PlotInterface(P, varargin{:});
+            self = self@hdsort.plot.PlotInterface(P, varargin{:});
             
             if nUnits > 1
                 self.subplots = myplot.Subplots([nX nY], 'showOnStartup', false);

@@ -1,4 +1,4 @@
-classdef Polar < myplot.PlotInterface
+classdef Polar < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         compass
         polar
@@ -72,7 +72,7 @@ classdef Polar < myplot.PlotInterface
             P.vectors = VECTORS;
             P.normalize = true;
             P.closeCurve = true;
-            self = self@myplot.PlotInterface(P, varargin{:});
+            self = self@hdsort.plot.PlotInterface(P, varargin{:});
             
             self.plotName = 'Polar';
             

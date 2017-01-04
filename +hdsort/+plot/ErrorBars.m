@@ -1,4 +1,4 @@
-classdef ErrorBars < myplot.PlotInterface
+classdef ErrorBars < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         data
         xVals
@@ -36,7 +36,7 @@ classdef ErrorBars < myplot.PlotInterface
             P.highlightBars = [];
             P.highlightColor = [1.0, 0.0, 0.0];
             P.errorbarscolor = [0.0, 0.0, 0.0];
-            self = self@myplot.PlotInterface(P, varargin{:});
+            self = self@hdsort.plot.PlotInterface(P, varargin{:});
             
             self.plotName = 'Bar';
             self.data = data;

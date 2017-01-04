@@ -1,4 +1,4 @@
-classdef Waveforms2D < myplot.PlotInterface
+classdef Waveforms2D < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         wfs
         med
@@ -57,7 +57,7 @@ classdef Waveforms2D < myplot.PlotInterface
             
             P.flipud = false;
             
-            self = self@myplot.PlotInterface(P, varargin{:});
+            self = self@hdsort.plot.PlotInterface(P, varargin{:});
             
             self.plotName = 'Waveforms2D';
             self.wfs = wfs;

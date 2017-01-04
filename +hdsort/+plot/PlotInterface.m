@@ -39,6 +39,7 @@ classdef PlotInterface < handle
         color
         nColors
         
+        Marker
         Transparency
         MarkerFaceAlpha
         MarkerEdgeAlpha
@@ -51,7 +52,6 @@ classdef PlotInterface < handle
         LineSpec
         
         showAh
-        %doNotSetAh
         showOnStartup
         
         width
@@ -67,13 +67,11 @@ classdef PlotInterface < handle
             
             % Treate various combinations of input arguments:
             P_in = struct();
-            %parseargs = false;
             if nargin == 1
                 assert(isstruct(varargin{1}), 'If there is only one input, it must be a struct!')
                 P_in = varargin{1};
                 varargin = {};
             elseif nargin > 1
-                %   parseargs = true;
                 if isstruct(varargin{1})
                     assert(mod(nargin, 2) == 1, 'Input arguments must come as pairs!')
                     P_in = varargin{1};
@@ -113,6 +111,7 @@ classdef PlotInterface < handle
             P.color = [];
             P.nColors = [];
    
+            P.Marker = 'none';
             P.Transparency = 1.0;
             P.MarkerFaceAlpha = 1.0;
             P.MarkerEdgeAlpha = 1.0;
@@ -169,7 +168,7 @@ classdef PlotInterface < handle
             
             %% Copy Properties of other PlotInterface:
             if ~isempty(P.addTo)
-                for f_ = properties(myplot.PlotInterface)'
+                for f_ = properties(hdsort.plot.PlotInterface)'
                     f = f_{1};
                     self.(f) = P.addTo.(f);
                 end

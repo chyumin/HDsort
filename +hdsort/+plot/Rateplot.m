@@ -1,4 +1,4 @@
-classdef Rateplot < myplot.PlotInterface
+classdef Rateplot < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         rate
         nUnits
@@ -19,7 +19,7 @@ classdef Rateplot < myplot.PlotInterface
             P.xlabel = 'time [s]';
             P.time = [];
             
-            self = self@myplot.PlotInterface(P, varargin{:})
+            self = self@hdsort.plot.PlotInterface(P, varargin{:})
             
             self.plotName = 'Rateplot';
             

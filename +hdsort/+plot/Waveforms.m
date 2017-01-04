@@ -1,4 +1,4 @@
-classdef Waveforms < myplot.PlotInterface
+classdef Waveforms < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         waveforms
         wfLength
@@ -44,7 +44,7 @@ classdef Waveforms < myplot.PlotInterface
             P.restrict2Class = [];
             
             P.plotMaxNWaveformsPerClass = 1000;
-            self = self@myplot.PlotInterface(P, varargin{:})
+            self = self@hdsort.plot.PlotInterface(P, varargin{:})
             
             assert(~isempty(wavs), 'Input must not be empty!')
             

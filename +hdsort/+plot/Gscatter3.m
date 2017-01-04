@@ -1,4 +1,4 @@
-classdef Gscatter3 < myplot.PlotInterface
+classdef Gscatter3 < hdsort.plot.PlotInterface
     properties (SetAccess=protected)
         labels
         xData
@@ -22,7 +22,7 @@ classdef Gscatter3 < myplot.PlotInterface
             P.color = '';
             P.zlabel = '';
             
-            self = self@myplot.PlotInterface(P, varargin{:})
+            self = self@hdsort.plot.PlotInterface(P, varargin{:})
             
             self.plotName = 'Gscatter3';
             
