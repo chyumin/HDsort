@@ -1,3 +1,3 @@
 
-addpath('.');
+addpath(pwd);
 addpath('External');
