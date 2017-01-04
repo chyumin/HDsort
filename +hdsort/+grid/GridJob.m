@@ -704,7 +704,10 @@ classdef GridJob < handle
         end
         
         
-        function submit_daemon()
+        function submit_daemon(gridType)
+            if nargin < 1
+                gridType = 'QSUB';
+            end
             
             gridConfig = hdsort.grid.config();
             
@@ -724,9 +727,9 @@ classdef GridJob < handle
                         
                         disp(['Sorting shFile: ' t.shFile])
                         
-                        if strcmp(self.gridType, 'BSUB')
+                        if strcmp(gridType, 'BSUB')
                             submit_str = sprintf('bsub < %s', t.shFile);
-                        elseif strcmp(self.gridType, 'QSUB')
+                        elseif strcmp(gridType, 'QSUB')
                             submit_str = sprintf('qsub %s', t.shFile);
                         end
                         move_str   = sprintf('mv %s %s', token_file, submit_token_file);
