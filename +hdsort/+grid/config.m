@@ -7,6 +7,8 @@ function c = config()
 % will then create the path names in the correct linux syntax independent 
 % form the computer on which the sorting was started.
 
+user_name = getenv('USER');
+
 if ~isempty(strfind(computer, 'WIN')) 
     %% Windows
     error('Not specified yet!')
