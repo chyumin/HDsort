@@ -706,18 +706,20 @@ classdef GridJob < handle
         
         function submit_daemon()
             
+            gridConfig = hdsort.grid.config();
+            
             cd('~/trunk/matlab')
             log_file = '~/submit_demon.log';
-            cd(self.gridConfig.tokenFilesFolder)
+            cd(gridConfig.tokenFilesFolder)
             
             while 1
-                fnames = dir(fullfile(self.gridConfig.tokenFilesFolder, 'start_*.mat'));
+                fnames = dir(fullfile(gridConfig.tokenFilesFolder, 'start_*.mat'));
                 if ~isempty(fnames)
                     disp('Found token, processing...')
                     for i=1:length(fnames)
-                        token_file = fullfile(self.gridConfig.tokenFilesFolder, fnames(i).name);
+                        token_file = fullfile(gridConfig.tokenFilesFolder, fnames(i).name);
                         t = load(token_file);
-                        submit_token_file = fullfile(self.gridConfig.tokenFilesFolder, 'submitted', fnames(i).name);
+                        submit_token_file = fullfile(gridConfig.tokenFilesFolder, 'submitted', fnames(i).name);
                         disp(token_file)
                         
                         disp(['Sorting shFile: ' t.shFile])
@@ -733,7 +735,7 @@ classdef GridJob < handle
                         hdsort.util.logToFile(log_file, submit_str)
                         [status, result] = system(submit_str);
                         hdsort.util.logToFile(log_file, result)
-                        cd(self.gridConfig.tokenFilesFolder)
+                        cd(gridConfig.tokenFilesFolder)
                         
                         if status == 0
                             disp('Submit successful')
