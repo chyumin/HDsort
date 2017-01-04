@@ -16,8 +16,9 @@
 classdef GridJob < handle
     properties (SetAccess=private)
     end
+    
     properties
-        gc
+        gridConfig
         jobName
         allTaskParameters
         
@@ -50,7 +51,7 @@ classdef GridJob < handle
             % calls on a series of config files. Each individual matlab task
             % will load a config file which is unique for this task and run
             % the same script as all other tasks as well.
-            self.gc = hdsort.grid.config();
+            self.gridConfig = hdsort.grid.config();
             
             is_letter = isstrprop(job_name, 'alpha');
             assert(is_letter(1), 'Job name must begin with a letter!')
@@ -61,13 +62,13 @@ classdef GridJob < handle
             p.runtime_hours = 0;
             p.runtime_minutes = 10;
             p.memoryusage = [];
-            p.gridType = 'BSSE';
+            p.gridType = 'QSUB';
             
             [p p2] = hdsort.util.parseInputs(p, varargin, 'split');
             self.P_untreated = p2; self.P = p;
             
             % For debugging on a local machine:
-            if ~isempty(self.P.runLocallyOn) self.gc.home = self.P.runLocallyOn; end
+            if ~isempty(self.P.runLocallyOn) self.gridConfig.home = self.P.runLocallyOn; end
             
             self.jobName = job_name;
             self.folders.root = rootFolder;
@@ -135,13 +136,13 @@ classdef GridJob < handle
             assert( self.nTasks == length(self.allTaskParameters), 'Error: number of tasks does not correspond to size of allTaskParameters!');
             for ii = 1:self.nTasks
                 taskParameters = self.allTaskParameters{ii};
-                taskParameters.reportFile = self.files.report{ii};
-                taskParameters.reportFolder = self.folders.report;
+                %taskParameters.reportFile = self.files.report{ii};
+                %taskParameters.reportFolder = self.folders.report;
                 
-                if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
+                %if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
                     taskParameters.reportFile = hdsort.grid.GridJob.convertToLinux(taskParameters.reportFile);
                     taskParameters.reportFolder = hdsort.grid.GridJob.convertToLinux(taskParameters.reportFolder);
-                end
+                %end
                 
                 taskType = self.taskType;
                 save( [self.files.tasks num2str(taskParameters.taskID)], 'taskParameters', 'taskType');
@@ -382,19 +383,19 @@ classdef GridJob < handle
             
             str = '#!/bin/bash\n';
             
-            if strcmp(self.gridType, 'BSSE')
+            if strcmp(self.gridType, 'QSUB')
                 str = [str '#$ -V\n'];
                 str = [str '#$ -cwd\n'];
                 
-                if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
-                    warning('Sorting not started from a linux machine might cause problems!')
+                %if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
+                    %warning('Sorting not started from a linux machine might cause problems!')
                     logFolder = hdsort.grid.GridJob.convertToLinux(self.folders.log);
                     str = [str '#$ -o ' logFolder '\n'];
                     str = [str '#$ -e ' logFolder '\n'];
-                else
-                    str = [str '#$ -o ' self.folders.log '\n'];
-                    str = [str '#$ -e ' self.folders.log '\n'];
-                end
+                %else
+                %    str = [str '#$ -o ' self.folders.log '\n'];
+                %    str = [str '#$ -e ' self.folders.log '\n'];
+                %end
                 
                 str = [str '#$ -q ' self.P.queue '.q\n'];
                 if strcmp(self.P.queue, 'regular')
@@ -407,14 +408,14 @@ classdef GridJob < handle
                     error('Unknown Queue!');
                 end
                 str = [str sprintf('#$ -t %d-%d\n', self.startIndex, self.endIndex)];
-                if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
+                %if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
                     taskFile = hdsort.grid.GridJob.convertToLinux(self.files.tasks)
                     str = [str sprintf('matlab -nodisplay -r "hdsort.grid.GridJob.runQSubTask(''%s\''); exit();"', taskFile)];
-                else
-                    str = [str sprintf('matlab -nodisplay -r "hdsort.grid.GridJob.runQSubTask(''%s\''); exit();"', self.files.tasks)];
-                end
+                %else
+                %    str = [str sprintf('matlab -nodisplay -r "hdsort.grid.GridJob.runQSubTask(''%s\''); exit();"', self.files.tasks)];
+                %end
                 
-            elseif strcmp(self.gridType, 'euler')
+            elseif strcmp(self.gridType, 'BSUB')
                 str = [str sprintf('#BSUB -W %d:%d\n', self.runtime.hours, self.runtime.minutes)]; %# wall-clock time (hrs:mins)
                 str = [str '#BSUB -n ' num2str(self.nWorkersPerNode) '\n']; % # number of tasks in job
                 str = [str '#BSUB -J ' self.jobName sprintf('[%d-%d]', self.startIndex, self.endIndex) '\n' ]; % # name and task id range in brackets
@@ -538,13 +539,13 @@ classdef GridJob < handle
         function prepareTest(self)
             self.startIndex = 3;
             self.endIndex = 12;
-            self.files.tasks = fullfile( self.gc.home, self.jobName, '/taskFile');
+            self.files.tasks = fullfile( self.gridConfig.home, self.jobName, '/taskFile');
             
             var1 = 'var1';
             var2 = 'var2';
             num1 = 12345;
             nTasks = self.numTasks();
-            outputPath = fullfile( self.gc.home, self.jobName, 'results');
+            outputPath = fullfile( self.gridConfig.home, self.jobName, 'results');
             
             for task_id = self.startIndex:self.endIndex
                 save( [self.files.tasks num2str(task_id)], 'outputPath', 'var1', 'var2', 'num1', 'task_id', 'nTasks');
@@ -556,21 +557,12 @@ classdef GridJob < handle
         
         % -----------------------------------------------------------------
         function createAutoSubmitToken(self)
-            pd = hdsort.pathDefinitions();
-            
-            if strcmp(self.gridType, 'euler')
-                tokenFolder = fullfile( pd.eulerRoot, 'tokens');
-            elseif strcmp(self.gridType, 'BSSE')
-                tokenFolder = fullfile( pd.tokenFiles );
-            else
-                error(['GridType ' self.gridType ' unknown!'])
-            end
-            token_file = fullfile(tokenFolder, ['start_' self.jobName '.mat']);
+            token_file = fullfile(self.gridConfig.tokenFilesFolder, ['start_' self.jobName '.mat']);
             
             shFile = fullfile(self.folders.main, [self.jobName '_job.sh']);
-            if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
+            %if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
                 shFile = hdsort.grid.GridJob.convertToLinux(shFile);
-            end
+            %end
             
             save(token_file, 'shFile');
             disp('Token file created.')
@@ -601,17 +593,20 @@ classdef GridJob < handle
                 return
             end
             
-            pd = hdsort.pathDefinitions();
-            p = regexp(path, filesep, 'split');
-            while ~strcmp(p{2}, 'Mea1k')
-                p = {p{2:end}};
-            end
-            %p = {p{2:end}};
+            linuxPath = path;
             
-            linuxPath = pd.linuxSortingPath;
-            while ~isempty(p)
-                linuxPath =  [linuxPath '/' p{1}];
-                p = {p{2:end}};
+            if ~isempty(strfind(computer, 'WIN')) || ~isempty(strfind(computer, 'MACI64'))
+                
+                p = regexp(path, filesep, 'split');
+                while ~strcmp(p{2}, self.gridConfig.commonFolderName) %'Mea1k')
+                    p = {p{2:end}};
+                end
+                
+                linuxPath = self.gridConfig.linuxSortingPath;
+                while ~isempty(p)
+                    linuxPath =  [linuxPath '/' p{1}];
+                    p = {p{2:end}};
+                end
             end
         end
         
@@ -625,14 +620,12 @@ classdef GridJob < handle
                 return
             end
             
-            pd = hdsort.pathDefinitions();
             p = regexp(path, filesep, 'split');
             while ~strcmp(p{2}, 'Mea1k')
                 p = {p{2:end}};
             end
-            %p = {p{2:end}};
             
-            localPath = pd.hima02;
+            localPath = self.gridConfig.localSortingPath;
             while ~isempty(p)
                 localPath =  [localPath '/' p{1}];
                 p = {p{2:end}};
@@ -711,36 +704,27 @@ classdef GridJob < handle
         end
         
         
-        function submit_daemon(gridType)
-            if nargin < 1
-                gridType = false;
-            end
+        function submit_daemon()
             
             cd('~/trunk/matlab')
-            pd = hdsort.pathDefinitions();
-            if strcmp(self.gridType, 'euler')
-                tokenFolder = fullfile( pd.eulerRoot, 'tokens');
-            elseif strcmp(self.gridType, 'BSSE')
-                tokenFolder = fullfile( pd.tokenFiles );
-            end
             log_file = '~/submit_demon.log';
-            cd(tokenFolder)
+            cd(self.gridConfig.tokenFilesFolder)
             
             while 1
-                fnames = dir(fullfile(tokenFolder, 'start_*.mat'));
+                fnames = dir(fullfile(self.gridConfig.tokenFilesFolder, 'start_*.mat'));
                 if ~isempty(fnames)
                     disp('Found token, processing...')
                     for i=1:length(fnames)
-                        token_file = fullfile(tokenFolder, fnames(i).name);
+                        token_file = fullfile(self.gridConfig.tokenFilesFolder, fnames(i).name);
                         t = load(token_file);
-                        submit_token_file = fullfile(tokenFolder, 'submitted', fnames(i).name);
+                        submit_token_file = fullfile(self.gridConfig.tokenFilesFolder, 'submitted', fnames(i).name);
                         disp(token_file)
                         
                         disp(['Sorting shFile: ' t.shFile])
                         
-                        if strcmp(self.gridType, 'euler')
+                        if strcmp(self.gridType, 'BSUB')
                             submit_str = sprintf('bsub < %s', t.shFile);
-                        elseif strcmp(self.gridType, 'BSSE')
+                        elseif strcmp(self.gridType, 'QSUB')
                             submit_str = sprintf('qsub %s', t.shFile);
                         end
                         move_str   = sprintf('mv %s %s', token_file, submit_token_file);
@@ -749,7 +733,7 @@ classdef GridJob < handle
                         hdsort.util.logToFile(log_file, submit_str)
                         [status, result] = system(submit_str);
                         hdsort.util.logToFile(log_file, result)
-                        cd(tokenFolder)
+                        cd(self.gridConfig.tokenFilesFolder)
                         
                         if status == 0
                             disp('Submit successful')
@@ -769,25 +753,5 @@ classdef GridJob < handle
             end
             disp('Done.')
         end
-        
-        
     end
-    
 end
-
-
-%%
-% % Initialize Console:
-% module load repo/grid
-% module load grid/grid
-% module load matlab/R2014a
-
-% % .sh script to actually run all the jobs
-% #!/bin/bash
-% #$ -cwd
-% #$ -t 1-50
-% time echo "scale=5000; 4*a(1)" | bc -l
-
-% % console command to trigger the job. "regular.q" is defining the queue
-% % in which to run the job
-% qsub -q regular.q job.sh
