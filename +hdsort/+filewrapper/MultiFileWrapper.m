@@ -23,7 +23,6 @@ classdef MultiFileWrapper < hdsort.filewrapper.FileWrapperInterface
             self.fileNames = fileNames;
             self.nFiles = numel(self.fileNames);
             
-            %self.fileWrapperList = func2str(fileWrapperClassHandle).empty();
             self.fileWrapperList = fileWrapperClassHandle(fileNames{1}, self, 1)
             self.MultiElectrode = self.fileWrapperList.MultiElectrode;
             
@@ -76,26 +75,19 @@ classdef MultiFileWrapper < hdsort.filewrapper.FileWrapperInterface
         
         %------------------------------------------------------------------
         function X = getData_(self, timeIndex, channelIndex) 
-            
             if nargin < 3 || strcmp(channelIndex, ':')
                 channelIndex = 1:self.size(2);
             end
-            
             
             if strcmp(timeIndex, ':')
                 SL = self.getAllFileLength();
                 timeIndex = 1:sum(SL);
             end
             
-            %fileOffsets = cumsum([0 SL]);
             X = zeros(length(timeIndex), length(channelIndex));
             
             totalLength = 0;
             for ii = 1:self.nFiles
-            %for i=1:length(fileOffsets)-1
-                %sessionFirstIndex = fileOffsets(i)+1;
-                %sessionLastIndex  = fileOffsets(i+1);
-                
                 [fileFirstIndex, fileLastIndex] = self.getFileIndices(ii);
                 
                 timeIndexInThisSession = timeIndex(timeIndex >= fileFirstIndex & timeIndex <= fileLastIndex) - fileFirstIndex +1;
@@ -120,10 +112,6 @@ classdef MultiFileWrapper < hdsort.filewrapper.FileWrapperInterface
             wfs = zeros(length(t), cutLength*length(channelIndex));
 
             for ii = 1:self.nFiles
-            %for i=1:length(fileOffsets)-1
-            %    sessionFirstIndex = fileOffsets(i)+1;
-            %    sessionLastIndex  = fileOffsets(i+1);
-                
                 [fileFirstIndex, fileLastIndex] = self.getFileIndices(ii);
                 
                 inThisSessionIdx = t>=fileFirstIndex & t <= fileLastIndex;

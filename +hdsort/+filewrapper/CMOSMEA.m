@@ -1,33 +1,20 @@
-classdef CMOSMEAnew < hdsort.filewrapper.MultiFileWrapper
-    properties
-    end
+classdef CMOSMEA < hdsort.filewrapper.MultiFileWrapper
+    % This object is intended to open files that are preprocessed such that
+    % the data can be used directly by the spike-sorter.
+    % It takes as input a list of preprocessed recordings that were
+    % recorded with the same chip-configuration (MultiElectrode) and
+    % treates them as one concatenated recording.
     
     methods
-        %% CONSTRUCTOR
+        
         %------------------------------------------------------------------
-        function self = CMOSMEAnew(fileNames, varargin)
-            
-            
-            %P.name = 'CMOSMEA';
-            %P.useFilter = 0;
-            %P.hpf = 500;
-            %P.lpf = 3000;
-            %P.filterOrder = 2;
-            %P.filterType = 'butter';
-            %P.filterName = '';
-            %P = hdsort.util.parseInputs(P, varargin, 'error');
-            
-            %if ~iscell(fileNames)
-            %    fileNames = {fileNames};
-            %end
+        %% CONSTRUCTOR
+        function self = CMOSMEA(fileNames, varargin)
             samplesPerSecond = hdf5read(fileNames{1}, '/Sessions/Session0/sr');  
             assert(length(samplesPerSecond)==1, 'Samples can not be an array!');
             
             self = self@hdsort.filewrapper.MultiFileWrapper('CMOSMEA', samplesPerSecond, [], fileNames, @hdsort.filewrapper.CMOSMEAFile);
-            %self = self@hdsort.filewrapper.FileWrapperInterface(derivedClassName, samplesPerSecond, MultiElectrode)
             
-            %self.h5info = h5info_;
-            %self.P = P;
             self.info = ['This object is for loading many preprocessed CMOSMEA datafiles. ' ...
                          'The files are concatenated!'];
         end

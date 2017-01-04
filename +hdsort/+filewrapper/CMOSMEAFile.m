@@ -1,16 +1,11 @@
 classdef CMOSMEAFile < hdsort.filewrapper.SingleFileWrapper
     
     properties
-        
-        %parent
-        %fileName
         sourceFname
-        %message
         dataSets
         filter_settings
         
         h5matrix_raw
-        %session_idx
         session_str
         size_buffer
         CL
@@ -20,10 +15,12 @@ classdef CMOSMEAFile < hdsort.filewrapper.SingleFileWrapper
     end
     
     methods
+        
         %------------------------------------------------------------------
-        function self = CMOSMEAFile(fileName, varargin) %parent, file_idx)
+        %% CONSTRUCTOR
+        function self = CMOSMEAFile(fileName, varargin)
             if nargin == 1
-                warning('Not recommended to use this object. Better use multi-file supporting hdsort.filewrapper.CMOSMEA!')
+                warning('Not recommended to use this object directly. Better use multi-file supporting hdsort.filewrapper.CMOSMEA!')
             end
             
             session_str_ = '/Sessions/Session0/'; % This wrapper only supports one session per file!
@@ -66,11 +63,7 @@ classdef CMOSMEAFile < hdsort.filewrapper.SingleFileWrapper
             
             self = self@hdsort.filewrapper.SingleFileWrapper('CMOSMEAFile', samplesPerSecond, ME, fileName, varargin{:})
             
-            %self = self@hdsort.filewrapper.FilteredDataSourceInterface(filterFactory_, useFilter, 'CMOSMEASession', samplesPerSecond, ME);
-            %self = self@hdsort.filewrapper.ExtendedDataSourceInterface('CMOSMEASession', samplesPerSecond, ME);
-
             self.fileName = fileName;
-            %self.session_idx = session_idx;
             self.session_str = session_str_;
             self.size_buffer = [];
             
@@ -88,8 +81,8 @@ classdef CMOSMEAFile < hdsort.filewrapper.SingleFileWrapper
                 
                 binDims = h5read(self.fileName, [self.session_str 'bin_dims']);
                 assert( exist(binFile, 'file') == 2, ['Task aborted: binary file ' binFile ' not found!']);
-                % todo: naming not good!
-                self.h5matrix_raw =  hdsort.filewrapper.binaryFileMatrix(binFile, binDims);
+                
+                self.h5matrix_raw =  hdsort.filewrapper.util.binaryFileMatrix(binFile, binDims);
             else
                 self.h5matrix_raw = hdsort.filewrapper.hdf5.matrix(self.fileName, [self.session_str 'sig'], true);
             end
@@ -100,12 +93,8 @@ classdef CMOSMEAFile < hdsort.filewrapper.SingleFileWrapper
                 self.sourceFname = [];
             end
             
-            %self.message = 'unkown';
-            %if hdsort.filewrapper.hdf5.exist(self.fileName, [self.session_str 'message'], h5info_var)
-            %    self.message = get(hdf5read(self.fileName, [self.session_str 'message']), 'data');
-            %end
             self.MultiElectrode.setDataSource(self);
-
+            
             %% Get LSB:
             self.lsb = self.getLSB_();
             self.connected_channels = find(connectedChannels);
@@ -154,7 +143,7 @@ classdef CMOSMEAFile < hdsort.filewrapper.SingleFileWrapper
         
         %------------------------------------------------------------------
         function x = isBinaryFile(self)
-            x = isa( self.h5matrix_raw, 'hdsort.filewrapper.binaryFileMatrix');
+            x = isa( self.h5matrix_raw, 'hdsort.filewrapper.util.binaryFileMatrix');
         end
         
         %------------------------------------------------------------------
@@ -212,8 +201,6 @@ classdef CMOSMEAFile < hdsort.filewrapper.SingleFileWrapper
         
         %------------------------------------------------------------------
         function X = getData_(self, timeIndex, channelIndex, channels)
-            %P.channels = []; %set channels to 'all' to also get unconnected channels
-            %P = hdsort.util.parseInputs(P, '', varargin);
             if nargin < 4
                 channels = [];
             end
@@ -222,6 +209,7 @@ classdef CMOSMEAFile < hdsort.filewrapper.SingleFileWrapper
                 assert(max(channelIndex)<=length(self.connected_channels), 'channel index out of bounds')
                 channelIndex = self.connected_channels(channelIndex);
             end
+            
             % channel idx is first dimension !!!
             X = double( self.h5matrix_raw(timeIndex, channelIndex) ) * self.lsb;
         end
@@ -230,6 +218,6 @@ classdef CMOSMEAFile < hdsort.filewrapper.SingleFileWrapper
         function L = getNSamples_(self)
             L = size(self.h5matrix_raw,1);
         end
-                
+        
     end
 end
