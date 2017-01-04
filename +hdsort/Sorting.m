@@ -10,7 +10,6 @@ classdef Sorting < handle
         groupFolder
         groupFilesList
         
-        %gridType
         sortjob
         postprocessjob
     end
@@ -18,10 +17,8 @@ classdef Sorting < handle
     methods
         % -----------------------------------------------------------------
         function self = Sorting(DS, dPath, name, varargin)
-            
             P.maxElPerGroup = 9;
             P = hdsort.util.parseInputs(P, varargin, 'error');
-            %self.gridType = P.gridType;
             
             self.DS = DS;
             self.dPath = dPath;
@@ -88,8 +85,14 @@ classdef Sorting < handle
         
         % -----------------------------------------------------------------
         function createLocalElectrodeGroups(self, maxElPerGroup)
-            MES = self.DS.MultiElectrode.toStruct();
+            if nargin < 2
+                assert(~isempty(self.maxElPerGroup), 'You must specify a maximal number of electrodes per local group!')
+                maxElPerGroup = self.maxElPerGroup;
+            else
+                self.maxElPerGroup = maxElPerGroup;
+            end
             
+            MES = self.DS.MultiElectrode.toStruct();
             try
                 load(self.files.groupFile)
                 disp('Groups already exist')
@@ -110,12 +113,8 @@ classdef Sorting < handle
         
         %% ----------------------------------------------------------------
         function [R, P] = startSorting(self, varargin)
-            % No sorting loadable, start sorting
-            %P.runMode = 'grid';
-            P.sortingMode = 'BSSE'; % Alternatives are: euler, grid_parfor, grid_for, localHDSorting
-            
+            P.sortingMode = 'QSUB'; % Alternatives are: euler, grid_parfor, grid_for, localHDSorting
             P.forceExecution = false;
-            %P.parfor = true;
             P.dataPath = self.dPath;
             P.queue = 'regular';
             P.maxElPerGroup = 9;
@@ -136,7 +135,7 @@ classdef Sorting < handle
                 self.createLocalElectrodeGroups(P.maxElPerGroup);
                 
                 if ~strcmp(P.sortingMode, 'localHDSorting')
-                    %P.sortingMode = 'BSSE';
+                    %P.sortingMode = 'QSUB';
                     %if strcmp(P.runMode, 'grid') || strcmp(P.runMode, 'grid_locally')
                     [R, P] = self.sortOnGrid(P);
                     
@@ -223,46 +222,27 @@ classdef Sorting < handle
             
             assert(isa(self.DS, 'hdsort.filewrapper.CMOSMEA'), 'At the moment, the grid framework can only be run with CMOSMEA objects! If you want to test the sorter with something else, use the flag ''sortingMode'', ''localHDSorting''');
             
-            if ~strcmp(P.sortingMode, 'BSSE') && ~strcmp(P.sortingMode, 'euler') 
-                        gridType = 'BSSE';
-                    else
-                        gridType = P.sortingMode;
-                    end
+            if ~strcmp(P.sortingMode, 'QSUB') && ~strcmp(P.sortingMode, 'euler')
+                gridType = 'QSUB';
+            else
+                gridType = P.sortingMode;
+            end
             
             sourceFiles = self.DS.getSourceFileNames();
             self.sortjob = hdsort.grid.SortJob(self.name, self.dPath, sourceFiles, ...
                 'groupFile', self.files.groupFile, ...
                 'gridType', gridType, 'queue', P.queue)
             
-            %self.sortjob.createBOTMGroups();
             self.sortjob.setTaskParameters();
-            %self.sortjob.prepareTasks();
-            %self.sortjob.summarizeReports();
         end
         
         % -----------------------------------------------------------------
         function [R, P] = sortOnGrid(self, varargin)
             P = hdsort.util.parseInputs(struct(), varargin, 'merge');
-            
             P = self.prepareSortJob(P);
-            %if strcmp(P.runMode, 'grid') || strcmp(P.runMode, 'grid_locally')
             
-            
-            %if strcmp(P.runMode, 'grid') || strcmp(P.runMode, 'grid_locally')
-            %assert(isa(self.DS, 'mysort.mea.CMOSMEA'), 'At the moment, the grid framework can only be run with CMOSMEA objects! If you want to test the sorter with something else, use the flag ''runMode'', ''localHDSorting''');
-            %sourceFiles = self.DS.getSourceFileNames();
-            
-            %self.sortjob = grid.SortJob(self.name, P.dataPath, sourceFiles, ...
-            %    'queue', P.queue, 'onEuler', self.onEuler, 'runtime_hours', 5);
-            
-            %self.sortjob.createBOTMGroups();
-            %self.sortjob.copyDataFiles();
-            %self.sortjob.setTaskParameters();
-            %self.sortjob.prepareTasks();
-            
-            if strcmp(P.sortingMode, 'BSSE') || strcmp(P.sortingMode, 'euler')
+            if strcmp(P.sortingMode, 'QSUB') || strcmp(P.sortingMode, 'euler')
                 assert(~strcmp(P.sortingMode, 'euler'), 'Not implemented yet!')
-                %self.createAutoSubmitToken();%self.sortjob.scratchlocation.folders.main);
                 
                 [nCompleted, tasksNotCompleted, nErrors, tasksWithErrors] = self.sortjob.summarySnapshot(true);
                 if self.sortjob.nTasks > nCompleted
@@ -274,61 +254,37 @@ classdef Sorting < handle
                 all_tasks_completed = self.sortjob.waitForTasksToFinish(60);
                 
             elseif strcmp(P.sortingMode, 'grid_parfor')
-                %if P.parfor
                 parfor t = 1:self.sortjob.nTasks()
                     self.sortjob.runTaskLocally(t);
                 end
                 all_tasks_completed = true;
-                
-                %end
             elseif strcmp(P.sortingMode, 'grid_for')
                 for t = 1:self.sortjob.nTasks()
                     self.sortjob.runTaskLocally(t);
                 end
                 all_tasks_completed = true;
-                
-                
             else
                 error('Unknown sortingMode!')
             end
-            self.sortjob.summarizeReports();
             
+            self.sortjob.summarizeReports();
         end
-        
         
         % -----------------------------------------------------------------
         function [R, P] = postprocessGridSorting(self, varargin)
-            % newPostProcFunc is a string that specifies which
-            % prostprocessing function should be used (merging of
-            % templates).
-            % Default is '', i.e. no string is passed on.
-            %P0.newPostProcFunc = '';
-            %P.newComputed = true;
             P.forceNewPostprocessing = false;
-            %P.postProcessOnGrid = true;
-            P.postProcessMode = 'BSSE';
-            
+            P.postProcessMode = 'QSUB';
             P = hdsort.util.parseInputs(P, varargin, 'error');
             
             try
                 R = self.loadSortingResult();
-                %P.newComputed = false;
                 assert(~P.forceNewPostprocessing, 'Force new postprocessing')
             catch
                 assert( ~isempty(self.sortjob), 'Make sure that a SortJob object is created before starting the postprocessing.')
-                
                 disp('Start postprocessGridSorting...')
-                %try
-                %load(self.files.sortingResult);
-                %assert(~P.forceNewPostprocessing, 'Force new postprocessing')
-                %disp('Postprocessing already finished.')
-                %catch
-                
                 if ~strcmp(P.postProcessMode, 'localPostProcessing')
-%                if P.postProcessOnGrid
-                    
-                    if ~strcmp(P.postProcessMode, 'BSSE') && ~strcmp(P.postProcessMode, 'euler') 
-                        gridType = 'BSSE';
+                    if ~strcmp(P.postProcessMode, 'QSUB') && ~strcmp(P.postProcessMode, 'euler')
+                        gridType = 'QSUB';
                     else
                         gridType = P.postProcessMode;
                     end
@@ -339,11 +295,9 @@ classdef Sorting < handle
                         'gridType', gridType, 'runtime_hours', 1)
                     
                     self.postprocessjob.setTaskParameters();
-                    %self.postprocessjob.prepareTasks();
                     self.postprocessjob.createAutoSubmitToken();
                     all_tasks_completed = self.postprocessjob.waitForTasksToFinish(10);
                     R = load(self.files.sortingResult);
-                    
                 else
                     disp('Load group information...');
                     GF = load(self.files.groupFile, 'groups', 'electrodeNumbers', 'electrodePositions', 'nGroupsPerElectrode', 'groupsidx');
@@ -365,14 +319,12 @@ classdef Sorting < handle
                     save(self.files.sortingResult, '-struct', 'R', '-v7.3');
                 end
                 
-                %end
             end
         end
         
         % -----------------------------------------------------------------
         function [R, P] = reuptakeSorting(self, varargin)
             P.dataPath = self.dPath;
-            %P.postProcFunc = '';
             P = hdsort.util.parseInputs(P, varargin, 'error');
             
             try
@@ -380,34 +332,21 @@ classdef Sorting < handle
             catch
                 try
                     assert( ~isempty(self.sortjob), 'Create new SortJob object...')
-                    %all_tasks_completed = self.sortjob.waitForTasksToFinish(60);
                 catch
                     P = self.prepareSortJob(P);
-                    
-                    %sourceFiles = self.DS.getSourceFileNames();
-                    
-                    %self.sortjob = grid.SortJob(self.name, P.dataPath, sourceFiles, ...
-                    %    'gridType', self.gridType, 'runtime_hours', 5);
-                    %self.sortjob.createBOTMGroups();
-                    %self.sortjob.copyDataFiles();
-                    %self.sortjob.setTaskParameters();
-                    %self.sortjob.prepareTasks();
                 end
                 all_tasks_completed = self.sortjob.waitForTasksToFinish(60);
-                %end
                 
                 self.sortjob.summarizeReports();
-                %self.sortjob.copyBackResults();
             end
         end
         
-        
-        
-        %% GROUP ORGA -----------------------------------------------------
+        % -----------------------------------------------------------------
+        %% GROUP ORGANISATION
         function f = getGroupFolder(self, groupNr)
-            %f = fullfile(self.dPath, ['sort_' self.name], 'groups', sprintf('group%04d', groupNr));
             f = fullfile(self.groupFolder, sprintf('group%04d', groupNr));
         end
+        
         function keys = listFilesInGroup(self)
             keys = self.groupFilesList.keys;
             disp(keys)
@@ -441,6 +380,8 @@ classdef Sorting < handle
                 end
             end
         end
+        
+        % -----------------------------------------------------------------
         function out = deleteResultsFile(self)
             out = true;
             try
@@ -451,7 +392,8 @@ classdef Sorting < handle
             
         end
         
-        % LOADING GROUP FILES --------ALL GROUPS---------------------------
+        % -----------------------------------------------------------------
+        %% LOADING GROUP FILES
         function G = loadGroupFile(self)
             if isempty(self.filesLoaded.groupFile)
                 self.filesLoaded.groupFile = load(self.files.groupFile);
@@ -466,13 +408,15 @@ classdef Sorting < handle
             end
             G = self.filesLoaded.GroupStruct;
         end
+        
         % -----------------------------------------------------------------
         function gdfs = loadGroupGDFs(self)
             G = self.loadGroupStruct();
             gdfs = {G.G.gdf};
         end
         
-        % LOADING GROUP FILES --------INDIVIDUAL GROUPS--------------------
+        % -----------------------------------------------------------------
+        %% LOADING GROUP FILES (INDIVIDUAL GROUPS)
         function S = loadDetectedSpikes4Group(self, groupNr)
             groupFolder = self.getGroupFolder(groupNr);
             S = load(fullfile(groupFolder, [self.name '.020spikes_det.mat']));
@@ -511,35 +455,30 @@ classdef Sorting < handle
             G = self.loadGroupFile();
             electrodePositions = G.electrodePositions(G.groupsidx{groupNumber},:);
             channelNumbers = G_struct.G(groupNumber).sortedElectrodes;
-            
         end
         
-        
-        %% PLOT FUNCTIONS #################################################
+        % -----------------------------------------------------------------
+        %% PLOT FUNCTIONS
         function P = plotElectrodeGroups(self, varargin)
             P.fh = [];
             P.ah = [];
             P = hdsort.util.parseInputs(P, varargin, 'error');
             
             S = self.loadGroupFile();
-            if isempty(P.ah)
-                if isempty(P.fh)
-                    P.fh = mysort.plot.figure;
-                end
-                P.ah = axes;
-            end
-            set(P.ah, 'nextplot', 'add');
+
             N = self.getNElGroups();
-            for i=1:N
-                c = hdsort.plot.PlotInterface.vectorColor(i);
-                m = mysort.plot.markerTypes(i);
-                ep = S.electrodePositions(S.groupsidx{i},:);
-                plot(P.ah, ep(:,1), ep(:,2), '.', 'marker', m, 'color', c, 'linewidth', 2, 'markersize', 16);
+            [col, markerSet] = hdsort.plot.PlotInterface.vectorColor(1:N);
+               
+            for ii = 1:N
+                ep = S.electrodePositions(S.groupsidx{ii},:);
+                P = hdsort.plot.Gscatter(ep(:,1), ep(:,2), [], 'ah', P.ah, 'fh', P.fh, 'color', col(ii,:), 'Marker', markerSet{ii});%, 'MarkerSize', 16);
             end
+            
         end
         
         
-        %% DEBUGGING FUNCTIONS ############################################
+        % -----------------------------------------------------------------
+        %% DEBUGGING FUNCTIONS
         function runPostProcessing(self)
             %% Process all local sortings into a final sorting
             G = self.loadGroupFile();
@@ -592,65 +531,4 @@ classdef Sorting < handle
             end
         end
     end
-    
-    %     %% STATIC FUNCTIONS ###################################################
-    %     methods(Static)
-    %
-    %         function submit_daemon()
-    %             error('function deprecated!')
-    %             cd('~/trunk/matlab')
-    %             pd = hdsort.pathDefinitions();
-    %             tokenFolder = fullfile( pd.tokenFiles );
-    %             log_file = '~/submit_demon.log';
-    %             cd(tokenFolder)
-    %
-    %             while 1
-    %                 fnames = dir(fullfile(tokenFolder, 'start_*.mat'));
-    %                 if ~isempty(fnames)
-    %                     disp('Found token, processing...')
-    %                     for i=1:length(fnames)
-    %                         token_file = fullfile(tokenFolder, fnames(i).name);
-    %                         t = load(token_file);
-    %                         submit_token_file = fullfile(tokenFolder, 'submitted', fnames(i).name);
-    %
-    %                         disp(token_file)
-    %
-    %                         p = regexp(t.sortingFolder, filesep, 'split')
-    %                         while ~strcmp(p{1}, 'Mea1k')
-    %                             p = {p{2:end}};
-    %                         end
-    %                         fullSortingFolder = fullfile(pd.mea1kIntermediate, p{2:end});
-    %
-    %                         disp(['Sorting Location: ' fullSortingFolder])
-    %                         disp(['Sorting Name: ' t.sortingName])
-    %
-    %                         submit_str = sprintf('qsub %s/%s_job.sh', fullSortingFolder, t.sortingName);
-    %                         move_str   = sprintf('mv %s %s', token_file, submit_token_file);
-    %
-    %                         cd('~')
-    %                         mysort.hdsort.util.logToFile(log_file, submit_str)
-    %                         [status, result] = system(submit_str);
-    %                         mysort.hdsort.util.logToFile(log_file, result)
-    %                         cd(tokenFolder)
-    %
-    %                         if status == 0
-    %                             disp('Submit successful')
-    %                             disp(result)
-    %                         else
-    %                             disp('Submit failed')
-    %                         end
-    %
-    %                         mysort.hdsort.util.logToFile(log_file, move_str)
-    %                         [status, result] = system(move_str);
-    %                         mysort.hdsort.util.logToFile(log_file, result)
-    %                         pause(2.5)
-    %                         disp('Done processing. Waiting...')
-    %                     end
-    %                 end
-    %                 pause(10)
-    %             end
-    %             disp('Done.')
-    %         end
-    %     end
-    
 end
