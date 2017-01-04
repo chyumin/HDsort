@@ -39,7 +39,7 @@ end
 DS = hdsort.filewrapper.CMOSMEA(preprocessedFiles);
 sorting = hdsort.Sorting(DS, preprocessedFolder, sortingName)
 %%
-sorting.startSorting('sortingMode', 'BSSE')
+sorting.startSorting('sortingMode', 'QSUB')
 %%
 sorting.startSorting('sortingMode', 'grid_for')
 %%
@@ -54,26 +54,34 @@ sorting.postprocessGridSorting()
 %% Test hdsort.filewrapper.CMOSMEA
 folder = '/Volumes/hierlemann/intermediate_data/Mea1k/rolandd/160513/preprocessed';
 fileList = {[folder '/Trace_20160513_11_32_04.h5'], [folder '/Trace_20160513_11_34_21.h5']}
+preprocessedFolder = folder;
 
 %%
-DS = hdsort.filewrapper.CMOSMEA(fileList{1});
-covest_old = DS.getCovest();
+%DS = hdsort.filewrapper.CMOSMEA(fileList{1});
+%covest_old = DS.getCovest();
 
 %%
-DSList = hdsort.filewrapper.CMOSMEA(fileList);
-covest_listold = DSList.getCovest();
+%DSList = hdsort.filewrapper.CMOSMEA(fileList);
+%covest_listold = DSList.getCovest();
 
 %% Test single file hdsort.filewrapper.CMOSMEAFile
-cmosmeafile = hdsort.filewrapper.CMOSMEAFile(fileList{1});
-clist = cmosmeafile.getChannelList();
-covest = cmosmeafile.getCovest();
+%cmosmeafile = hdsort.filewrapper.CMOSMEAFile(fileList{1});
+%clist = cmosmeafile.getChannelList();
+%covest = cmosmeafile.getCovest();
 
-%% Test multifile hdsort.filewrapper.CMOSMEAnew
-cmoslist = hdsort.filewrapper.CMOSMEAnew(fileList);
+%% Test multifile hdsort.filewrapper.CMOSMEA
+cmoslist = hdsort.filewrapper.CMOSMEA(fileList);
 %covest_list = cmoslist.getCovest();
 
 %%
-sorting = hdsort.Sorting(cmoslist, preprocessedFolder, sortingName)
+sortingName = 'asdf0123'
+sortingPath = '/Volumes/hierlemann/intermediate_data/Mea1k/rolandd/170104'
+sorting = hdsort.Sorting(cmoslist, sortingPath, sortingName)
+
+%%
+
+sorting.startSorting('sortingMode', 'QSUB')
+
 
 %%
 dc = diag(covest.CCol);

@@ -136,13 +136,9 @@ classdef GridJob < handle
             assert( self.nTasks == length(self.allTaskParameters), 'Error: number of tasks does not correspond to size of allTaskParameters!');
             for ii = 1:self.nTasks
                 taskParameters = self.allTaskParameters{ii};
-                %taskParameters.reportFile = self.files.report{ii};
-                %taskParameters.reportFolder = self.folders.report;
                 
-                %if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
-                    taskParameters.reportFile = hdsort.grid.GridJob.convertToLinux(taskParameters.reportFile);
-                    taskParameters.reportFolder = hdsort.grid.GridJob.convertToLinux(taskParameters.reportFolder);
-                %end
+                taskParameters.reportFile = hdsort.grid.GridJob.convertToLinux(self.files.report{ii});
+                taskParameters.reportFolder = hdsort.grid.GridJob.convertToLinux(self.folders.report);
                 
                 taskType = self.taskType;
                 save( [self.files.tasks num2str(taskParameters.taskID)], 'taskParameters', 'taskType');
@@ -156,7 +152,7 @@ classdef GridJob < handle
                 
                 % Only create new report files when it doesn't exist yet:
                 if exist(self.files.report{ii}, 'file') ~= 2
-                    rep = hdsort.filewrapper.binaryFileMatrix(self.files.report{ii}, [1 2], 'writable', true);
+                    rep = hdsort.filewrapper.util.binaryFileMatrix(self.files.report{ii}, [1 2], 'writable', true);
                     rep(:,:) = [0 0];
                 end
             end
@@ -230,7 +226,7 @@ classdef GridJob < handle
             end
             for ii = 1:self.nTasks
                 try
-                    rep = hdsort.filewrapper.binaryFileMatrix(self.files.report{ii}, [1 2], 'writable', false);
+                    rep = hdsort.filewrapper.util.binaryFileMatrix(self.files.report{ii}, [1 2], 'writable', false);
                 catch
                     myDisp([self.jobName ': Binary file for task ' num2str( self.taskIDs(ii) ) ' threw exception!']);
                     rep = [0 1];
@@ -309,7 +305,7 @@ classdef GridJob < handle
             summary.completedTasks = zeros(1, self.nTasks);
             summary.times = {};
             for ii = 1:self.nTasks
-                rep = hdsort.filewrapper.binaryFileMatrix(self.files.report{ii}, [1 2], 'writable', false);
+                rep = hdsort.filewrapper.util.binaryFileMatrix(self.files.report{ii}, [1 2], 'writable', false);
                 if rep(1,2) > 0
                     summary.tasksError = [summary.tasksError self.taskIDs(ii)];
                 end
@@ -593,16 +589,17 @@ classdef GridJob < handle
                 return
             end
             
+            gridConfig = hdsort.grid.config();
             linuxPath = path;
             
             if ~isempty(strfind(computer, 'WIN')) || ~isempty(strfind(computer, 'MACI64'))
                 
                 p = regexp(path, filesep, 'split');
-                while ~strcmp(p{2}, self.gridConfig.commonFolderName) %'Mea1k')
+                while ~strcmp(p{2}, gridConfig.commonFolderName) %'Mea1k')
                     p = {p{2:end}};
                 end
                 
-                linuxPath = self.gridConfig.linuxSortingPath;
+                linuxPath = gridConfig.linuxSortingPath;
                 while ~isempty(p)
                     linuxPath =  [linuxPath '/' p{1}];
                     p = {p{2:end}};
@@ -620,12 +617,14 @@ classdef GridJob < handle
                 return
             end
             
+            gridConfig = hdsort.grid.config();
+            
             p = regexp(path, filesep, 'split');
             while ~strcmp(p{2}, 'Mea1k')
                 p = {p{2:end}};
             end
             
-            localPath = self.gridConfig.localSortingPath;
+            localPath = gridConfig.localSortingPath;
             while ~isempty(p)
                 localPath =  [localPath '/' p{1}];
                 p = {p{2:end}};
@@ -711,8 +710,8 @@ classdef GridJob < handle
             
             gridConfig = hdsort.grid.config();
             
-            cd('~/trunk/matlab')
-            log_file = '~/submit_demon.log';
+            %cd('~/trunk/matlab')
+            %log_file = '~/submit_demon.log';
             cd(gridConfig.tokenFilesFolder)
             
             while 1
@@ -735,9 +734,9 @@ classdef GridJob < handle
                         move_str   = sprintf('mv %s %s', token_file, submit_token_file);
                         
                         cd('~')
-                        hdsort.util.logToFile(log_file, submit_str)
+                        hdsort.util.logToFile(gridConfig.log_file, submit_str)
                         [status, result] = system(submit_str);
-                        hdsort.util.logToFile(log_file, result)
+                        hdsort.util.logToFile(gridConfig.log_file, result)
                         cd(gridConfig.tokenFilesFolder)
                         
                         if status == 0
@@ -747,9 +746,9 @@ classdef GridJob < handle
                             disp('Submit failed')
                         end
                         
-                        hdsort.util.logToFile(log_file, move_str)
+                        hdsort.util.logToFile(gridConfig.log_file, move_str)
                         [status, result] = system(move_str);
-                        hdsort.util.logToFile(log_file, result)
+                        hdsort.util.logToFile(gridConfig.log_file, result)
                         pause(2.5)
                         disp('Done processing. Waiting...')
                     end

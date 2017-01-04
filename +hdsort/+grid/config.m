@@ -31,8 +31,10 @@ else
 end
 
 c.linuxSortingPath = '/net/bs-filesvr02/export/group/hierlemann';
-c.commonFolderName = 'Mea1k';  
+c.commonFolderName = 'Mea1k';
 
+
+c.log_file = '~/submit_demon.log';
 %c.submit_host = 'bs-submit01';
 
 end

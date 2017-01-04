@@ -9,6 +9,7 @@ classdef Sorting < handle
         
         groupFolder
         groupFilesList
+        maxElPerGroup
         
         sortjob
         postprocessjob
@@ -20,8 +21,10 @@ classdef Sorting < handle
             P.maxElPerGroup = 9;
             P = hdsort.util.parseInputs(P, varargin, 'error');
             
+            
             self.DS = DS;
             self.dPath = dPath;
+            self.maxElPerGroup = P.maxElPerGroup;
             self.name = name;
             self.init();
         end
