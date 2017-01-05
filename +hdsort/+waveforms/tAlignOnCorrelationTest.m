@@ -15,7 +15,3 @@ subplot(2,1,1)
 plot(squeeze(T));
 subplot(2,1,2)
 plot(squeeze(ali));
-
-
-mysortx.plot.XIvsF(T, T)
-mysortx.plot.XIvsF(ali, ali)
