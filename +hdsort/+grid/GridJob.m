@@ -273,9 +273,9 @@ classdef GridJob < handle
                 cmdLineOutput = false;
             end
             
-            if  ~cmdLineOutput
-                return
-            end
+            %if  ~cmdLineOutput
+            %    return
+            %end
             
             %% Check for most recent job id:
             try
@@ -710,10 +710,7 @@ classdef GridJob < handle
             
             gridConfig = hdsort.grid.config();
             
-            %cd('~/trunk/matlab')
-            %log_file = '~/submit_demon.log';
             cd(gridConfig.tokenFilesFolder)
-            
             while 1
                 fnames = dir(fullfile(gridConfig.tokenFilesFolder, 'start_*.mat'));
                 if ~isempty(fnames)
