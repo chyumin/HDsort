@@ -1,4 +1,4 @@
-% This file is part of the package mysortx.that provides a spike sorting
+% This file is part of the package hdsort that provides a spike sorting
 % algorithms. 
 %
 % Author: Felix Franke
@@ -12,7 +12,7 @@
 %   Tel: +49-30-314 26756
 %
 % Date: 8/24/2010
-% Copyright © Felix Franke & Technische Universität Berlin 2010
+% Copyright ? Felix Franke & Technische Universit?t Berlin 2010
 % Acknowledgement: This work was supported by grant DFG GRK 1589/1.
 %__________________________________________________________________________
 % This verion is for Robin Ince, University of Manchester, please treat
@@ -29,9 +29,9 @@ epochs = [ 1 10
           201 220
           300 401];
       
-mysortx.epoch.removeShort(epochs, 20)
+hdsort.epoch.removeShort(epochs, 20)
 
 
-mysortx.epoch.removeShort(epochs, 99)
+hdsort.epoch.removeShort(epochs, 99)
 
-mysortx.epoch.removeShort(epochs, 101)
+hdsort.epoch.removeShort(epochs, 101)
