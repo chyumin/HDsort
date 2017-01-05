@@ -5,23 +5,16 @@ P = hdsort.util.parseInputs(P, varargin, 'error');
 
 %% Load GDFs
 nGroups = length(elGroupNumbers);
-for i=1:nGroups
-    oldVersion_subdpath = fullfile(dpath, sprintf('group%03d', i));
-    direct_subdpath     = fullfile(dpath, sprintf('group%04d', i));
-    full_subdpath       = fullfile(dpath, runName, sprintf('group%04d', i));
+for ii=1:nGroups
+    group_paths       = fullfile(dpath, 'groups', sprintf('group%04d', ii));
+    
     if iscell(P.groupPaths)
         assert(length(P.groupPaths) == nGroups, 'Something awefully horrible has happended!');
-        subdpath{i} = fullfile(dpath, P.groupPaths{i});
-    elseif exist(direct_subdpath, 'file')
-        subdpath{i} = direct_subdpath;
+        subdpath{ii} = fullfile(dpath, P.groupPaths{ii});
     else
-        if ~exist(full_subdpath, 'file') && exist(oldVersion_subdpath, 'file')
-            % This is important for backward compatibility
-            subdpath{i} = oldVersion_subdpath;
-        else
-            subdpath{i} = full_subdpath;
-        end
-    end
+        assert(exist(group_paths, 'dir')==7, 'Something awefully horrible has happended!');
+        subdpath{ii} = group_paths;
+    end 
 end
 
 G = struct('sortedElectrodes', {}, 'gdf', {}, 'units', {});
@@ -58,31 +51,31 @@ fprintf('Found Units in local sortings: %d\n', sum(nUnitsPerLocalSorting));
 
 %% Load Templates
 nT = 0;
-for i=1:nGroups
-    fnames = dir(fullfile(subdpath{i}, [runName '_templates.mat']));
-    G(i).templates = load(fullfile(subdpath{i}, fnames.name));
-    nT = nT + size(G(i).templates.wfs,3);
+for ii=1:nGroups
+    fnames = dir(fullfile(subdpath{ii}, [runName '_templates.mat']));
+    G(ii).templates = load(fullfile(subdpath{ii}, fnames.name));
+    nT = nT + size(G(ii).templates.wfs,3);
 end
 fprintf('Found Templates local sortings: %d\n', nT);
 
 %% Load Noise
 Ns = cell(nGroups,1);
-for i=1:nGroups
-    S = load(fullfile(subdpath{i}, [runName '.060cov.mat']));
-    Ns{i} = S.noise.CestS.CCol;
+for ii=1:nGroups
+    S = load(fullfile(subdpath{ii}, [runName '.060cov.mat']));
+    Ns{ii} = S.noise.CestS.CCol;
 end
 meanNoiseStd = mean(sqrt(diag(Ns{1})));
 
 %% Merge double Templates
-for i=1:length(G)
-    nUnitsInGDF      = length(unique(G(i).gdf(:,1)));
+for ii=1:length(G)
+    nUnitsInGDF      = length(unique(G(ii).gdf(:,1)));
     
-    if ~isempty(G(i).templates.wfs)
-        nUnitsInTempates = size(G(i).templates.wfs,3);
+    if ~isempty(G(ii).templates.wfs)
+        nUnitsInTempates = size(G(ii).templates.wfs,3);
     else
         nUnitsInTempates = 0;
     end
-    str_ = sprintf('i: %d, nGdf: %d, nWfs: %d, dpath: %s, rn: %s', i, nUnitsInGDF, nUnitsInTempates, dpath, runName);
+    str_ = sprintf('ii: %d, nGdf: %d, nWfs: %d, dpath: %s, rn: %s', ii, nUnitsInGDF, nUnitsInTempates, dpath, runName);
     assert(nUnitsInGDF == nUnitsInTempates, ['must be identical - ' str_])
 end
 
@@ -96,18 +89,25 @@ else
 end
 
 %     G = hdsort.leg.combineLocalSortings(G, meanNoiseStd);
-for i=1:length(G)
-    assert(length(unique(G(i).gdf(:,1))) == size(G(i).templates.wfs,3), ['must be identical - ' str_])
+for ii=1:length(G)
+    if ~isempty(G(ii).gdf(:,1))
+        assert(length(unique(G(ii).gdf(:,1))) == size(G(ii).templates.wfs,3), ['must be identical - ' str_])
+    else
+        assert(isempty(G(ii).templates.wfs), ['must be identical - ' str_])
+    end
 end
 g_file = fullfile(dpath, 'G_struct.mat');
 save(g_file, 'G', 'meanNoiseStd', '-v7.3');
 
 %% Extract final gdf and templates
 disp('Extracting final gdf and templates...');
-[R, P_] = mysort.HDSorting.computeFinalGDFFromMergedLocalSortings(G);
+[R, P_] = hdsort.leg.computeFinalGDFFromMergedLocalSortings(G);
 
 fprintf('Templates after merging: %d\n', size(R.T_merged,3) );
 R.gdf_merged = sortrows(R.gdf_merged,2);
-R.gdf_discarded = sortrows(R.gdf_discarded, 2);
+
+if ~isempty(R.gdf_discarded)
+    R.gdf_discarded = sortrows(R.gdf_discarded, 2);
+end
 R.G = G;
 

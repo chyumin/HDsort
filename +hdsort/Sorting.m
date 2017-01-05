@@ -21,7 +21,6 @@ classdef Sorting < handle
             P.maxElPerGroup = 9;
             P = hdsort.util.parseInputs(P, varargin, 'error');
             
-            
             self.DS = DS;
             self.dPath = dPath;
             self.maxElPerGroup = P.maxElPerGroup;
@@ -138,60 +137,13 @@ classdef Sorting < handle
                 self.createLocalElectrodeGroups(P.maxElPerGroup);
                 
                 if ~strcmp(P.sortingMode, 'localHDSorting')
-                    %P.sortingMode = 'QSUB';
-                    %if strcmp(P.runMode, 'grid') || strcmp(P.runMode, 'grid_locally')
-                    [R, P] = self.sortOnGrid(P);
+                    success = self.sortOnGrid(P);
+                    [R, P] = postprocessGridSorting(self, varargin);
                     
-                    %                     assert(isa(self.DS, 'mysort.mea.CMOSMEA'), 'At the moment, the grid framework can only be run with CMOSMEA objects! If you want to test the sorter with something else, use the flag ''runMode'', ''localHDSorting''');
-                    %                     sourceFiles = self.DS.getSourceFileNames();
-                    %
-                    %                     self.sortjob = grid.SortJob(self.name, P.dataPath, sourceFiles, ...
-                    %                         'queue', P.queue, 'onEuler', self.onEuler, 'runtime_hours', 5);
-                    %
-                    %                     self.sortjob.createBOTMGroups();
-                    %                     %self.sortjob.copyDataFiles();
-                    %                     self.sortjob.setTaskParameters();
-                    %                     self.sortjob.prepareTasks();
-                    %
-                    %                     if strcmp(P.runMode, 'grid')
-                    %                         %self.createAutoSubmitToken();%self.sortjob.scratchlocation.folders.main);
-                    %                         [nCompleted, tasksNotCompleted, nErrors, tasksWithErrors] = self.sortjob.summarySnapshot(true);
-                    %                         if self.sortjob.nTasks > nCompleted
-                    %                             self.sortjob.createAutoSubmitToken();
-                    %                         else
-                    %                             disp('All tasks seem to be completed...')
-                    %                         end
-                    %
-                    %                         all_tasks_completed = self.sortjob.waitForTasksToFinish(60);
-                    %
-                    %                     elseif strcmp(P.runMode, 'grid_locally')
-                    %
-                    %                         if P.parfor
-                    %                             parfor t = 1:self.sortjob.nTasks()
-                    %                                 self.sortjob.runTaskLocally(t);
-                    %                             end
-                    %                         else
-                    %                             for t = 1:self.sortjob.nTasks()
-                    %                                 self.sortjob.runTaskLocally(t);
-                    %                             end
-                    %                         end
-                    %                         all_tasks_completed = true;
-                    %
-                    %                     else
-                    %                         error('Something went wrong here!')
-                    %                     end
-                    %                     self.sortjob.summarizeReports();
-                    %                    % self.sortjob.copyBackResults();
-                    %
                 elseif strcmp(P.sortingMode, 'localHDSorting')
                     % This function includes the postprocessing step and
                     % saves the results directluy to a file:
-                    [gdf_merged, T_merged, localSorting, localSortingID] = ...
-                        hdsort.startHDSorting(self.DS, self.dPath, self.name);
-                    R.gdf_merged = gdf_merged;
-                    R.T_merged = T_merged;
-                    R.localSorting = localSorting;
-                    R.localSortingID = localSortingID;
+                    [R, P, P2] = hdsort.startHDSorting(self.DS, self.dPath, ['sort_' self.name]);
                 end
             end
             
@@ -213,17 +165,11 @@ classdef Sorting < handle
         % -----------------------------------------------------------------
         % Functions for using the computer grid:
         % -----------------------------------------------------------------
-        
         function P = prepareSortJob(self, varargin)
-            %P.runMode = 'grid';
-            %P.forceExecution = false;
-            %P.postProcFunc = '';
-            %P.parfor = true;
-            %P.dataPath = self.dPath;
-            
             P = hdsort.util.parseInputs(struct(), varargin, 'merge');
             
-            assert(isa(self.DS, 'hdsort.filewrapper.CMOSMEA'), 'At the moment, the grid framework can only be run with CMOSMEA objects! If you want to test the sorter with something else, use the flag ''sortingMode'', ''localHDSorting''');
+            %assert(isa(self.DS, 'hdsort.filewrapper.CMOSMEA'), 'At the moment, the grid framework can only be run with CMOSMEA objects! If you want to test the sorter with something else, use the flag ''sortingMode'', ''localHDSorting''');
+            assert(isa(self.DS, 'hdsort.filewrapper.FileWrapperInterface'), 'The spike-sorter needs an object derived from a FileWrapperInterface as input!');
             
             if ~strcmp(P.sortingMode, 'QSUB') && ~strcmp(P.sortingMode, 'euler')
                 gridType = 'QSUB';
@@ -240,7 +186,7 @@ classdef Sorting < handle
         end
         
         % -----------------------------------------------------------------
-        function [R, P] = sortOnGrid(self, varargin)
+        function success = sortOnGrid(self, varargin)
             P = hdsort.util.parseInputs(struct(), varargin, 'merge');
             P = self.prepareSortJob(P);
             
@@ -261,6 +207,7 @@ classdef Sorting < handle
                     self.sortjob.runTaskLocally(t);
                 end
                 all_tasks_completed = true;
+                
             elseif strcmp(P.sortingMode, 'grid_for')
                 for t = 1:self.sortjob.nTasks()
                     self.sortjob.runTaskLocally(t);
@@ -271,6 +218,8 @@ classdef Sorting < handle
             end
             
             self.sortjob.summarizeReports();
+            
+            success = all_tasks_completed;
         end
         
         % -----------------------------------------------------------------
@@ -285,6 +234,7 @@ classdef Sorting < handle
             catch
                 assert( ~isempty(self.sortjob), 'Make sure that a SortJob object is created before starting the postprocessing.')
                 disp('Start postprocessGridSorting...')
+                
                 if ~strcmp(P.postProcessMode, 'localPostProcessing')
                     if ~strcmp(P.postProcessMode, 'QSUB') && ~strcmp(P.postProcessMode, 'euler')
                         gridType = 'QSUB';
@@ -292,7 +242,7 @@ classdef Sorting < handle
                         gridType = P.postProcessMode;
                     end
                     
-                    self.postprocessjob = grid.PostprocessJob(self.name, ...
+                    self.postprocessjob = hdsort.grid.PostprocessJob(self.name, ...
                         self.sortjob.folders.root, self.files.groupFile, ...
                         self.sortjob.folders.groups, self.files.sortingResult, ...
                         'gridType', gridType, 'runtime_hours', 1)
@@ -321,7 +271,6 @@ classdef Sorting < handle
                     disp('Saving postprocessing results...')
                     save(self.files.sortingResult, '-struct', 'R', '-v7.3');
                 end
-                
             end
         end
         
@@ -435,8 +384,8 @@ classdef Sorting < handle
             
             %% Get the units in each group:
             G_struct = self.loadGroupStruct();
-            gdf_in_group = G_struct.G(groupNumber).gdf;
-            units_in_group = G_struct.G(groupNumber).units;
+            %gdf_in_group = G_struct.G(groupNumber).gdf;
+            %units_in_group = G_struct.G(groupNumber).units;
             
             units_idx_in_group = find(G_struct.G(groupNumber).units == number_within_group);
             unit_id_in_group = G_struct.G(groupNumber).units(units_idx_in_group);
@@ -458,6 +407,8 @@ classdef Sorting < handle
             G = self.loadGroupFile();
             electrodePositions = G.electrodePositions(G.groupsidx{groupNumber},:);
             channelNumbers = G_struct.G(groupNumber).sortedElectrodes;
+            
+            wfs = wfs(:,:,spike_idx);
         end
         
         % -----------------------------------------------------------------
@@ -479,13 +430,11 @@ classdef Sorting < handle
             
         end
         
-        
         % -----------------------------------------------------------------
         %% DEBUGGING FUNCTIONS
         function runPostProcessing(self)
-            %% Process all local sortings into a final sorting
+            % Process all local sortings into a final sorting
             G = self.loadGroupFile();
-            %             load(groupFile, 'groups', 'electrodeNumbers', 'electrodePositions', 'nGroupsPerElectrode', 'groupsidx');
             
             disp('Postprocessing...');
             [gdf_merged, T_merged, localSorting, localSortingID, NeuronCombinations] =...
@@ -494,7 +443,7 @@ classdef Sorting < handle
             units = unique(gdf_merged(:,1));
             nU = length(units);
             
-            mysort.plot.figure([1200 900])
+            mysortx.plot.figure([1200 900])
             ah = axes;
             set(ah, 'nextplot', 'add');
             nG = length(NeuronCombinations);
@@ -527,7 +476,6 @@ classdef Sorting < handle
             assert(length(R.localSorting) == nU, 'must be identical');
             assert(length(R.localSortingID) == nU, 'must be identical');
             assert(size(T_merged,3) == nU, 'must be identical');
-            %             save(fullfile(outPath, [runName '_results.mat']), 'gdf_merged', 'T_merged', 'localSorting', 'localSortingID');
             
             function p = id2pos(g,gu)
                 p = [g gu];

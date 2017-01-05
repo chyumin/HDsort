@@ -982,7 +982,7 @@ function [S P] = sortScript(DS, dpath, name, varargin)
         % overwritten by the slower one.
         if exist(fname, 'file')>0
             warning(sprintf('File: %s does already exist, WILL NOT BE OVERWRITTEN - sorting ended!', fname));
-            S.STOP_ME_BECAUSE_I_AM_SLOW = true;c
+            S.STOP_ME_BECAUSE_I_AM_SLOW = true;
             %S.S.STOP_ME_BECAUSE_I_AM_SLOW = S.STOP_ME_BECAUSE_I_AM_SLOW;
             % Wait a bit because of the file system issue...
             pause(10); 

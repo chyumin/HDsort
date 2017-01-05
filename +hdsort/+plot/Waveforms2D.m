@@ -157,15 +157,15 @@ classdef Waveforms2D < hdsort.plot.PlotInterface
             if self.plotAllTraces
                 if nU > 1
                     if self.plotMedian
-                        self.color = 0.75 + 0.25* hdsort.plot.vectorColor(uIDs);
+                        self.color = 0.75 + 0.25* hdsort.plot.PlotInterface.vectorColor(uIDs);
                     else
-                        self.color = hdsort.plot.vectorColor(uIDs);
+                        self.color = hdsort.plot.PlotInterface.vectorColor(uIDs);
                     end
                 end
                 
                 for u = 1:nU
                     uIdx = self.IDs == uIDs(u);
-                    [m mTf mchan_] =  util.max2D(abs(self.wfs(:,:,uIdx) ), 'each column');
+                    [m mTf mchan_] =  hdsort.util.max2D(abs(self.wfs(:,:,uIdx) ), 'each column');
                     
                     nC = min(self.maxNumberOfChannels, nC);
                     mchan = mchan_(1:nC);

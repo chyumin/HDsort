@@ -1,11 +1,11 @@
 % 
 % preprocessedFiles = {'some_file.h5', 'some_file2.h5'};
-% DS = mysort.mea.CMOSMEA(preprocessedFiles);
+% DS = mysortx.mea.CMOSMEA(preprocessedFiles);
 % sortingPath = 'path-to-some-folder'
 % sortingName = 'sortingNameXYZ';
 % 
 % %% Constructor:
-% sorting = mysort.HDSorting.Sorting(DS, sortingPath, sortingName);
+% sorting = mysortx.HDSorting.Sorting(DS, sortingPath, sortingName);
 % 
 % %% New Sorting:
 % sorting.startSorting('runMode', 'grid', 'parfor',true);
@@ -61,7 +61,7 @@ preprocessedFolder = folder;
 %covest_old = DS.getCovest();
 
 %%
-%DSList = hdsort.filewrapper.CMOSMEA(fileList);
+DSList = mysortx.mea.CMOSMEA(fileList);
 %covest_listold = DSList.getCovest();
 
 %% Test single file hdsort.filewrapper.CMOSMEAFile
@@ -74,18 +74,73 @@ cmoslist = hdsort.filewrapper.CMOSMEA(fileList);
 %covest_list = cmoslist.getCovest();
 
 %%
+cmoslist.restrictToChannels(1:2);
+wfs1 = cmoslist.getWaveform(100, 20, 50);
+
+cmoslist.restrictToChannels();
+cmoslist.restrictToChannels(2:3);
+wfs2 = cmoslist.getWaveform(100, 20, 50);
+
+
+
+%%
+DSList.restrictToChannels();
+cmoslist.restrictToChannels();
+
+DSList.restrictToChannels(1:10);
+cmoslist.restrictToChannels(1:10);
+
+%%
+nstdold = DSList.noiseStd();
+nstdnew = cmoslist.noiseStd();
+
+
+%%
+stold = DSList.detectSpikes('thr', 5);
+stnew = cmoslist.detectSpikes('thr', 5);
+
+%%
+cutLeft = 20; 
+cutLength = 50; 
+channels = 1:10;
+
+wfold = DSList.getWaveform(stold{1}, cutLeft, cutLength, channels);
+wfnew = cmoslist.getWaveform(stold{1}, cutLeft, cutLength, channels);
+
+%%
 sortingName = 'asdf0123'
 sortingPath = '/Volumes/hierlemann/intermediate_data/Mea1k/rolandd/170104'
 sorting = hdsort.Sorting(cmoslist, sortingPath, sortingName)
 
 %%
+sorting.startSorting('sortingMode', 'localHDSorting')
 
+%%
+sorting.startSorting('sortingMode', 'grid_for')
+sorting.postprocessGridSorting()
+%%
 sorting.startSorting('sortingMode', 'QSUB')
-
 
 %%
 dc = diag(covest.CCol);
 dc_old = diag(covest_old.CCol);
 
 figure; plot(dc); hold on; plot(dc_old+1000)
+
+
+%%
+M = randn(10000, 100);
+MM = hdsort.filewrapper.DataMatrix(M);
+
+%%
+MM.restrictToChannels(1:2);
+wfs1 = MM.getWaveform(100, 20, 50);
+st1 = MM.detectSpikes();
+x1 = MM.getData(1:10,:);
+
+MM.restrictToChannels();
+MM.restrictToChannels(2:3);
+wfs2 = MM.getWaveform(100, 20, 50);
+st2 = MM.detectSpikes();
+x2 = MM.getData(1:10,:);
 

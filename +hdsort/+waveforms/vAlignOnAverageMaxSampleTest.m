@@ -12,14 +12,14 @@
 %     Y1 = hdsort.util.shiftMCRows(X,-stau,nC,1);
 %     Y2 = hdsort.util.shiftRowsInterpolated(X, -stau , nC);
     debug = 1;
-%     mysort.plot.spikes(X,'nC',nC);
+%     mysortx.plot.spikes(X,'nC',nC);
 %     title('Not aligned Spikes'); 
-%     mysort.plot.spikes(Y1,'nC',nC); title('Back perf. Aligned Spikes'); 
-%     mysort.plot.spikes(Y2,'nC',nC); title('Back perf. interp Aligned Spikes'); 
+%     mysortx.plot.spikes(Y1,'nC',nC); title('Back perf. Aligned Spikes'); 
+%     mysortx.plot.spikes(Y2,'nC',nC); title('Back perf. interp Aligned Spikes'); 
 %     [tau Y] = hdsort.util.alignWaveformsOnMax(X, 2, 'debug',1);
 % 
 %     fprintf('Shift Error after Iteration %d: %d\n', i, sum(abs(-tau-stau)));
-%     mysort.plot.spikes(Y,'nC',nC);
+%     mysortx.plot.spikes(Y,'nC',nC);
 %     title('Aligned Spikes');
     
     [tau Y] = hdsort.waveforms.vAlignOnAverageMaxSample(X, nC, 'maxIdx', 22, 'nMaxChannelsForWeighting', 5);
@@ -27,10 +27,10 @@
     figure; plot(stau, -tau, '.');
     xlabel('real tau');
     ylabel('estimated tau');
-    mysort.plot.spikes(Y,'nC',nC);
+    mysortx.plot.spikes(Y,'nC',nC);
     title('Aligned Spikes');    
 %     [tau Y] = hdsort.util.alignWaveformsOnMax(X, 2, 'debug',1, 'maxIdx', 30);
 %     fprintf('Shift Error after Iteration %d: %d\n', i, sum(abs(-tau-stau)));
-%     mysort.plot.spikes(Y,'nC',nC);
+%     mysortx.plot.spikes(Y,'nC',nC);
 %     title('Aligned Spikes');        
 

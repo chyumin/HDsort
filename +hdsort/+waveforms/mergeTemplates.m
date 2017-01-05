@@ -139,7 +139,7 @@ end
 %     subplot(2,4,4+4)
 %     imagesc(A); colorbar    
     
-% % %     [xc XD ShiftsXD maxdist maxRelDist] = mysort.wf.tXDiff(resampledTemplates);
+% % %     [xc XD ShiftsXD maxdist maxRelDist] = mysortx.wf.tXDiff(resampledTemplates);
 % % %     relDistCritetion    = 100*maxRelDist < 30;
 % % %     distCriterion = ( maxAbsDistCriterion | relDistCritetion );
 % % %     corrCriterion = XC > .9;
@@ -167,24 +167,24 @@ end
     
 %% Or use Clustering    
 %         nDim = 14;
-%         fetX = mysort.util.dimReductionPCA(M', nDim, [], 3*1000000);
+%         fetX = mysortx.util.dimReductionPCA(M', nDim, [], 3*1000000);
 %         bwidth = sqrt(1.5*nDim);
 %         [clustCent,point2cluster,clustMembsCell] = MeanShiftCluster(fetX', bwidth);
 %         [ids clusterCenter] = MeanShiftClusterBundleResult(fetX, clustMembsCell, 1);
 %         uclasses = unique(ids);
-%         clustering.templates = mysort.util.calculateClassMeans(VT, ids, 'usemedian');
-%         mysort.plot.clustering(fetX, ids);
+%         clustering.templates = mysortx.util.calculateClassMeans(VT, ids, 'usemedian');
+%         mysortx.plot.clustering(fetX, ids);
 %         groupIdx = {};
 %         groups = {};
 %         for i=1:length(uclasses)
 %             groupidx = find(ids==uclasses(i));
 %             groupIdx{i,1} = groupidx;
 %             groups{i,1} = Ugdf(groupidx); 
-%             [m maxT] = max(max(abs(mysort.wf.t2v(T(:,:,groupidx))), [], 2));
+%             [m maxT] = max(max(abs(mysortx.wf.t2v(T(:,:,groupidx))), [], 2));
 %             Tmerged(:,:,i) = median(T(:,:,groupidx(maxT)), 3);
 %         end
         
 
 
 %% More fancy features
-%     [xc XC ShiftsXC] = mysort.wf.tXCorr(T);
+%     [xc XC ShiftsXC] = mysortx.wf.tXCorr(T);

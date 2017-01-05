@@ -70,8 +70,10 @@ function [R P] = computeFinalGDFFromMergedLocalSortings(G)
     assert(size(R.T_merged,3) == nU, 'must be identical');
     assert(nextt-1 == nU, 'must be identical');
     
-    units_dis = unique(R.gdf_discarded(:,1));
-    nU_dis = length(units_dis);
-    assert(size(R.T_discarded,3) == nU_dis, 'must be identical');
-    assert(nextt_dis-1 == nU_dis, 'must be identical');
+    if ~isempty(R.gdf_discarded)
+        units_dis = unique(R.gdf_discarded(:,1));
+        nU_dis = length(units_dis);
+        assert(size(R.T_discarded,3) == nU_dis, 'must be identical');
+        assert(nextt_dis-1 == nU_dis, 'must be identical');
+    end
     

@@ -34,7 +34,7 @@ function [Q, E, thr, P] = qualityOfTemplateSet(T, priors, debug)
     combinations = zeros(2, nD);
     count = 0;
     if debug 
-        fh = mysort.plot.figure([1200 900]);
+        fh = mysortx.plot.figure([1200 900]);
     end
     for i=1:nT
         for j=i+1:nT

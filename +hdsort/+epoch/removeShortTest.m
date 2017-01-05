@@ -1,4 +1,4 @@
-% This file is part of the package mysort that provides a spike sorting
+% This file is part of the package mysortx.that provides a spike sorting
 % algorithms. 
 %
 % Author: Felix Franke
@@ -29,9 +29,9 @@ epochs = [ 1 10
           201 220
           300 401];
       
-mysort.epoch.removeShort(epochs, 20)
+mysortx.epoch.removeShort(epochs, 20)
 
 
-mysort.epoch.removeShort(epochs, 99)
+mysortx.epoch.removeShort(epochs, 99)
 
-mysort.epoch.removeShort(epochs, 101)
+mysortx.epoch.removeShort(epochs, 101)

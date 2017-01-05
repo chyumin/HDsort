@@ -17,5 +17,5 @@ subplot(2,1,2)
 plot(squeeze(ali));
 
 
-mysort.plot.XIvsF(T, T)
-mysort.plot.XIvsF(ali, ali)
+mysortx.plot.XIvsF(T, T)
+mysortx.plot.XIvsF(ali, ali)

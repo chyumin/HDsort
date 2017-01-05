@@ -40,9 +40,9 @@ function [aliV tau mx] = vAlignOnMax(V, nC, varargin)
     aliV = hdsort.waveforms.vShift(V, nC, tau, P.truncate);
     
     if P.debug
-        mysort.plot.spikes(V,'nC',nC);
+        mysortx.plot.spikes(V,'nC',nC);
         title('Raw Spikes');
-        mysort.plot.spikes(MT,'nC',1);
+        mysortx.plot.spikes(MT,'nC',1);
         title('Preprocessed Spikes');            
     end
 end

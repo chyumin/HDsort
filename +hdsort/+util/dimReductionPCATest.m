@@ -36,7 +36,7 @@ for it = 1:length(TT)
     TdownaliIntNoise([1:max(1,ceil(max(taus))) end+min(0,min(floor(taus)))+1:end],:) = [];
 
     %%
-    mysort.hdsort.plot.figure('w', 600, 'h', 800);
+    mysortx.hdsort.plot.figure('w', 600, 'h', 800);
     nR = 5; nCol = 3;
     subplot.nR, nCol,1+nCol*0)
     hdsort.plot.T); axis tight;

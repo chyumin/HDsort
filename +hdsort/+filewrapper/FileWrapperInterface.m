@@ -255,9 +255,6 @@ classdef FileWrapperInterface < handle
                 channelindex = 1:self.size(2);
             end
             if ~isempty(self.activeChannels)
-                if ~islogical(channelindex)
-                channelindex
-                end
                 channelindex = self.activeChannels(channelindex);
             end
             X = self.getData_(timeindex, channelindex);

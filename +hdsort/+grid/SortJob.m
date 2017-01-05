@@ -41,7 +41,6 @@ classdef SortJob < hdsort.grid.GridJob
             %% Set the data files:
             if ~iscell(dataFiles) dataFiles = {dataFiles}; end
             self.files.data = dataFiles;
-            %self.folders.root = rootPath;
             
             try
                 load(self.sortJobP.groupFile)
@@ -260,16 +259,16 @@ classdef SortJob < hdsort.grid.GridJob
             %% ISIH:
             self.destinationlocation.files.isih = fullfile( self.folders.qcplot, 'isih');
             if ~exist(self.destinationlocation.files.isih, 'file')
-                F = mysort.hdsort.plot.isi( res.gdf_merged )
-                mysort.hdsort.plot.savefig(F.figureHandle, self.destinationlocation.files.isih)
+                F = mysortx.hdsort.plot.isi( res.gdf_merged )
+                mysortx.hdsort.plot.savefig(F.figureHandle, self.destinationlocation.files.isih)
             end
             
             %% Footprints whole
             self.destinationlocation.files.footprints = fullfile( self.folders.qcplot, 'footprints_whole');
             if ~exist(self.destinationlocation.files.footprints, 'file')
                 F.figureHandle = figure();
-                mysort.hdsort.plot.hdsort.waveforms.D(res.T_merged, MES.electrodePositions, 'IDs', res.localSortingID);
-                mysort.hdsort.plot.savefig(F.figureHandle, self.destinationlocation.files.footprints)
+                mysortx.hdsort.plot.hdsort.waveforms.D(res.T_merged, MES.electrodePositions, 'IDs', res.localSortingID);
+                mysortx.hdsort.plot.savefig(F.figureHandle, self.destinationlocation.files.footprints)
             end
             
             %% Footprints localized
@@ -279,9 +278,9 @@ classdef SortJob < hdsort.grid.GridJob
                 for i = 1:length(res.localSorting)
                     id = res.localSortingID(i);
                     lu = res.localSorting(i);
-                    P = mysort.hdsort.plot.hdsort.waveforms.D(0.1*res.T_merged(:,:,i), MES.electrodePositions, 'IDs', (1000*id+lu), 'maxNumberOfChannels', 10, 'AxesHandle', P.AxesHandle, 'hdsort.plot.rgs', {'color', hdsort.plot.PlotInterface.vectorColor(i)});
+                    P = mysortx.hdsort.plot.hdsort.waveforms.D(0.1*res.T_merged(:,:,i), MES.electrodePositions, 'IDs', (1000*id+lu), 'maxNumberOfChannels', 10, 'AxesHandle', P.AxesHandle, 'hdsort.plot.rgs', {'color', hdsort.plot.PlotInterface.vectorColor(i)});
                 end
-                mysort.hdsort.plot.savefig(F.figureHandle, self.destinationlocation.files.footprints2)
+                mysortx.hdsort.plot.savefig(F.figureHandle, self.destinationlocation.files.footprints2)
             end
             
         end
@@ -366,7 +365,7 @@ classdef SortJob < hdsort.grid.GridJob
                 fileNameBin = fullfile(pathstr, [name '.dat']);
                 
                 if exist(fileNameBin, 'file') ~= 2
-                    mysort.mea.copyH5toBinary(self.files.data{i}, fileNameH5, fileNameBin);
+                    mysortx.mea.copyH5toBinary(self.files.data{i}, fileNameH5, fileNameBin);
                 end
                 
                 %% Remember the location of the datafiles on the scratch now:
@@ -396,7 +395,7 @@ classdef SortJob < hdsort.grid.GridJob
                     
                     %% Create a binary file on the scratch:
                     if exist(fileNameBin, 'file') ~= 2
-                        mysort.mea.copyH5toBinary(self.files.data{i}, fileNameH5, fileNameBin);
+                        mysortx.mea.copyH5toBinary(self.files.data{i}, fileNameH5, fileNameBin);
                     end
                     newDataFileLocations{i} = fileNameH5;
                 else

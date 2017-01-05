@@ -202,7 +202,7 @@ classdef PlotInterface < handle
                 figure(fh);
             else
                 [P restargs] = hdsort.util.parseInputs(P, varargin, 'split');
-                restargs = util.deflateP(restargs);
+                restargs = hdsort.util.deflateP(restargs);
                 fh = figure(restargs{:});
             end
             if ~isempty(P.h); P.height = P.h; end

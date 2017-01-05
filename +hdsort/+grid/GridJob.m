@@ -7,7 +7,7 @@
 % C) copy the startup.m from the matlab folder to your Grid Home and set
 %    the correct paths
 % D) Test this by logging into the submit system, loading the matlab
-%    module, starting matlab and see if the mysort package is loaded
+%    module, starting matlab and see if the mysortx.package is loaded
 % E) ...
 %
 %
@@ -581,6 +581,12 @@ classdef GridJob < handle
         
         % -----------------------------------------------------------------
         function linuxPath = convertToLinux(path)
+            % This function transforms absolute file names from a Windows
+            % or Mac system to a linux system. The necessary settings are
+            % must be set in +hdsort/+grid/config.m.
+            % The path is reduced to a string called
+            % 'gridConfig.commonFolderName' and then rebuilt based on
+            % 'gridConfig.linuxSortingPath'.
             if iscell(path)
                 linuxPath = {};
                 for ii = 1:numel(path)
@@ -588,14 +594,13 @@ classdef GridJob < handle
                 end
                 return
             end
-            
-            gridConfig = hdsort.grid.config();
             linuxPath = path;
             
             if ~isempty(strfind(computer, 'WIN')) || ~isempty(strfind(computer, 'MACI64'))
+                gridConfig = hdsort.grid.config();
                 
                 p = regexp(path, filesep, 'split');
-                while ~strcmp(p{2}, gridConfig.commonFolderName) %'Mea1k')
+                while ~strcmp(p{2}, gridConfig.commonFolderName)
                     p = {p{2:end}};
                 end
                 

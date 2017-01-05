@@ -55,9 +55,9 @@ function [tau aliX] = vAlignOnAverageMaxSample(X, nC, varargin)
         aliX = hdsort.util.shiftRowsInterpolated(aliX, tau , nC);
     end
     if P.debug
-        mysort.plot.spikes(X,'nC',nC);
+        mysortx.plot.spikes(X,'nC',nC);
         title('Raw Spikes');
-        mysort.plot.spikes(MX,'nC',1);
+        mysortx.plot.spikes(MX,'nC',1);
         title('Preprocessed Spikes');            
     end
 end

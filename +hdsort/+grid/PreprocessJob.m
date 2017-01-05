@@ -161,7 +161,7 @@ classdef PreprocessJob < hdsort.grid.GridJob
             
             function mainBlock()
                 %if isfield(taskP, 'oldMea1kFiles')
-                %    preprocessedFiles = mysort.mea.preprocessAllMea1kH5Files(taskP.rawFile, ...
+                %    preprocessedFiles = mysortx.mea.preprocessAllMea1kH5Files(taskP.rawFile, ...
                 %        taskP.configFile, taskP.destinationFolder)
                 %else
                     fileDS = hdsort.filewrapper.(taskP.fileWrapper)(taskP.rawFile);

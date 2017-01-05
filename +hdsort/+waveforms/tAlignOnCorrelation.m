@@ -41,9 +41,9 @@ function [ali tau xvsf] = tAlignOnCorrelation(T,varargin)
         aliF = hdsort.util.m2t(FM, nC);
         
         disp(I);
-        RES = mysort.plot.XIvsF(T,F,'TvsF',xvsf,'title',0,'axistight',1);        
+        RES = mysortx.plot.XIvsF(T,F,'TvsF',xvsf,'title',0,'axistight',1);        
         hold on
-        RES = mysort.plot.XIvsF(ali,aliF,'title',0,'axistight',1,'figure',0,...
+        RES = mysortx.plot.XIvsF(ali,aliF,'title',0,'axistight',1,'figure',0,...
             'axesHandles',RES.axesHandles,'color','g','holdOn',1);
 
         [M I] = max(RES.XIvsF,[], 1);

@@ -31,7 +31,7 @@ T = wfs;
 X = hdsort.waveforms.v4plot(hdsort.waveforms.t2v(T(:,1:2:end,1:4:end)), size(T,2)/2)';
 Y = hdsort.waveforms.v4plot(hdsort.waveforms.t2v(ali(:,1:2:end,1:4:end)), size(T,2)/2)';
 
-mysort.plot.figure([1400 800]);
+mysortx.plot.figure([1400 800]);
 ah = subplot(2,1,1);
 plot(X, 'color', [.5 .5 .5]);
 hold on
@@ -46,5 +46,5 @@ title('After Alignment');
 linkaxes(ah, 'xy');
 
 % xvsf = hdsort.util.calculateXIvsF(hdsort.waveforms.t2v(T),hdsort.waveforms.t2v(T),1,1);
-% mysort.plot.XIvsF(T, T)
-% mysort.plot.XIvsF(ali, ali)
+% mysortx.plot.XIvsF(T, T)
+% mysortx.plot.XIvsF(ali, ali)

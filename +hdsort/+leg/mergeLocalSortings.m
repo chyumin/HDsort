@@ -181,22 +181,10 @@ function [G] = mergeLocalSortings(G, meanNoiseStd, varargin)
                                 ovp = nO(1)/min([length(st1) length(st2)]);
                                 if ovp > P.minSpikeTrainOvp
                                     % Spike trains are similar enough
-                                    if 0
-                                        hdsort.plot.templates2D(G(g1).templates.wfs(:,:,t1idx(t1)), G(g1).templates.MES.electrodePositions, 100, 5, 'IDs', 1:length(t1idx))
-                                        ah = gca; 
-                                        hold on
-                                        hdsort.plot.templates2D(G(g2).templates.wfs(:,:,t2idx(t2)), G(g2).templates.MES.electrodePositions, 100, 5, 'IDs', length(t1idx)+(1:length(t2idx)), 'ah', ah)
-                                    end
                                     bMerge = 1;
                                 else
                                     % Rejection because of spike trains
-                                    bMerge = 0;
-                                    if 0
-                                        hdsort.plot.templates2D(G(g1).templates.wfs(:,:,t1idx(t1)), G(g1).templates.MES.electrodePositions, 100, 5, 'IDs', 1:length(t1idx))
-                                        ah = gca; 
-                                        hold on
-                                        hdsort.plot.templates2D(G(g2).templates.wfs(:,:,t2idx(t2)), G(g2).templates.MES.electrodePositions, 100, 5, 'IDs', length(t1idx)+(1:length(t2idx)), 'ah', ah)
-                                    end                                
+                                    bMerge = 0;                              
                                 end
                             end
                         end

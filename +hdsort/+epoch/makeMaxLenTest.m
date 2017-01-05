@@ -3,5 +3,5 @@ e = [1 100
      3 3000
      4 4000];
  
-e2 = mysort.epoch.makeMaxLen(e, 500)
-mysort.epoch.length(e2)
+e2 = mysortx.epoch.makeMaxLen(e, 500)
+mysortx.epoch.length(e2)

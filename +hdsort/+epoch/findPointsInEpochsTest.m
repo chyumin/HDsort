@@ -4,4 +4,4 @@ epochs = [1 15
           22 33
           45 60
           88 89];
-fp = mysort.epoch.findPointsInEpochs(points, epochs)
+fp = mysortx.epoch.findPointsInEpochs(points, epochs)

@@ -194,9 +194,9 @@ classdef SpikeSortingContainer < handle
         %------------------------------------------------------------------
         function TL = getTemplateList(self)
             WFS = self.getTemplateWaveforms();
-            TL = mysort.mea.Template.empty();
+            TL = mysortx.mea.Template.empty();
             for n = 1:size(WFS,3);
-                TL(n) = mysort.mea.Template(WFS(:,:,n), self.templateCutLeft, ...
+                TL(n) = mysortx.mea.Template(WFS(:,:,n), self.templateCutLeft, ...
                     self.wfDataSource.getSamplesPerSecond(), n, self.wfDataSource.MultiElectrode.copy(), ones(1, self.wfDataSource.MultiElectrode.getNElectrodes()));
             end
         end

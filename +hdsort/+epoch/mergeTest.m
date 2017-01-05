@@ -1,4 +1,4 @@
-% This file is part of the package mysort that provides a spike sorting
+% This file is part of the package mysortx.that provides a spike sorting
 % algorithms. 
 %
 % Author: Felix Franke
@@ -29,20 +29,20 @@ epochs = [ 1 10
           15 20
           35 40];
       
-mysort.epoch.merge(epochs)
+mysortx.epoch.merge(epochs)
 
 epochs = [ 1 16
           15 20
           35 40];
       
-mysort.epoch.merge(epochs)
+mysortx.epoch.merge(epochs)
 
 
 epochs = [15 16
            1 36
           35 40];
       
-mysort.epoch.merge(epochs)
+mysortx.epoch.merge(epochs)
 
 epochs = [1324        1370
           1327        1374
@@ -50,5 +50,5 @@ epochs = [1324        1370
           2059        2105
           2062        2111]
     
-mysort.epoch.merge(epochs)
+mysortx.epoch.merge(epochs)
 
