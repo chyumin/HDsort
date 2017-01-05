@@ -1,8 +1,8 @@
 classdef BELMEAFile < hdsort.filewrapper.SingleFileWrapper
     % Wrapper for BEL-MEA recording file format.
-    % This object does not support multi-file handling! 
-    % Its main purpose is to open recording files and to run preprocessing 
-    % such that the data is in a format that can be used directly for 
+    % This object does not support multi-file handling!
+    % Its main purpose is to open recording files and to run preprocessing
+    % such that the data is in a format that can be used directly for
     % spike-sorting (see hdsort.filewrapper.CMOSMEA).
     
     properties
@@ -306,7 +306,7 @@ classdef BELMEAFile < hdsort.filewrapper.SingleFileWrapper
         %------------------------------------------------------------------
         function [missingFrames] = getMissingFrameNumbers(self)
             if ~isstruct(self.missingFrames)
-                self.missingFrames = mysort.mea.getMissingFrameNumbers(self.getFrameNumbers());
+                self.missingFrames = hdsort.filewrapper.util.getMissingFrameNumbers(self.getFrameNumbers());
             end
             missingFrames = self.missingFrames;
         end
@@ -325,34 +325,15 @@ classdef BELMEAFile < hdsort.filewrapper.SingleFileWrapper
             hpf = 300;
             lpf = 7000;
             fir_filterOrder = 110;
-            b  = mysort.mea.filter_design_fir(hpf, lpf, self.getSampleRate(), fir_filterOrder);
-           % gainmultiplier = 256;
-        %dfun = @(x) int16(gainmultiplier*x);
+            b  = hdsort.util.filter_design_fir(hpf, lpf, self.getSampleRate(), fir_filterOrder);
             
-            X = self.getData(varargin{:});    
-%                 if P.downSample > 1
-%                     X = double(X);
-%                     X = bsxfun(@minus, X, mean(X,1));
-%                     if P.subtractMeanOverAllChannels
-%                         X = X-repmat(mean(X,2), 1, size(X,2));
-%                     end
-%                     X = resample(X, 1, P.downSample);
-%                 end
-                
-                X = double(X);
-                X = bsxfun(@minus, X, mean(X,1));
-                %if P.subtractMeanOverAllChannels
-                %    X = X-repmat(mean(X,2), 1, size(X,2));
-                %end
-                %if P.bUseFPGA_IIR_Filter
-                %    X = filter(f_bp, X);
-                %else
-                    X = conv2(X, b(:), 'same');
-                %end
-         %       X = dfun(X);
-        
-        
+            X = self.getData(varargin{:});
             
+            X = double(X);
+            X = bsxfun(@minus, X, mean(X,1));
+            
+            
+            X = conv2(X, b(:), 'same');
         end
         
         %------------------------------------------------------------------
@@ -377,7 +358,6 @@ classdef BELMEAFile < hdsort.filewrapper.SingleFileWrapper
             P.hpf = 300;
             P.lpf = 7000;
             P.fir_filterOrder = 110;
-            P.bUseFPGA_IIR_Filter = false;
             P.deflation = 1;
             P.chunkLen = [];
             P.downSample = 1;
@@ -390,7 +370,7 @@ classdef BELMEAFile < hdsort.filewrapper.SingleFileWrapper
             P.chunkSize = 250000;
             P.chunkOverlap = 111;
             P.progressDisplay = 'console';
-            P = util.parseInputs(P, varargin);
+            P = hdsort.util.parseInputs(P, varargin);
             
             if isempty(P.outFileName)
                 P.outFileName = [self.getRootFileName() '.h5'];
@@ -406,7 +386,7 @@ classdef BELMEAFile < hdsort.filewrapper.SingleFileWrapper
                 warning(['Output File does already exist! ' outFile]);
                 return;
             end
-                
+            
             assert(int32(P.downSample)==P.downSample, 'downSample must be an integer!');
             assert(P.downSample==1 || P.lpf >0, 'You must high pass filter before dowsampling, otherwise you will get artefacts at the endpoints!');
             
@@ -476,22 +456,15 @@ classdef BELMEAFile < hdsort.filewrapper.SingleFileWrapper
             
             % create filter object
             d = P.downSample;
-            if P.bUseFPGA_IIR_Filter
-                % INIT IIR Filter
-                filterType = 'IIR butterworth FPGA';
-                h = 500;
-                l = 3000;
-                fo = 2;
-                f_bp = mysort.mea.filter_design_fpga(h, l, sr, fo);
-            else
-                % INIT FIR Filter
-                b  = mysort.mea.filter_design_fir(P.hpf, P.lpf, fileInfo.sr, P.fir_filterOrder);
-                filterType = 'FIR fircls';
-                
-                h = P.hpf;
-                l = P.lpf;
-                fo = P.fir_filterOrder;
-            end
+            
+            % INIT FIR Filter
+            b  = hdsort.util.filter_design_fir(P.hpf, P.lpf, fileInfo.sr, P.fir_filterOrder);
+            filterType = 'FIR fircls';
+            
+            h = P.hpf;
+            l = P.lpf;
+            fo = P.fir_filterOrder;
+            
             
             % Set File as being in process
             proc = hdsort.filewrapper.hdf5.createVariableAndOrFile(outFile, '/bFileIsInProcess', [1 1], [1 1], 'H5T_NATIVE_INT');
@@ -542,8 +515,7 @@ classdef BELMEAFile < hdsort.filewrapper.SingleFileWrapper
                 P.binFile = fullfile(pathstr, [name, '.dat']);
                 
                 % create a binary file where the data is stored
-                %sig = mysort.ds.binaryFileMatrix(P.binFile, [1 dims(2)], 'writable', true);
-                sig = mysort.ds.binaryFileMatrix(P.binFile, [1 nC_effective], 'writable', true);
+                sig = hdsort.filewrapper.util.binaryFileMatrix(P.binFile, [1 nC_effective], 'writable', true);
                 
                 % Save a link to the binary file into /sig:
                 binFileName = [name, '.dat'];
@@ -556,18 +528,7 @@ classdef BELMEAFile < hdsort.filewrapper.SingleFileWrapper
                 clear bin_dims;
             end
             
-            if P.bUseFPGA_IIR_Filter
-                % If we use an IIR filter, we need to burn it in
-                X = self.getData(1:min(end, 5000),isConnectedIdx);
-                X = double(X);
-                X = bsxfun(@minus, X, mean(X,1));
-                if P.subtractMeanOverAllChannels
-                    X = X-repmat(mean(X,2), 1, size(X,2));
-                end
-                mysort.mea.filter_init(f_bp, X);
-            end
-            
-            chunker = mysort.util.Chunker(nSamples, 'chunkSize', P.chunkSize, ...
+            chunker = hdsort.util.Chunker(nSamples, 'chunkSize', P.chunkSize, ...
                 'chunkOverlap', P.chunkOverlap, 'one_sided_overlap', false, 'progressDisplay', P.progressDisplay);
             
             while chunker.hasNextChunk()
@@ -601,11 +562,9 @@ classdef BELMEAFile < hdsort.filewrapper.SingleFileWrapper
                 if P.subtractMeanOverAllChannels
                     X = X-repmat(mean(X,2), 1, size(X,2));
                 end
-                if P.bUseFPGA_IIR_Filter
-                    X = filter(f_bp, X);
-                else
-                    X = conv2(X, b(:), 'same');
-                end
+                
+                X = conv2(X, b(:), 'same');
+                
                 X = dfun(X);
                 sig(firstFullIdx:lastFullIdx,:) = X((1+firstXdiff):(end-lastXdiff), :);
             end
@@ -642,17 +601,6 @@ classdef BELMEAFile < hdsort.filewrapper.SingleFileWrapper
             % Set File as being done
             proc(1,1) = int32(0);
             clear proc
-            
-            % ---------------------------------------------------------------------
-            %function spikeDetMatrix = prepareSpikeDetection()
-            %    spikeDetMatrix = [];
-            %    if isempty(P.spikeDetectionThresholdInNoiseStd)
-            %        return
-            %    end
-            %    maxDimsSD = [-1 2];
-            %    spikeDetMatrix = hdsort.filewrapper.hdf5.createVariableAndOrFile(outFile, [P.sessionName '/spikeDetection/detectedSpikesMatrix'], ...
-            %        [100 2], maxDimsSD, 'H5T_NATIVE_INT', [5000 2], 0);
-            %end
             
             % ---------------------------------------------------------------------
             function prepareFilterVariables()
@@ -753,6 +701,7 @@ classdef BELMEAFile < hdsort.filewrapper.SingleFileWrapper
                 end
                 clear a cl
             end
+            
             % ---------------------------------------------------------------------
             function prepareNewChannelList(isConnected)
                 % CHANNEL LIST IN New CL Format

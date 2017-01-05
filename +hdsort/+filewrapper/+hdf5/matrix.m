@@ -141,7 +141,7 @@ classdef matrix < handle
                 % Load all waveforms one by one   
                 for i = 1:nCut
                     X = self.getData(t1(i):t2(i), channelindex)';
-                    wf(i,:) = mysort.wf.m2v(X);
+                    wf(i,:) = hdsort.waveforms.m2v(X);
                 end  
             elseif self.getWaveformAccessSwitch == 2
                 fprintf('get h5 matrix Waveform_ group close by (%d)\n', nCut);
@@ -158,7 +158,7 @@ classdef matrix < handle
                         for k=t_start:i-1
                             s1 = t1(k) - t1(t_start) + 1;
                             s2 = t2(k) - t1(t_start) + 1;
-                            wf(k,:) = mysort.wf.m2v(X(:,s1:s2));
+                            wf(k,:) = hdsort.waveforms.m2v(X(:,s1:s2));
                         end
                         t_start = i;
                     end
@@ -175,7 +175,7 @@ classdef matrix < handle
                 X = self.getData(IDX, channelindex);
                 X = reshape(X, [cutLength nCut length(channelindex)]);
                 for i = 1:nCut
-                    wf(i,:) = mysort.wf.m2v(squeeze(X(:, i, :))');
+                    wf(i,:) = hdsort.waveforms.m2v(squeeze(X(:, i, :))');
                 end                
             end
         end
@@ -236,7 +236,7 @@ classdef matrix < handle
             try
                 self.fileID    = H5F.open(self.fname, rmode, plist); 
             catch
-                str = mysort.util.buildLastErrString();
+                str = hdsort.util.buildLastErrString();
                 disp(str);
                 error('Could not open file %s!', self.fname);
             end

@@ -10,6 +10,10 @@ classdef CMOSMEA < hdsort.filewrapper.MultiFileWrapper
         %------------------------------------------------------------------
         %% CONSTRUCTOR
         function self = CMOSMEA(fileNames, varargin)
+            if ~iscell(fileNames)
+                fileNames = {fileNames};
+            end
+            
             samplesPerSecond = hdf5read(fileNames{1}, '/Sessions/Session0/sr');  
             assert(length(samplesPerSecond)==1, 'Samples can not be an array!');
             
