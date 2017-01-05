@@ -127,7 +127,7 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
             
             if 0
                 ax = [];
-                mysort.hdsort.plot.figure('w', 800, 'h', 800);
+                mysortx.hdsort.plot.figure('w', 800, 'h', 800);
                 ax(1) = subplot.4,1,1)
                 hold on
                 for i=1:size(self.D,1)
@@ -486,8 +486,8 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
                 if ~self.P.norm_constraint || ...
                         norm(Y) > norm(Y+subtractor)
                     if debug
-                        fig = mysort.hdsort.plot.figure();
-                        ah = mysort.hdsort.plot.subplot.[3,1]);
+                        fig = mysortx.hdsort.plot.figure();
+                        ah = mysortx.hdsort.plot.subplot.[3,1]);
                         axes(ah(1));
                         title('X');
                         Margin = 200*self.P.upsample;
@@ -547,7 +547,7 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
         %%% -------------------PLOTTER----------------------------
         %%% ------------------------------------------------------
         function plotLastChunkSorting(self, varargin)
-            import mysort.*
+            import mysortx.*
             P.start = [];
             P.stopp = [];
             P.titles = 1;
@@ -560,7 +560,7 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
             P.gtGdf = [];
             P.X = [];
             P = hdsort.util.parseInputs(P, 'plotLastChunkSorting', varargin);
-            G = mysort.hdsort.plot.globals();
+            G = mysortx.hdsort.plot.globals();
             if isempty(P.start)
                 P.start = self.chunk_start;
             end
@@ -581,18 +581,18 @@ classdef BOTM < botm.OnlineSpikeSorterInterface & ...
                 clf;
             else
                 if isempty(P.figureHandle)
-                    fig1 = mysort.hdsort.plot.figure('color','w');
+                    fig1 = mysortx.hdsort.plot.figure('color','w');
                 else
                     fig1 = P.figureHandle;
                 end
             end
-            mysort.hdsort.plot.figureName('BOTM.plotLastChunkSorting');
+            mysortx.hdsort.plot.figureName('BOTM.plotLastChunkSorting');
             
             if ~isempty(P.figureName)
                 set(gcf, 'Name', P.figureName);
             end
             
-            ax = mysort.hdsort.plot.subplot([2,1], 'figureTitle', P.figureTitle,...
+            ax = mysortx.hdsort.plot.subplot([2,1], 'figureTitle', P.figureTitle,...
                             'offsetY',.08);
             axes(ax(1));
             % Plot data

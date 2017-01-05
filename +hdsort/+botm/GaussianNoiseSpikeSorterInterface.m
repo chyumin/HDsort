@@ -1,5 +1,5 @@
 
-classdef GaussianNoiseSpikeSorterInterface  < mysort.sorters.SpikeSorterInterface
+classdef GaussianNoiseSpikeSorterInterface  < mysortx.sorters.SpikeSorterInterface
     properties (Constant = true)
         
     end    
@@ -15,8 +15,8 @@ classdef GaussianNoiseSpikeSorterInterface  < mysort.sorters.SpikeSorterInterfac
     methods
         %%% ----------------CONSTRUCTOR---------------------------     
         function self = GaussianNoiseSpikeSorterInterface(Covest, Tf, varargin)  
-            self = self@mysort.sorters.SpikeSorterInterface();
-            self.P.spikeDetector = mysort.detectors.threshold('method', 'none', 'threshFactor',4); 
+            self = self@mysortx.sorters.SpikeSorterInterface();
+            self.P.spikeDetector = mysortx.detectors.threshold('method', 'none', 'threshFactor',4); 
             self.P.minCondNumber = 10000;
             self.P.diagonalLoading = 'DL'; % May be 'DL', 'DSL', 'none'
             self.P = hdsort.util.parseInputs(self.P, varargin);
@@ -32,13 +32,13 @@ classdef GaussianNoiseSpikeSorterInterface  < mysort.sorters.SpikeSorterInterfac
         %%% ------------------------------------------------------
         function hdsort.plot.lusterProjections(self, varargin)
 %             [spikes classes] = self.getSpikeWaveforms(varargin{:});
-%             mysort.hdsort.plot.clusterProjection(spikes, classes, self.templates, self.NE.getNoiseCovarianceMatrix(self.Tf));
+%             mysortx.hdsort.plot.clusterProjection(spikes, classes, self.templates, self.NE.getNoiseCovarianceMatrix(self.Tf));
         end
 
         %%% ------------------------------------------------------
         function hdsort.plot.ntraClusterPCA(self, varargin)
 %             [spikes classes] = self.getSpikeWaveforms(varargin{:});
-%             mysort.hdsort.plot.clusters(spikes, classes, self.NE.getNoiseCovarianceMatrix(self.Tf), 'templates', self.templates);
+%             mysortx.hdsort.plot.clusters(spikes, classes, self.NE.getNoiseCovarianceMatrix(self.Tf), 'templates', self.templates);
         end
         
         %%% ------------------------------------------------------
@@ -48,8 +48,8 @@ classdef GaussianNoiseSpikeSorterInterface  < mysort.sorters.SpikeSorterInterfac
 %             iU = self.NE.getPrewhiteningOperator(self.Tf);
 %             pwSpikesX = spikes*iU;            
 %             fetX = hdsort.util.dimReductionPCA(pwSpikesX, 4);
-%             mysort.hdsort.plot.clustering(fetX, classes);
-%             mysort.hdsort.plot.figureName('ClusterPCA'); 
+%             mysortx.hdsort.plot.clustering(fetX, classes);
+%             mysortx.hdsort.plot.figureName('ClusterPCA'); 
         end        
     end
 end

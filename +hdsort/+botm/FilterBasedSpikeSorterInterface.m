@@ -82,17 +82,17 @@ classdef FilterBasedSpikeSorterInterface < botm.OnlineSpikeSorterInterface ...
         
         %%% ------------------------------------------------------
         function plotTemplates(self)
-            mysort.hdsort.plot.spikes(self.T, 'classes', 1:self.nF, 'nC', size(self.DH,2));
-            mysort.hdsort.plot.figureName('Templates');
+            mysortx.hdsort.plot.spikes(self.T, 'classes', 1:self.nF, 'nC', size(self.DH,2));
+            mysortx.hdsort.plot.figureName('Templates');
         end
         
         %%% ------------------------------------------------------
         function RES = plotConfusionMatrix(self)
-            mysort.hdsort.plot.figure('color','w');%'ymax', 1000, 'ymin', -1000,
-            RES = mysort.hdsort.plot.XIvsF(waveforms.v2t(self.T,size(self.DH,2)), waveforms.v2t(self.F,size(self.DH,2)),...
+            mysortx.hdsort.plot.figure('color','w');%'ymax', 1000, 'ymin', -1000,
+            RES = mysortx.hdsort.plot.XIvsF(waveforms.v2t(self.T,size(self.DH,2)), waveforms.v2t(self.F,size(self.DH,2)),...
                              'figure', 0, ...
                             'XIvsF',self.CONF,'title',0,'axistight',0, 'nC', size(self.DH,2));    
-            mysort.hdsort.plot.figureName('ConfusionMatrix');                        
+            mysortx.hdsort.plot.figureName('ConfusionMatrix');                        
         end        
               
     end
