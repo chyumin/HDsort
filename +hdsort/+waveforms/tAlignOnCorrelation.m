@@ -34,21 +34,3 @@ function [ali tau xvsf] = tAlignOnCorrelation(T,varargin)
     
     ali  = hdsort.waveforms.v2t(XM, nC);
     
-    if P.debug
-        F = hdsort.waveforms.v2t(vF, nC);
-        FM = hdsort.waveforms.v2m(vF, nC);
-        FM = hdsort.util.shiftMCRows(FM, -tau, nC, P.trunc);
-        aliF = hdsort.util.m2t(FM, nC);
-        
-        disp(I);
-        RES = mysortx.plot.XIvsF(T,F,'TvsF',xvsf,'title',0,'axistight',1);        
-        hold on
-        RES = mysortx.plot.XIvsF(ali,aliF,'title',0,'axistight',1,'figure',0,...
-            'axesHandles',RES.axesHandles,'color','g','holdOn',1);
-
-        [M I] = max(RES.XIvsF,[], 1);
-        I = squeeze(I);
-        I = I -Tf;
-        disp(I);
-    end
-
