@@ -11,7 +11,7 @@ chunkDims = [1 10];
 deflation = 0;
 bReadOnly = 0;
 % Create file and variable
-M = mysort.h5.createVariableAndOrFile(fname, h5path, dims, maxDims, h5type, chunkDims, deflation, bReadOnly);
+M = hdsort.filewrapper.hdf5.createVariableAndOrFile(fname, h5path, dims, maxDims, h5type, chunkDims, deflation, bReadOnly);
 % Store string
 M(1,:) = stringToStore;
 % Reload String

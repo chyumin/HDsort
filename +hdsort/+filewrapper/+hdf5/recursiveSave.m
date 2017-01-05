@@ -17,19 +17,17 @@ function recursiveSave(fname, val, tree, mode)
             for k=1:length(val)
                 myname = sprintf('%05d/', k);
                 for i=1:length(flist)
-                    filewrapper.hdf5.recursiveSave(fname, val(k).(flist{i}), [tree '/' myname flist{i}], varMode);
+                    hdsort.filewrapper.hdf5.recursiveSave(fname, val(k).(flist{i}), [tree '/' myname flist{i}], varMode);
                 end
             end
         else
             for i=1:length(flist)
-                filewrapper.hdf5.recursiveSave(fname, val.(flist{i}), [tree '/' flist{i}], varMode);
+                hdsort.filewrapper.hdf5.recursiveSave(fname, val.(flist{i}), [tree '/' flist{i}], varMode);
             end
         end
     else
         if iscell(val)
-            filewrapper.hdf5writeCell(fname, tree, val, varMode);
-        elseif isa(val, 'mysort.util.DebuggableClass')
-            filewrapper.hdf5recursiveSave(fname, val.getStruct(), [tree '____CLASS____' class(val)], varMode);
+            hdsort.filewrapper.hdf5writeCell(fname, tree, val, varMode);
         elseif islogical(val)
             check_create()
             hdf5write(fname, tree, double(val), 'WriteMode', varMode, 'V71Dimensions', true);
