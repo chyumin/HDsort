@@ -7,10 +7,10 @@ classdef FileWrapperInterface < handle
         fullMultiElectrode
         activeChannels
         
-        
         memoryBufferNoiseSmad
         
         info
+        name
     end
     
     methods(Abstract)
@@ -37,7 +37,7 @@ classdef FileWrapperInterface < handle
             self.samplesPerSecond = double(samplesPerSecond);
             
             self.memoryBufferNoiseSmad = [];
-            
+            self.name = '';
         end
         
         %------------------------------------------------------------------

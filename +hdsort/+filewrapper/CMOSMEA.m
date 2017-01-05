@@ -15,6 +15,7 @@ classdef CMOSMEA < hdsort.filewrapper.MultiFileWrapper
             
             self = self@hdsort.filewrapper.MultiFileWrapper('CMOSMEA', samplesPerSecond, [], fileNames, @hdsort.filewrapper.CMOSMEAFile);
             
+            self.name = 'CMOSMEA files';
             self.info = ['This object is for loading many preprocessed CMOSMEA datafiles. ' ...
                          'The files are concatenated!'];
         end

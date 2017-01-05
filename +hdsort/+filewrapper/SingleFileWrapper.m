@@ -26,6 +26,7 @@ classdef SingleFileWrapper < hdsort.filewrapper.FileWrapperInterface
             
             self.bCovIsPrecalculated = false;
             
+            self.name = fileName;
             self.info = 'If this info message is displayed, there has been an error in the construction of this object!';
         end
         

@@ -8,10 +8,9 @@ classdef BELMEAFile < hdsort.filewrapper.SingleFileWrapper
     properties
         P
         h5info
-        fileName
         
         fileID
-        className
+        %className
         
         
         nDims
@@ -96,11 +95,13 @@ classdef BELMEAFile < hdsort.filewrapper.SingleFileWrapper
             self.dataSets.bits.name = '/bits';
             
             self.fileName = fileName;
-            self.className = P.className;
+            %self.className = P.className;
             self.h5info = h5info(fileName);
             self.connectedChannel = find(self.MultiElectrode.electrodeNumbers > -1);
             
             self = self.openH5File();
+            
+            self.info = ['This object is intended to wrap a single BEL-MEA recording file.'];
         end
         
         %------------------------------------------------------------------

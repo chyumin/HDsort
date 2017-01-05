@@ -34,6 +34,8 @@ classdef MultiFileWrapper < hdsort.filewrapper.FileWrapperInterface
                 
             end
             self.setActiveFileIndex(1);
+            
+            self.name = '';
         end
         
         %------------------------------------------------------------------
@@ -111,7 +113,6 @@ classdef MultiFileWrapper < hdsort.filewrapper.FileWrapperInterface
                 channels = 1:self.size_(2);
             end
             
-            %wfs = zeros(length(t), cutLength*length(channels));
             wfs = zeros(nCut, cutLength*length(channels));
 
             for ii = 1:self.nFiles
@@ -123,7 +124,6 @@ classdef MultiFileWrapper < hdsort.filewrapper.FileWrapperInterface
                 nInThisSession = sum(inThisSessionIdx);
                 
                 if nInThisSession       
-                    %wfs_tmp = self.fileWrapperList(ii).getWaveform(tInThisSession, cutLeft, cutLength, channels);
                     
                     wfs_tmp = self.fileWrapperList(ii).getWaveform_(nInThisSession, ...
                         channels, cutLength, t1InThisSession, t2InThisSession);
