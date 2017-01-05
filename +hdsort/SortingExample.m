@@ -1,21 +1,3 @@
-% 
-% preprocessedFiles = {'some_file.h5', 'some_file2.h5'};
-% DS = mysortx.mea.CMOSMEA(preprocessedFiles);
-% sortingPath = 'path-to-some-folder'
-% sortingName = 'sortingNameXYZ';
-% 
-% %% Constructor:
-% sorting = mysortx.HDSorting.Sorting(DS, sortingPath, sortingName);
-% 
-% %% New Sorting:
-% sorting.startSorting('runMode', 'grid', 'parfor',true);
-% 
-% %% Go back to a sorting that had been started on the grid before:
-% sorting.reuptakeSorting();
-% 
-% %% Postprocessing:
-% sorting.postprocessGridSorting();
-
 % -------------------------------------------------------------------------
 %% New test scenario:
 pd = hdsort.pathDefinitions()
@@ -60,9 +42,6 @@ preprocessedFolder = folder;
 %DS = hdsort.filewrapper.CMOSMEA(fileList{1});
 %covest_old = DS.getCovest();
 
-%%
-DSList = mysortx.mea.CMOSMEA(fileList);
-%covest_listold = DSList.getCovest();
 
 %% Test single file hdsort.filewrapper.CMOSMEAFile
 %cmosmeafile = hdsort.filewrapper.CMOSMEAFile(fileList{1});
