@@ -49,7 +49,7 @@ function [ ] = clusterProjection(spikesX, classes, templates, C, varargin)
         elseif P.figure
             fh = hdsort.plot.figure('name', 'Cluster Projections');
         end
-        mp = myplot.Subplots((nT-1)*(nT-1), 'upperTriangle', 1, 'offsetY', .1, 'spacerY', 0);
+        mp = hdsort.plot.Subplots((nT-1)*(nT-1), 'upperTriangle', 1, 'offsetY', .1, 'spacerY', 0);
         ah = mp.getSubplotHandle();
     else
         ah = P.axesHandles;

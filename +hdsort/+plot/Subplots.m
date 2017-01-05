@@ -83,11 +83,6 @@ classdef Subplots < hdsort.plot.PlotInterface
         
         % -----------------------------------------------------------------
         function show_(self)
-            %hidem(self.ah);
-            
-            %if isempty(self.parentFh)
-            %    self.parentFh = gcf;
-            %end
             
             assert(isempty(self.labels) || length(self.labels) >= self.nSubplots, 'If labels is provided it must contain one label per subplot!');
             assert(self.nRows < 37 && self.nColumns <37, 'Too many rows or columns to plot!');

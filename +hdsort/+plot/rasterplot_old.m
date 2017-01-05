@@ -1,4 +1,4 @@
-classdef Rasterplot < myplot.Plot
+classdef Rasterplot < hdsort.plot.Plot
     properties (SetAccess=protected)
         gdf
     end
@@ -19,7 +19,7 @@ classdef Rasterplot < myplot.Plot
             P.timeToZero = false;
             P.xlabel = 'time [s]';
             P.interval = [];
-            self = self@myplot.Plot(P, varargin{:})
+            self = self@hdsort.plot.Plot(P, varargin{:})
             
             %% Create a gdf:
             if iscell(input)

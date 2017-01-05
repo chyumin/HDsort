@@ -112,7 +112,7 @@ classdef Waveforms < hdsort.plot.PlotInterface
             wavs = hdsort.waveforms.v4plot(self.waveforms, self.nChannels);
             
             if ~self.stacked
-                self.subplots = myplot.Subplots([length(self.classes) 1], 'spacerY', self.spacerY, 'ah', self.ah);
+                self.subplots = hdsort.plot.Subplots([length(self.classes) 1], 'spacerY', self.spacerY, 'ah', self.ah);
                 %self.subplots = hdsort.plot.subplots([length(self.classes) 1], 'spacerY', self.spacerY);
                 
                 ahs = self.subplots.getSubplotHandle();

@@ -41,14 +41,14 @@ classdef MultiScatter < hdsort.plot.PlotInterface
             %self.setColor(self.color, numel(self.labels));
             
             nD = numel(self.dims);
-            self.subplots = myplot.Subplots((nD-1)*(nD-1), 'upperTriangle', 1, 'offsetY', .1, 'ah', self.ah);
+            self.subplots = hdsort.plot.Subplots((nD-1)*(nD-1), 'upperTriangle', 1, 'offsetY', .1, 'ah', self.ah);
             
             X = 1;
             Y = X + 1;
             for ii = 1:numel(self.subplots.subplotHandles)
                 
                 sah = self.subplots.getSubplotHandle(ii);
-                p_ = myplot.Gscatter(self.data(:,X), self.data(:,Y), self.labels, 'ah', sah, ...
+                p_ = hdsort.plot.Gscatter(self.data(:,X), self.data(:,Y), self.labels, 'ah', sah, ...
                     'markerArea', self.markerArea, 'markerType', self.markerType , 'MarkerFaceAlpha', self.MarkerFaceAlpha, 'MarkerEdgeAlpha', self.MarkerEdgeAlpha, ...
                     'xlabel', [self.dimLabel num2str(X)], 'ylabel', [self.dimLabel num2str(Y)]);
                 

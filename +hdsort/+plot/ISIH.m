@@ -24,7 +24,7 @@ classdef ISIH < hdsort.plot.PlotInterface
             if ~iscell(spiketrains_or_gdf) && any(size(spiketrains_or_gdf) == 1)
                 spiketrains = {spiketrains_or_gdf(:)};
             elseif ~iscell(spiketrains_or_gdf)
-                spiketrains = hdsort.spiketrain.tGdf2cell(spiketrains_or_gdf);
+                spiketrains = hdsort.spiketrain.gdf2cell(spiketrains_or_gdf);
             else
                 spiketrains = spiketrains_or_gdf;
             end
@@ -40,7 +40,7 @@ classdef ISIH < hdsort.plot.PlotInterface
             self = self@hdsort.plot.PlotInterface(P, varargin{:});
             
             if nUnits > 1
-                self.subplots = myplot.Subplots([nX nY], 'showOnStartup', false);
+                self.subplots = hdsort.plot.Subplots([nX nY], 'showOnStartup', false);
             end
             
             self.plotName = 'ISIH';
@@ -51,7 +51,7 @@ classdef ISIH < hdsort.plot.PlotInterface
             %    self.showAh = true;
             %end
             
-            [isih times_ms] = util.isih(self.spiketrains, 'binSize_ms', self.binSize_ms, 'maxlag_ms', self.maxlag_ms, 'Fs', self.Fs);
+            [isih times_ms] = hdsort.util.isih(self.spiketrains, 'binSize_ms', self.binSize_ms, 'maxlag_ms', self.maxlag_ms, 'Fs', self.Fs);
             self.isih = isih;
             self.times_ms = times_ms;
             
@@ -62,7 +62,6 @@ classdef ISIH < hdsort.plot.PlotInterface
             self.setColor(self.color, 1);
             
             if self.nUnits > 1
-                %show_@myplot.Subplots(self);
                 self.subplots.setAh(self.ah);
                 self.subplots.show();
             else
@@ -79,7 +78,7 @@ classdef ISIH < hdsort.plot.PlotInterface
                 
                 %b1 = bar(ah, self.times_ms, self.isih(ii, :)', 'histc');
                 %set(b1, 'facecolor', self.color);
-                self.bar = myplot.Bar(self.times_ms, self.isih(ii, :)', 'Style', 'histc', 'ah', ah, 'color', self.color);
+                self.bar = hdsort.plot.Bar(self.times_ms, self.isih(ii, :)', 'Style', 'histc', 'ah', ah, 'color', self.color);
                 
                 % Plot a refractory period line:
                 if self.refPeriod_ms > self.binSize_ms
