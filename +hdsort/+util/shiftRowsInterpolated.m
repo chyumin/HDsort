@@ -6,8 +6,8 @@ function X = shiftRowsInterpolated(X, t, nC)
     range = 1:size(X,2)/nC;
     for i=1:size(X,1)
         if abs(t(i))>.001
-            xsinc = mysortx.wf.mSincfun(mysortx.wf.v2m(X(i,:), nC));            
-            X(i,:) = mysortx.wf.m2v(xsinc(range-t(i)));
+            xsinc = hdsort.waveforms.mSincfun(hdsort.waveforms.v2m(X(i,:), nC));            
+            X(i,:) = hdsort.waveforms.m2v(xsinc(range-t(i)));
         end
-    end        
+    end
 end
