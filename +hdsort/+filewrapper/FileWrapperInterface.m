@@ -208,6 +208,8 @@ classdef FileWrapperInterface < handle
             end
             
             wf_t = self.getWaveform_(nCut, channelindex, cutLength, t1, t2);
+            %wf_t = self.getWaveform_(t, cutLeft, cutLength, channelindex)
+            
             assert(isa(wf_t, 'double'), 'Function getWaveform_ must be return a double!');
             
             % Copy cut hdsort.waveforms.back into original order, leaving those

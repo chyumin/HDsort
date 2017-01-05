@@ -104,21 +104,30 @@ classdef MultiFileWrapper < hdsort.filewrapper.FileWrapperInterface
         
         %------------------------------------------------------------------
         %------------------------------------------------------------------
-        function wf = getWaveform_(self, t, cutLeft, cutLength, channels)
+        %function wf = getWaveform_(self, t, cutLeft, cutLength, channels)
+        function wfs = getWaveform_(self, nCut, channels, cutLength, t1, t2)
+            
             if nargin < 5 || isempty(channels)
-                channelIndex = 1:self.size_(2);
+                channels = 1:self.size_(2);
             end
             
-            wfs = zeros(length(t), cutLength*length(channelIndex));
+            %wfs = zeros(length(t), cutLength*length(channels));
+            wfs = zeros(nCut, cutLength*length(channels));
 
             for ii = 1:self.nFiles
                 [fileFirstIndex, fileLastIndex] = self.getFileIndices(ii);
                 
-                inThisSessionIdx = t>=fileFirstIndex & t <= fileLastIndex;
-                tInThisSession = t(inThisSessionIdx) - fileFirstIndex +1;
+                inThisSessionIdx = t1>=fileFirstIndex & t2<=fileLastIndex;
+                t1InThisSession = t1(inThisSessionIdx) - fileFirstIndex +1;
+                t2InThisSession = t2(inThisSessionIdx) - fileFirstIndex +1;
+                nInThisSession = sum(inThisSessionIdx);
                 
-                if ~isempty(tInThisSession)         
-                    wfs_tmp = self.fileWrapperList(i).getWaveform(tInThisSession, cutLeft, cutLength, channelIndex);
+                if nInThisSession       
+                    %wfs_tmp = self.fileWrapperList(ii).getWaveform(tInThisSession, cutLeft, cutLength, channels);
+                    
+                    wfs_tmp = self.fileWrapperList(ii).getWaveform_(nInThisSession, ...
+                        channels, cutLength, t1InThisSession, t2InThisSession);
+                    
                     wfs(inThisSessionIdx, :) = wfs_tmp;
                 end
             end

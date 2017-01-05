@@ -196,7 +196,7 @@ classdef CMOSMEAFile < hdsort.filewrapper.SingleFileWrapper
         %------------------------------------------------------------------
         function wf = getWaveform_(self, nCut, channelIndex, varargin)
             channelIndex = self.connected_channels(channelIndex);
-            wf = double( self.h5matrix_raw.getWaveform_(nCut, channelIndex, varargin{:}) );
+            wf = self.lsb * double( self.h5matrix_raw.getWaveform_(nCut, channelIndex, varargin{:}) );
         end
         
         %------------------------------------------------------------------
