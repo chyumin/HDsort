@@ -30,7 +30,7 @@ classdef PreprocessJob < hdsort.grid.GridJob
             if ~isempty(self.preprocessJobP.destinationFolder)
                 self.folders.destination = self.preprocessJobP.destinationFolder;
             else
-%                self.folders.destination = self.folders.main;
+                %                self.folders.destination = self.folders.main;
                 self.folders.destination = self.folders.root;
             end
             
@@ -47,16 +47,16 @@ classdef PreprocessJob < hdsort.grid.GridJob
         end
         
         function bool = alreadyPreprocessed(self)
-             [preprocessedFiles, cmdFiles, rawFiles] = self.getFileNames();
-             for preprocessedFile = preprocessedFiles(:)'
-                 try
-                     DS = hdsort.filewrapper.CMOSMEA(preprocessedFile{1});
-                 catch
-                     bool = false;
+            [preprocessedFiles, cmdFiles, rawFiles] = self.getFileNames();
+            for preprocessedFile = preprocessedFiles(:)'
+                try
+                    DS = hdsort.filewrapper.CMOSMEA(preprocessedFile{1});
+                catch
+                    bool = false;
                     return;
-                 end
-             end
-             bool = true;
+                end
+            end
+            bool = true;
         end
         
         %------------------------------------------------------------------
@@ -96,7 +96,7 @@ classdef PreprocessJob < hdsort.grid.GridJob
             if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
                 warning('Sorting not started from a linux machine might cause problems!')
                 taskParameters.destinationFolder = hdsort.grid.GridJob.convertToLinux(taskParameters.destinationFolder);
-                taskParameters.configFile = hdsort.grid.GridJob.convertToLinux(taskParameters.configFile);             
+                taskParameters.configFile = hdsort.grid.GridJob.convertToLinux(taskParameters.configFile);
             end
             
             disp('Create task files from groups...');
@@ -105,7 +105,7 @@ classdef PreprocessJob < hdsort.grid.GridJob
                 taskParameters.taskID = self.taskIDs(ii);
                 
                 if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
-                	taskParameters.rawFile = hdsort.grid.GridJob.convertToLinux(self.rawFiles{ii});
+                    taskParameters.rawFile = hdsort.grid.GridJob.convertToLinux(self.rawFiles{ii});
                 else
                     taskParameters.rawFile = self.rawFiles{ii};
                 end
@@ -160,13 +160,8 @@ classdef PreprocessJob < hdsort.grid.GridJob
             end
             
             function mainBlock()
-                %if isfield(taskP, 'oldMea1kFiles')
-                %    preprocessedFiles = mysortx.mea.preprocessAllMea1kH5Files(taskP.rawFile, ...
-                %        taskP.configFile, taskP.destinationFolder)
-                %else
-                    fileDS = hdsort.filewrapper.(taskP.fileWrapper)(taskP.rawFile);
-                    preprocessedFiles = fileDS.preprocessFile(taskP.destinationFolder);
-                %end
+                fileDS = hdsort.filewrapper.(taskP.fileWrapper)(taskP.rawFile);
+                preprocessedFiles = fileDS.preprocessFile(taskP.destinationFolder);
                 
                 %% Write to reporter file:
                 disp('Writing results...')

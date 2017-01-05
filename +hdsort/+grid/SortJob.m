@@ -259,28 +259,26 @@ classdef SortJob < hdsort.grid.GridJob
             %% ISIH:
             self.destinationlocation.files.isih = fullfile( self.folders.qcplot, 'isih');
             if ~exist(self.destinationlocation.files.isih, 'file')
-                F = mysortx.hdsort.plot.isi( res.gdf_merged )
-                mysortx.hdsort.plot.savefig(F.figureHandle, self.destinationlocation.files.isih)
+                F = hdsort.plot.ISIH( res.gdf_merged )
+                F.saveFig(self.destinationlocation.files.isih);
             end
             
             %% Footprints whole
             self.destinationlocation.files.footprints = fullfile( self.folders.qcplot, 'footprints_whole');
             if ~exist(self.destinationlocation.files.footprints, 'file')
-                F.figureHandle = figure();
-                mysortx.hdsort.plot.hdsort.waveforms.D(res.T_merged, MES.electrodePositions, 'IDs', res.localSortingID);
-                mysortx.hdsort.plot.savefig(F.figureHandle, self.destinationlocation.files.footprints)
+                F = hdsort.plot.Waveforms2D(res.T_merged, MES.electrodePositions, 'IDs', res.localSortingID);
+                F.saveFig(self.destinationlocation.files.footprints);
             end
             
             %% Footprints localized
             self.destinationlocation.files.footprints2 = fullfile( self.folders.qcplot, 'footprints_localized');
             if ~exist(self.destinationlocation.files.footprints2, 'file')
-                F.figureHandle = figure(); P.AxesHandle = []
-                for i = 1:length(res.localSorting)
-                    id = res.localSortingID(i);
-                    lu = res.localSorting(i);
-                    P = mysortx.hdsort.plot.hdsort.waveforms.D(0.1*res.T_merged(:,:,i), MES.electrodePositions, 'IDs', (1000*id+lu), 'maxNumberOfChannels', 10, 'AxesHandle', P.AxesHandle, 'hdsort.plot.rgs', {'color', hdsort.plot.PlotInterface.vectorColor(i)});
+                for ii = 1:length(res.localSorting)
+                    id = res.localSortingID(ii);
+                    lu = res.localSorting(ii);
+                    F = hdsort.plot.Waveforms2D(0.1*res.T_merged(:,:,ii), MES.electrodePositions, 'IDs', (1000*id+lu), 'maxNumberOfChannels', 10, 'AxesHandle', P.AxesHandle, 'hdsort.plot.rgs', {'color', hdsort.plot.PlotInterface.vectorColor(ii)});
+                    F.saveFig([self.destinationlocation.files.footprints2 num2str(ii)])
                 end
-                mysortx.hdsort.plot.savefig(F.figureHandle, self.destinationlocation.files.footprints2)
             end
             
         end
@@ -322,8 +320,8 @@ classdef SortJob < hdsort.grid.GridJob
                 
                 groupFolders = self.findSubFolders(self.folders.groups)
                 
-                for i = 1:length(groupFolders)
-                    groupFolder = groupFolders{i};
+                for ii = 1:length(groupFolders)
+                    groupFolder = groupFolders{ii};
                     [pathstr,name,ext] = fileparts(groupFolder);
                     newGroupFolder = fullfile(newGroupsFolder, name);
                     
@@ -335,7 +333,7 @@ classdef SortJob < hdsort.grid.GridJob
                         self.copyFile(fullFile, newGroupFolder);
                     end
                     
-                    self.files.groupPaths{i} = groupFolder; %newGroupFolder;
+                    self.files.groupPaths{ii} = groupFolder; %newGroupFolder;
                 end
             end
             
@@ -347,68 +345,37 @@ classdef SortJob < hdsort.grid.GridJob
         
         
         % -----------------------------------------------------------------
-        function copyDataFilesToBinary(self)
-            error('Not implemented properly!')
-            
-            % This function copies the original h5 file to a binary file and a
-            % h5 metadata file in the job folder. From now on, meta-file will
-            % be treated as the original data file.
-            % The binary files are created directly on the scratch.
-            newDataFileLocations = {};
-            
-            disp('Copy data file(s) to binary...');
-            for i = 1:length(self.files.data)
-                
-                [pathstr,name,ext] = fileparts(self.files.data{i});
-                
-                fileNameH5 = fullfile(pathstr, [name '_meta' ext]);
-                fileNameBin = fullfile(pathstr, [name '.dat']);
-                
-                if exist(fileNameBin, 'file') ~= 2
-                    mysortx.mea.copyH5toBinary(self.files.data{i}, fileNameH5, fileNameBin);
-                end
-                
-                %% Remember the location of the datafiles on the scratch now:
-                newDataFileLocations{i} = fileNameH5;
-                
-                disp([ num2str(i) ' of ' num2str(length(self.files.data)) ' copied.']);
-            end
-            
-            self.files.data = newDataFileLocations;
-        end
-        
-        % -----------------------------------------------------------------
         function copyDataFiles(self, destinationLocation)
             
             newDataFileLocations = {};
             
             disp('Copy data file(s)...');
-            for i = 1:length(self.files.data)
+            for ii = 1:length(self.files.data)
                 
                 %% Check if the data (the first file at least) is binary:
-                m_test = hdsort.filewrapper.CMOSMEA(self.files.data{i});
+                m_test = hdsort.filewrapper.CMOSMEA(self.files.data{ii});
                 
                 if ~m_test.isBinaryFile()
-                    [pathstr,name,ext] = fileparts(self.files.data{i});
+                    [pathstr,name,ext] = fileparts(self.files.data{ii});
                     fileNameH5 = fullfile(destinationLocation, [name '.h5']);
                     fileNameBin= fullfile(destinationLocation, [name '.dat']);
                     
                     %% Create a binary file on the scratch:
                     if exist(fileNameBin, 'file') ~= 2
-                        mysortx.mea.copyH5toBinary(self.files.data{i}, fileNameH5, fileNameBin);
+                        hdsort.filewrapper.util.copyH5toBinary(self.files.data{ii}, fileNameH5, fileNameBin);
                     end
-                    newDataFileLocations{i} = fileNameH5;
+                    newDataFileLocations{ii} = fileNameH5;
                 else
-                    [pathstr,name,ext] = fileparts(self.files.data{i});
-                    fileNameH5 = self.files.data{i}; %fullfile(self.startlocation.folders.data, [name '_meta' ext]);
+                    [pathstr,name,ext] = fileparts(self.files.data{ii});
+                    fileNameH5 = self.files.data{ii}; %fullfile(self.startlocation.folders.data, [name '_meta' ext]);
                     fileNameBin = fullfile(pathstr, [name '.dat']);
                     
                     %% Copy meta and binary file:
-                    newDataFileLocations{i} = self.copyFile(fileNameH5, destinationLocation) ;
+                    newDataFileLocations{ii} = self.copyFile(fileNameH5, destinationLocation) ;
                     self.copyFile(fileNameBin,destinationLocation);
                 end
                 
-                disp([ num2str(i) ' of ' num2str(length(self.files.data)) ' copied.']);
+                disp([ num2str(ii) ' of ' num2str(length(self.files.data)) ' copied.']);
             end
             self.files.data = newDataFileLocations;
             

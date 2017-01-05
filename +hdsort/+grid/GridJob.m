@@ -7,7 +7,7 @@
 % C) copy the startup.m from the matlab folder to your Grid Home and set
 %    the correct paths
 % D) Test this by logging into the submit system, loading the matlab
-%    module, starting matlab and see if the mysortx.package is loaded
+%    module, starting matlab and see if the hdsort-package is loaded
 % E) ...
 %
 %
