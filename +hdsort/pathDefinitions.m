@@ -7,7 +7,6 @@ function def = pathDefinitions()
 %         bIsOffline = true;
 %     end
     def.hdsort.pathDefinitionsPath = pwd;
-%     callerName = mysortx.util.getCallerName();
     def.callerPath = [];
     
     user_config = hdsort.global_user_config();
