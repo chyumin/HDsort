@@ -8,7 +8,7 @@ assert(length(startTimes) == nFiles, 'Number of start times must be equal to num
 
 gdf = [];
 for f = 1:nFiles
-    gdf_ = double(mysortx.spiketrain.toGdf({St{:,f}}));
+    gdf_ = double(hdsort.spiketrain.toGdf({St{:,f}}));
     l = size(gdf_, 1);
     gdf_ = gdf_ + [zeros(l,1), ones(l,1)*startTimes(f)];
     gdf = [gdf; gdf_];
