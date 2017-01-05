@@ -443,7 +443,7 @@ classdef Sorting < handle
             units = unique(gdf_merged(:,1));
             nU = length(units);
             
-            mysortx.plot.figure([1200 900])
+            figure;
             ah = axes;
             set(ah, 'nextplot', 'add');
             nG = length(NeuronCombinations);
