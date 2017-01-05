@@ -44,7 +44,6 @@ classdef Covest2 < handle
                 nC = size(self.CCol,2);
                 self.P.maxLag = min(size(X,1)/nC, self.P.maxLag);
             elseif ~isempty(X)
-%                 self.DS = mysort.ds.Matrix(X(1:self.P.noiseEpochs(end,2),:), X.getSampleRate(), X.MultiElectrode);
                 self.DS = X;
                 xcovs = self.calcXCovs();
                 self.CCol = hdsort.noise.xcov2ccol(xcovs, self.P.maxLag);
@@ -68,8 +67,7 @@ classdef Covest2 < handle
             elseif strcmp(self.P.forceMethod, 'xcorr');
                 xcovs = self.calcXCovsWithXCorr();
             elseif isempty(self.P.forceMethod)
-                if self.P.maxLag <= 30 % this is the break-even point. see 
-                                       % \mysortpackage\tests\tests\noise\covestTest2.m
+                if self.P.maxLag <= 30
                     xcovs = self.calcXCovsWithMatMul();
                 else 
                     xcovs = self.calcXCovsWithXCorr();
