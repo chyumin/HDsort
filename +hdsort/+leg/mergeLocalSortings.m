@@ -1,6 +1,5 @@
-function [G] = mergeLocalSortings_march24(G, meanNoiseStd, varargin)
-    %warning('This function is deprecated. Use combineLocalSortings instead!');
-    disp('mergeLocalSortings_march24 function')
+function [G] = mergeLocalSortings(G, meanNoiseStd, varargin)
+    disp('mergeLocalSortings function')
     
     % Merges the individual neurons from many local sortings of the same
     % piece of data. Here, a given real neuron might have been sorted in
@@ -43,7 +42,7 @@ function [G] = mergeLocalSortings_march24(G, meanNoiseStd, varargin)
         else
             nTg = size(G(g).templates.wfs,3);
             G(g).templates.maxInThisGroup = zeros(1,nTg);
-            [mi ma mi_idx ma_idx] = waveforms.tMinMaxPerTemplate(G(g).templates.wfs);
+            [mi ma mi_idx ma_idx] = hdsort.waveforms.tMinMaxPerTemplate(G(g).templates.wfs);
             [globMin minChan] = min(mi, [], 2);
 
             for t=1:nTg
@@ -100,17 +99,17 @@ function [G] = mergeLocalSortings_march24(G, meanNoiseStd, varargin)
             % we do that by taking the biggest channels that have at
             % least a peak of 10% from the maximal amplitude and compute on
             % those the correlation between the maxima and minima of the            
-            [mi1 ma1] = waveforms.tMinMaxPerTemplate(G(g1).templates.wfs(:,:,t1idx));
-            [mi2 ma2] = waveforms.tMinMaxPerTemplate(G(g2).templates.wfs(:,:,t2idx));
+            [mi1 ma1] = hdsort.waveforms.tMinMaxPerTemplate(G(g1).templates.wfs(:,:,t1idx));
+            [mi2 ma2] = hdsort.waveforms.tMinMaxPerTemplate(G(g2).templates.wfs(:,:,t2idx));
             if 0
                 figure;
-                plot(waveforms.t2v(G(g1).templates.wfs(:,:,:))', 'b');
+                plot(hdsort.waveforms.t2v(G(g1).templates.wfs(:,:,:))', 'b');
                 hold on
-                plot(waveforms.t2v(G(g2).templates.wfs(:,:,:))', 'g');
+                plot(hdsort.waveforms.t2v(G(g2).templates.wfs(:,:,:))', 'g');
                 figure;
-                plot(waveforms.t2v(G(g1).templates.wfs(:,:,2))');
+                plot(hdsort.waveforms.t2v(G(g1).templates.wfs(:,:,2))');
                 hold on
-                plot(waveforms.t2v(G(g2).templates.wfs(:,:,2))', 'g');
+                plot(hdsort.waveforms.t2v(G(g2).templates.wfs(:,:,2))', 'g');
             end
             for t1 = 1:length(t1idx)
                 M1 = abs([mi1(t1,:) ma1(t1,:)]);
@@ -121,11 +120,11 @@ function [G] = mergeLocalSortings_march24(G, meanNoiseStd, varargin)
                 for t2 = 1:length(t2idx)
                     bMerge = 0;
                     if 0
-                        figure; plot(waveforms.t2v(G(g1).templates.wfs(:,:,:))');
+                        figure; plot(hdsort.waveforms.t2v(G(g1).templates.wfs(:,:,:))');
                         figure;
-                        plot(waveforms.t2v(G(g1).templates.wfs(:,:,t1))');
+                        plot(hdsort.waveforms.t2v(G(g1).templates.wfs(:,:,t1))');
                         hold on
-                        plot(waveforms.t2v(G(g2).templates.wfs(:,:,t2))', 'g');
+                        plot(hdsort.waveforms.t2v(G(g2).templates.wfs(:,:,t2))', 'g');
                     end                    
                     M2 = abs([mi2(t2,:) ma2(t2,:)]);
                     absMax2 = max(M2);
