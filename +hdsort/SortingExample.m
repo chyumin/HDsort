@@ -31,6 +31,18 @@ sorting.postprocessGridSorting()
 %% Alternate:
 [gdf_merged, T_merged, localSorting, localSortingID, sessionLengths] = hdsort.startHDSorting(preprocessedFiles, preprocessedFolder, 'testGrid_startHDSorting')
 
+% -------------------------------------------------------------------------
+%% Test hdsort.filewrapper.CortexLabFiles
+folderSet = '/Volumes/hierlemann/intermediate_data/Mea1k/rolandd/cortexlab/set1';
+datFile_ = dir([folderSet '/*.dat']);
+datFile = fullfile(folderSet, datFile_.name);
+% Read PRM file:
+prmFile_ = dir([folderSet '/*.prm']);
+prmFile = fullfile(folderSet, prmFile_.name);
+%
+M = hdsort.filewrapper.CortexLabFile(datFile, prmFile)
+%%
+preM = M.preprocessFile('/Users/rolandd/tmp')
 
 % -------------------------------------------------------------------------
 %% Test hdsort.filewrapper.CMOSMEA
