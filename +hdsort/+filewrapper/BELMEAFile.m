@@ -587,6 +587,7 @@ classdef BELMEAFile < hdsort.filewrapper.SingleFileWrapper
             ffn(1,:) = int32(self.dims);
             clear ffn
             if missingFrames.n > 0
+                lL = numel(missingFrames.begin);
                 ffn = hdsort.filewrapper.hdf5.createVariableAndOrFile(outFile, [P.sessionName '/frame_numbers/missing_fns'], [lL 2], [lL 2], 'H5T_NATIVE_INT');
                 ffn(:,:) = [missingFrames.begin(:) missingFrames.length(:)];
             else
