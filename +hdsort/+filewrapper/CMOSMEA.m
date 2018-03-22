@@ -42,6 +42,16 @@ classdef CMOSMEA < hdsort.filewrapper.MultiFileWrapper
                 sessionHasMissingFrames(i) = ~(length(sFR(i).missing_fns)==1);
             end
         end
+        
+        %------------------------------------------------------------------
+        function gainMultiplier = getGainMultiplier(self)
+            gainMultiplier = self.fileWrapperList(1).getGainMultiplier();
+            for ii = 2:length(self.fileWrapperList)
+                gm_ = self.fileWrapperList(ii).getGainMultiplier();
+                assert( gm_ == gainMultiplier, 'Gain multiplier is not the same in all files!')
+            end
+        end
+        
          
     end
 end

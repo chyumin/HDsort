@@ -23,11 +23,11 @@ classdef MultiFileWrapper < hdsort.filewrapper.FileWrapperInterface
             self.fileNames = fileNames;
             self.nFiles = numel(self.fileNames);
             
-            self.fileWrapperList = fileWrapperClassHandle(fileNames{1}, self, 1)
+            self.fileWrapperList = fileWrapperClassHandle(fileNames{1}, self, 1);
             self.MultiElectrode = self.fileWrapperList.MultiElectrode;
             
             for ii = 2:self.nFiles
-                self.fileWrapperList(ii) = fileWrapperClassHandle(fileNames{ii}, self, ii)
+                self.fileWrapperList(ii) = fileWrapperClassHandle(fileNames{ii}, self, ii);
                 
                 %% Check Multielectrodes:
                 assert(  self.fileWrapperList(ii).MultiElectrode == self.MultiElectrode, 'Multielectrodes must be simmilar!')

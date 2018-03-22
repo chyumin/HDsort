@@ -112,7 +112,7 @@ classdef matrix < handle
         %------------------------------------------------------------------
         function X = getData(self, varargin)
             sz = self.size;
-            [bb relIdx] = hdsort.filewrapper.hdf5.getBoundingBoxFromIndexing(sz, varargin{:});
+            [bb, relIdx] = hdsort.filewrapper.hdf5.getBoundingBoxFromIndexing(sz, varargin{:});
             if nargin == 2
                 % if only one index was requested, only ask for one
                 % dimension

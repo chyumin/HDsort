@@ -287,26 +287,14 @@ classdef MultiElectrode < handle
             dists = self.getAllElDistancesFromPoint(myPos);
             N = find(dists<=maxDist);
         end 
+
         %------------------------------------------------------------------        
-        function [groupsidx nGroupsPerElectrode] = getLocalElectrodeGroups(self)
-            [groupsidx nGroupsPerElectrode] = hdsort.filewrapper.constructLocalElectrodeGroups(self.electrodePositions(:,1), self.electrodePositions(:,2));       
-        end
-        %------------------------------------------------------------------        
-        function ah = plotElectrodeGroups(self, groupsidx)
-            if nargin == 1
-                [groupsidx nGroupsPerElectrode] = self.getLocalElectrodeGroups();
-            end
-            figure;
-            ah = axes();
+        function ah = plotConfig(self)
+            figure; ah = axes();
             plot(self.electrodePositions(:,1), self.electrodePositions(:,2), 'ok');
-            hold on
-            for ii=1:length(groupsidx)
-                x = self.electrodePositions(groupsidx{ii},1);
-                y = self.electrodePositions(groupsidx{ii},2);
-                plot(ah, x+1+2*rand, y+2*rand, 'x', 'color', hdsort.plot.PlotInterface.vectorColor(ii), 'markersize', 14, 'linewidth', 2);
-                hold on
-            end
+            text(self.electrodePositions(:,1), self.electrodePositions(:,2), num2str( (1:size(self.electrodePositions,1))'));
             set(ah,'YDir','reverse');
         end
+        
     end
 end

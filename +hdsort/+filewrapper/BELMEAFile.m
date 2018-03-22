@@ -148,9 +148,9 @@ classdef BELMEAFile < hdsort.filewrapper.SingleFileWrapper
                 [nDims h5_dims h5_maxDims] = H5S.get_simple_extent_dims(self.dataSets.additional_channels.dataspaceID);
                 self.dimAddChans = fliplr(h5_dims);
             catch
-                str = hdsort.util.buildLastErrString();
-                disp(str);
-                error('Could not find H5 Variable %s!', self.dataSets.additional_channels.name);
+                %str = hdsort.util.buildLastErrString();
+                %disp(str);
+                self.dimAddChans = [0,0];
             end
             
             %% Other info:
@@ -187,14 +187,20 @@ classdef BELMEAFile < hdsort.filewrapper.SingleFileWrapper
         end
         
         %------------------------------------------------------------------
-        function readHardwareSettings(self)
-            hwinfo = h5info(self.fileName, self.dataSets.hardware_settings.name);
-            hws_names = {hwinfo.Datasets.Name};
+        function hs = readHardwareSettings(self)
+            try
+                hwinfo = h5info(self.fileName, self.dataSets.hardware_settings.name);
+                hws_names = {hwinfo.Datasets.Name};
             
-            for h_ = hws_names
-                hw_name = [self.dataSets.hardware_settings.name '/' h_{1}];
-                self.hardware_settings.(h_{1}) = self.tryReadingDataset(hw_name);
+                for h_ = hws_names
+                    hw_name = [self.dataSets.hardware_settings.name '/' h_{1}];
+                    self.hardware_settings.(h_{1}) = self.tryReadingDataset(hw_name);
+                end
+            catch
+                disp('No hardware info found!')
+                self.hardware_settings = [];
             end
+            hs = self.hardware_settings;
         end
         
         %------------------------------------------------------------------
@@ -294,7 +300,11 @@ classdef BELMEAFile < hdsort.filewrapper.SingleFileWrapper
             block = bb(2,1) - bb(1,1) +1;
             offset = bb(1,1) - 1;
             
+            try
             frameNo = double(hdsort.filewrapper.hdf5.read_dset(self.dataSets.frame_numbers.datasetID, block, offset));
+            catch
+            frameNo = double(hdsort.filewrapper.hdf5.read_dset(self.dataSets.frame_numbers.datasetID, [block, 1], [offset 0]));
+            end
             frameNo = frameNo(:)';
             
             % select actually requested data

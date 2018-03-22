@@ -219,5 +219,10 @@ classdef CMOSMEAFile < hdsort.filewrapper.SingleFileWrapper
             L = size(self.h5matrix_raw,1);
         end
         
+        %------------------------------------------------------------------
+        function gainMultiplier = getGainMultiplier(self)
+            gainMultiplier = double(h5read(self.fileName, '/Sessions/Session0/filter/gainmultiplier'));
+        end
+        
     end
 end
