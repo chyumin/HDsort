@@ -143,8 +143,12 @@ classdef Sorting < handle
                 elseif strcmp(P.sortingMode, 'localHDSorting')
                     % This function includes the postprocessing step and
                     % saves the results directluy to a file:
-                    [R, P, P2] = hdsort.startHDSorting(self.DS, self.dPath, ['sort_' self.name]);
+                    [R, P] = hdsort.startHDSorting(self.DS, self.dPath, ['sort_' self.name]);
                 end
+                if ~isfield(R, 'summary')
+                    R.summary = [];
+                end
+                save(self.files.sortingResult, 'R', 'P');
             end
             
         end
@@ -154,7 +158,8 @@ classdef Sorting < handle
             self.files.sortingResult = fullfile(self.dPath, [self.name '_results.mat']);
             if isempty(self.filesLoaded.sortingResult)
                 try
-                    self.filesLoaded.sortingResult = load(self.files.sortingResult);
+                    load(self.files.sortingResult);
+                    self.filesLoaded.sortingResult = R;
                 catch
                     error('Could not load sorting result, run sorter first!');
                 end
