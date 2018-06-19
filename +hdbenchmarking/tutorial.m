@@ -3,7 +3,7 @@ baseFolder = './Tutorial';
 
 % -------------------------------------------------------------------------
 %% 1. Reshape the original recordings such that they contain two interchangable recording areas:
-original_rawFile = fullfile('.', 'Tutorial', 'example_data', 'file01.raw.h5')
+original_rawFile = fullfile(baseFolder, 'example_data', 'file01.raw.h5')
 originalRAW = hdsort.filewrapper.BELMEAFile(original_rawFile)
 originalME = originalRAW.getMultiElectrode()
 
@@ -14,13 +14,13 @@ originalME.plotConfig();
 el1 = 515;
 el2 = 589;
 
-%% Generate new ME:
+% Generate new ME:
 [newME, swapElectrodePairs, blockIdx] = hdbenchmarking.generate.overlappingBlocks(originalME, el1, el2, 1);
 [~, name_] = fileparts(original_rawFile); [~, fileBaseName] = fileparts(name_);
 newMultiElectrodeFile = fullfile(baseFolder, [fileBaseName '_newMultiElectrode.mat']);
 save(newMultiElectrodeFile, 'newME', 'swapElectrodePairs', 'blockIdx', 'fileBaseName');
 
-%% Generate a new file:
+% Generate a new file:
 % To create a file in the BELMEA file format, you need to create a matrix object
 % containing the raw data (either using the hdf5.matrix wrapper or for any
 % matlab matrix the filewrapper.DataMatrix). You further need the frameNumbers,
@@ -36,7 +36,7 @@ for ii = 1:numel(newME.electrodeNumbers)
 end
 channelIdx = find(channelIdx_);
 
-new_rawFile = fullfile('.', 'Tutorial', 'new_file01.raw.h5')
+new_rawFile = fullfile('.', 'Tutorial', 'benchmarking_example01', 'new_file01.raw.h5')
 if ~exist(new_rawFile)
     new_rawFile = hdsort.filewrapper.convertToBELMEAFile(new_rawFile, dataMatrix, frameNumbers, newME, channelIdx)
 end
@@ -44,7 +44,7 @@ end
 % -------------------------------------------------------------------------
 %% 2. Sort original recordings in order to get neuron candidates:
 sortingName = 'hd_sort_tutorial01'
-sortingLocation =  fullfile('.', 'Tutorial');
+sortingLocation =  fullfile('.', 'Tutorial', 'benchmarking_example01');
 
 newRAW = hdsort.filewrapper.BELMEAFile(new_rawFile)
 
@@ -59,9 +59,9 @@ nSpikes = SpikeSortingResult.getSpikeCounts();
 
 % -------------------------------------------------------------------------
 %% 3. Generate artificial data (example)
-baseFolder = './Tutorial';
+folder = fullfile(baseFolder, 'benchmarking_example01');
 
-rawFileName = fullfile(baseFolder, 'new_file01.raw.h5');
+rawFileName = fullfile(folder, 'new_file01.raw.h5');
 preFileNames = sorting.files.preprocessed;
 
 % Select the electrodes that demark the corners of the hidens blocks by
@@ -69,7 +69,7 @@ preFileNames = sorting.files.preprocessed;
 el1 = 381;
 el2 = 382;
 
-resultFile = fullfile(baseFolder, 'results.mat');
+resultFile = fullfile(folder, 'results.mat');
 load(resultFile)
 
 datasetName = 'amplitude_sweep01';
@@ -87,7 +87,7 @@ PRE = hdsort.filewrapper.CMOSMEA(preFileNames);
 artificialPRE = hdsort.filewrapper.CMOSMEA(artificialFileList);
 artificialSortingName = 'hdbenchmarking_tutorial01';
 
-sortingLocation =  fullfile('.', 'Tutorial');
+sortingLocation =  fullfile('.', 'Tutorial', 'benchmarking_example01');
 
 sorting_artificial = hdsort.Sorting(artificialPRE, sortingLocation, artificialSortingName)
 sorting_artificial.preprocess('forceFileDeletionIfExists', 1, 'prefilter', 0)
@@ -98,10 +98,9 @@ SpikeSortingResult_artificial = sorting_artificial.createSpikeSortingResult(sort
 
 % -------------------------------------------------------------------------
 %% 5. Analyze the results by comparing them to the ground truth:
-analysisLocation =  fullfile('.', 'Tutorial');
 artificialUnits = load(artificialUnitFile)
 [sortingEvaluation, sortingEvaluationFile] = hdbenchmarking.evaluate.sorting(...
-    artificialUnits, SpikeSortingResult_artificial, analysisLocation);
+    artificialUnits, SpikeSortingResult_artificial, folder);
 
 % -------------------------------------------------------------------------
 %% 6. Plot the results:
