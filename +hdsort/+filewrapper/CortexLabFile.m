@@ -100,25 +100,25 @@ classdef CortexLabFile < hdsort.filewrapper.SingleFileWrapper
             X =  self.memmap.Data.X(c{:})';
         end
         
-        %------------------------------------------------------------------
-        function [frameNo] = getFrameNumbers(self, varargin)
-            frameNo = 1:self.getNSamples();
-        end
-       
-        %------------------------------------------------------------------
-        function [missingFrames] = getMissingFrameNumbers(self, bufferFile)
-            if nargin == 2 && exist(bufferFile)
-                load(bufferFile)
-            else
-                if ~isstruct(self.missingFrames)
-                    missingFrames = hdsort.filewrapper.util.getMissingFrameNumbers(self.getFrameNumbers());
-                end
-                if nargin == 2
-                    save(bufferFile, 'missingFrames');
-                end
-            end
-            self.missingFrames = missingFrames;
-        end
+%         %------------------------------------------------------------------
+%         function [frameNo] = getFrameNumbers(self, varargin)
+%             frameNo = 1:self.getNSamples();
+%         end
+%        
+%         %------------------------------------------------------------------
+%         function [missingFrames] = getMissingFrameNumbers(self, bufferFile)
+%             if nargin == 2 && exist(bufferFile)
+%                 load(bufferFile)
+%             else
+%                 if ~isstruct(self.missingFrames)
+%                     missingFrames = hdsort.filewrapper.util.getMissingFrameNumbers(self.getFrameNumbers());
+%                 end
+%                 if nargin == 2
+%                     save(bufferFile, 'missingFrames');
+%                 end
+%             end
+%             self.missingFrames = missingFrames;
+%         end
         
         %------------------------------------------------------------------
         function L = getNSamples_(self)
@@ -311,7 +311,7 @@ classdef CortexLabFile < hdsort.filewrapper.SingleFileWrapper
                 P.binFile = fullfile(pathstr, [name, '.dat']);
                 
                 % create a binary file where the data is stored
-                sig = hdsort.filewrapper.util.binaryFileMatrix(P.binFile, [1 nC_effective], 'writable', true);
+                sig = hdsort.filewrapper.util.BinaryFileMatrix(P.binFile, [1 nC_effective], 'writable', true);
                 
                 % Save a link to the binary file into /sig:
                 binFileName = [name, '.dat'];

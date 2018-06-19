@@ -82,7 +82,7 @@ classdef CMOSMEAFile < hdsort.filewrapper.SingleFileWrapper
                 binDims = h5read(self.fileName, [self.session_str 'bin_dims']);
                 assert( exist(binFile, 'file') == 2, ['Task aborted: binary file ' binFile ' not found!']);
                 
-                self.h5matrix_raw =  hdsort.filewrapper.util.binaryFileMatrix(binFile, binDims);
+                self.h5matrix_raw =  hdsort.filewrapper.util.BinaryFileMatrix(binFile, binDims);
             else
                 self.h5matrix_raw = hdsort.filewrapper.hdf5.matrix(self.fileName, [self.session_str 'sig'], true);
             end
@@ -127,23 +127,43 @@ classdef CMOSMEAFile < hdsort.filewrapper.SingleFileWrapper
         
         %------------------------------------------------------------------
         function readFilterSettings(self)
-            fsinfo = h5info(self.fileName, self.dataSets.filter_settings.name);
-            fs_names = {fsinfo.Datasets.Name};
-            
-            for f_ = fs_names
-                fs_name = [self.dataSets.filter_settings.name '/' f_{1}];
-                self.filter_settings.(f_{1}) = self.tryReadingDataset(fs_name);
+            try
+                fsinfo = h5info(self.fileName, self.dataSets.filter_settings.name);
+                fs_names = {fsinfo.Datasets.Name};
+                
+                for f_ = fs_names
+                    fs_name = [self.dataSets.filter_settings.name '/' f_{1}];
+                    self.filter_settings.(f_{1}) = self.tryReadingDataset(fs_name);
+                end
+            catch
+                warning('Not filter information found!')
             end
         end
         
         %------------------------------------------------------------------
-        function FR = getFrameNumbers(self)
+        function missingFrames = getMissingFrameNumbers(self)
             FR = hdsort.filewrapper.hdf5.recursiveLoad(self.fileName, [self.session_str 'frame_numbers']);
+            if ~isfield(FR, 'missing_fns')
+                warning('There is a problem with missing framenumbers in CMOSMEASession.getFrameNumbers()!')
+                FR.missing_fns = -1;
+            end
+            
+            missingFrames.first = FR.first_fn;
+            missingFrames.last = FR.last_fn;
+            if FR.missing_fns == -1
+                missingFrames.begin = [];
+                missingFrames.n = 0;
+                missingFrames.length = [];
+            else
+                missingFrames.begin = FR.missing_fns(1, :);
+                missingFrames.n = size(FR.missing_fns, 2);
+                missingFrames.length = FR.missing_fns(2, :);
+            end
         end
         
         %------------------------------------------------------------------
         function x = isBinaryFile(self)
-            x = isa( self.h5matrix_raw, 'hdsort.filewrapper.util.binaryFileMatrix');
+            x = isa( self.h5matrix_raw, 'hdsort.filewrapper.util.BinaryFileMatrix');
         end
         
         %------------------------------------------------------------------

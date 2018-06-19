@@ -108,7 +108,7 @@ clear x
 %maxDims = [nSamples nC];
 
 % create a binary file where the data is stored
-sig = hdsort.filewrapper.util.binaryFileMatrix(binFile, [1 nC], 'writable', true);
+sig = hdsort.filewrapper.util.BinaryFileMatrix(binFile, [1 nC], 'writable', true);
 
 % Save a link to the binary file into /sig:
 [pathstr,name,ext] = fileparts(binFile);

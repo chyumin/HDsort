@@ -26,7 +26,6 @@ classdef BinaryFileMatrix < handle
             P.writable = false;
             P.precision  = 'int16';
             P.offset = 0;
-            P.useNewAllocationScheme = false;
             
             self.P = hdsort.util.parseInputs(P, varargin, 'error');
             
@@ -48,50 +47,8 @@ classdef BinaryFileMatrix < handle
         
         %------------------------------------------------------------------
         function initializeFile(self)
-            if ~self.P.useNewAllocationScheme
-                fileID = fopen(self.fname,'a+'); fwrite(fileID, zeros(self.dims), self.P.precision); fclose(fileID);
-            else
-                % This is experimental
-                warning('THIS IS EXPERIMENTAL AND DOES NOT WORK PROPERLY!');
-                format = {self.P.precision self.dims([2 1]) 'X'};
-                sz = self.hFrameSize(format);
-                skip = sz-1;
-                fileID = fopen(self.fname,'a+');
-                fwrite(fileID, 0, self.P.precision, skip);
-                fseek(fileID, 0, 'eof');
-                FileSize = ftell(fileID);
-                fclose(fileID);
-                disp(FileSize)
-            end
-        end        
-
-        
-        % -------------------------------------------------------------------------
-        % This function is a copy from the memmapfile class to compute how
-        % many bytes need to be jumped to initialize an empty file.
-        % Return size of a single frame in bytes.
-        function sz = hFrameSize(self, format)
-            sz = 0;
-            if iscell(format)
-                for i=1:size(format, 1)
-                    sz = sz + self.hFrameSize(format{i,1}) * prod(format{i,2});
-                end
-            else
-                switch format
-                    case {'int8', 'uint8'}
-                        sz = 1;
-
-                    case {'int16', 'uint16'}
-                        sz = 2;
-
-                    case {'int32', 'uint32', 'single'}
-                        sz = 4;
-
-                    case {'double', 'int64', 'uint64'}
-                        sz = 8;
-                end
-            end
-        end % hFrameSize
+            fileID = fopen(self.fname,'a+'); fwrite(fileID, zeros(self.dims), self.P.precision); fclose(fileID);
+        end
         
         % DESTRUCTOR
         %------------------------------------------------------------------
@@ -178,44 +135,33 @@ classdef BinaryFileMatrix < handle
             end
             assert( dimsX(2) == self.dims(2), 'Dimensions missmatch: number of columns must be the same!');
             
-            if strcmp(varargin{1}, ':')
+            if varargin{1} == ':'
                 % Case when call is M(:, :)
                 m = min(self.dims(1), dimsX(1));
                 v = 1:m;
-                self.memmap.Data.X(:,v) = X(1:length(v), :)';
-                self.appendData( X((length(v)+1):end, :) );                
             else
                 % Case when call is M(1:6, :)
                 vx = varargin{1};
                 assert( length(vx) == dimsX(1), 'Dimensions missmatch: number of rows must be the same!');
-                
-                setidx = vx<=self.dims(1);
-                setvx    = vx(setidx);
-                self.memmap.Data.X(:,setvx) = X(setidx, :)';
-                
-                appendidx = vx>self.dims(1);
-                appendvx = vx(appendidx);
-                assert(~any(appendvx > self.dims(1) + length(appendvx)), 'Can only append consecutive blocks without holes. Take care of zero padding yourselv!');
-                self.appendData( X(appendidx, :) );                
-            end            
-
+                m = min(self.dims(1), vx(end) );
+                v = vx(1):m;
+            end
+            
+            self.memmap.Data.X(:,v) = X(1:length(v), :)';
+            self.appendData( X((length(v)+1):end, :) );
         end
         
         %------------------------------------------------------------------
         function appendData(self, X)
             if size(X,1) ~= 0
                 fileID = fopen(self.fname,'a+');
-                % WRTING THE MATRIX WITH THE TRANSPOSE WORKS BUT IT
-                % FORCES CALL BY VALUE NOT CALL BY HANDLE. FOR HUGE DATA
-                % CHUNKS THIS MIGHT BE BAD.
-                % BUT WE NEED TO WRITE ROW BY ROW AS THE DATA IN MEMORY IS CONSECUTIVE row1, row2,
-                % USE appendDataTransposed instead if possible
                 fwrite(fileID, X', self.P.precision);
                 fclose(fileID);
                 self.dims(1) = self.dims(1) + size(X,1);
-                self.openMemmap();
+                self.openMemmap;
             end
         end
+        
         %------------------------------------------------------------------
         function ret = appendDataTransposed(self, Xt)
             % This function is faster than the non-transposed version for
@@ -229,7 +175,7 @@ classdef BinaryFileMatrix < handle
             end
             ret = true;
         end
-        ed
+        
         %------------------------------------------------------------------
         function wf = getWaveform_(self, nCut, channelindex, cutLength, t1, t2)
 %             wf = zeros(nCut, length(channelindex)*cutLength);
@@ -252,7 +198,7 @@ classdef BinaryFileMatrix < handle
                 end
                 self.deleteFile;
                 self.initializeFile;
-                self.openMemmap();
+                self.openMemmap;
             catch
                 warning(['Could not clear binary file ' self.fname '!']);
             end

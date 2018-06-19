@@ -292,7 +292,7 @@ classdef MultiElectrode < handle
         function ah = plotConfig(self)
             figure; ah = axes();
             plot(self.electrodePositions(:,1), self.electrodePositions(:,2), 'ok');
-            text(self.electrodePositions(:,1), self.electrodePositions(:,2), num2str( (1:size(self.electrodePositions,1))'));
+            text(self.electrodePositions(:,1), self.electrodePositions(:,2)+10, num2str( (1:size(self.electrodePositions,1))'));
             set(ah,'YDir','reverse');
         end
         

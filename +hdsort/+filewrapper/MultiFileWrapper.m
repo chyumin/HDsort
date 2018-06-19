@@ -134,6 +134,19 @@ classdef MultiFileWrapper < hdsort.filewrapper.FileWrapperInterface
         end
         
         %------------------------------------------------------------------
+        function [missingFrames, sessionHasMissingFrames] = getMissingFrameNumbers(self)
+            nSessions = length(self.fileWrapperList);
+            sessionHasMissingFrames = false(1,nSessions);
+            
+            missingFrames = self.fileWrapperList(1).getMissingFrameNumbers();
+            sessionHasMissingFrames(1) = missingFrames(1).n > 0;
+            for ii = 2:nSessions
+                missingFrames(ii) = self.fileWrapperList(ii).getMissingFrameNumbers();
+                sessionHasMissingFrames(ii) = missingFrames(ii).n > 0;
+            end
+        end
+        
+        %------------------------------------------------------------------
         function fileNames = getSourceFileNames(self)
             fileNames = self.fileNames;
         end

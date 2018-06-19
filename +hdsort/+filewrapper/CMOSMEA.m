@@ -32,16 +32,16 @@ classdef CMOSMEA < hdsort.filewrapper.MultiFileWrapper
             x = self.fileWrapperList(idx).isBinaryFile();
         end
         
-        %------------------------------------------------------------------
-        function [sFR, sessionHasMissingFrames] = getFrameNumbers(self)
-            nSessions = length(self.fileWrapperList);
-            sessionHasMissingFrames = false(1,nSessions);
-            FR = [];
-            for i = 1:nSessions
-                sFR(i) = self.fileWrapperList(i).getFrameNumbers();
-                sessionHasMissingFrames(i) = ~(length(sFR(i).missing_fns)==1);
-            end
-        end
+%         %------------------------------------------------------------------
+%         function [sFR, sessionHasMissingFrames] = getFrameNumbers(self)
+%             nSessions = length(self.fileWrapperList);
+%             sessionHasMissingFrames = false(1,nSessions);
+%             FR = [];
+%             for i = 1:nSessions
+%                 sFR(i) = self.fileWrapperList(i).getFrameNumbers();
+%                 sessionHasMissingFrames(i) = ~(length(sFR(i).missing_fns)==1);
+%             end
+%         end
         
         %------------------------------------------------------------------
         function gainMultiplier = getGainMultiplier(self)

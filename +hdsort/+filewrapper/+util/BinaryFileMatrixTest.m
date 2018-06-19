@@ -2,12 +2,12 @@ X = magic(10);
 X = X(:,1:5);
 
 pd = pdefs();
-ffile = fullfile(pd.localData, 'binaryFileMatrixTest.bin');
+ffile = fullfile(pd.localData, 'BinaryFileMatrixTest.bin');
 dims = size(X);
-Y = hdsort.filewrapper.util.binaryFileMatrix(ffile, dims, 'writable', true, 'precision', 'single');
+Y = hdsort.filewrapper.util.BinaryFileMatrix(ffile, dims, 'writable', true, 'precision', 'single');
 Y(:,:) = X;
 
-K = hdsort.filewrapper.util.binaryFileMatrix(ffile, dims, 'writable', false, 'precision', 'single');
+K = hdsort.filewrapper.util.BinaryFileMatrix(ffile, dims, 'writable', false, 'precision', 'single');
 
 X
 K(:,:)

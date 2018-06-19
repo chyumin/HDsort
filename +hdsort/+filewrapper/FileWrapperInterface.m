@@ -261,6 +261,29 @@ classdef FileWrapperInterface < handle
             assert(isa(X, 'double'), 'Function getData_ must be return a double!');
         end
         
+        %------------------------------------------------------------------
+        % Override these function if the frame number information is
+        % present:
+        function [frameNo, sessionHasMissingFrames] = getFrameNumbers(self, idx)
+            [missingFrames, sessionHasMissingFrames] = self.getMissingFrameNumbers();
+            
+            if nargin == 1 || (ischar(idx) && strcmp(idx, ':'))
+                frameNo = hdsort.filewrapper.util.getFrameNumbersFromMissing(missingFrames);
+                assert(numel(frameNo) == size(self, 1), '!')
+            elseif ischar(idx) && strcmp(idx, 'end')
+                frameNo = missingFrames.last;
+            elseif ~ischar(idx) && idx == 1
+                frameNo = missingFrames.first;
+            else
+                frameNo_ = hdsort.filewrapper.util.getFrameNumbersFromMissing(missingFrames);
+                frameNo = frameNo_(idx);
+            end
+        end
+        
+        function mfn = getMissingFrameNumbers(self)
+            mfn = hdsort.filewrapper.util.getMissingFrameNumbers(1:size(self,1));
+        end
+        
         %%
         %------------------------------------------------------------------
         %-------------- ExtendedDataSourceInterface functions -------------
@@ -310,7 +333,8 @@ classdef FileWrapperInterface < handle
             P.channelIdx = 1:self.size(2);
             P.maxLen = 300000;
             P.thr = 4;
-            P.Tf = 80;            
+            P.Tf = 80;     
+            P.displayProgress = false;
             P = hdsort.util.parseInputs(P, varargin);
            
             Len = self.size(1);
@@ -331,35 +355,52 @@ classdef FileWrapperInterface < handle
             if any(notCalcIdx)
                 cidx = P.channelIdx(notCalcIdx);
                 fullcidx = fullChanIdx(cidx);
-                disp('Computing noise std...'); tic
+                
+                if P.displayProgress
+                    disp('Computing noise std...'); tic
+                end
+                
                 smadL = min(Len, P.maxLen);
                 smad = hdsort.noise.estimateSigma(...
                         self.getData(1:smadL, cidx), P.Tf, P.thr);
                 self.memoryBufferNoiseSmad(fullcidx) = smad;
-                disp('Done.'); toc        
+                
+                if P.displayProgress
+                    disp('Done.'); toc        
+                end
             end
             smad = self.memoryBufferNoiseSmad(fullChanIdx);
         end
         
         %------------------------------------------------------------------
-        function [times pks] = detectSpikes(self, varargin)
+        function [times, pks, nChunksChannelHasNoSpikes, smad] = detectSpikes(self, varargin)
             P.channelIdx = 1:self.size(2);
             P.chunkSize = 100000;
             P.thr = 3.5;
+            P.smad = [];
             P.energyfun = @(x) -x;
             P.minPeakDistance = ceil(self.getSamplesPerSecond/1000); % 1ms
             P.Len = [];
+            P.progressDisplay = 'console';
             P = hdsort.util.parseInputs(P, varargin);
             
             if isempty(P.Len)
                 P.Len = self.size(1);
             end
             
-            % get noise std
-            smad = self.noiseStd('channelIdx', P.channelIdx);
+            % Get noise std:
+            if isempty(P.smad)
+                smad = self.noiseStd('channelIdx', P.channelIdx);
+            else
+                assert(length(P.smad) == length(P.channelIdx), 'there must be one smad per channel');
+                smad = P.smad;
+            end
             
             % Detect spikes in the beginning of the file
-            disp('Detecting spikes...'); tic
+            if ~strcmp(P.progressDisplay, 'none')
+                disp('Detecting spikes...');
+            end
+            tic;
             pks = cell(length(P.channelIdx),1);
             times = pks;
             for cidx = 1:length(P.channelIdx)
@@ -367,18 +408,27 @@ classdef FileWrapperInterface < handle
                 pks{c,1} = [];
                 times{c,1} = [];
             end
+            
             chunker = hdsort.util.Chunker(P.Len, 'chunkSize', P.chunkSize, ...
-                'progressDisplay', 'console', 'minChunkSize', 1000, 'chunkOverlap', 2*P.minPeakDistance);
+                'progressDisplay', P.progressDisplay, 'minChunkSize', 1000, 'chunkOverlap', 2*P.minPeakDistance);
+            nChunksChannelHasNoSpikes = zeros(1, length(P.channelIdx));
             while chunker.hasNextChunk()
-                [chunkOvp chunk] = chunker.getNextChunk();
+                [chunkOvp, chunk] = chunker.getNextChunk();
                 X = double(self.getData(chunkOvp(1):chunkOvp(2), P.channelIdx));
+                countEmptyChannelsThisChunk = 0;
                 for cidx = 1:length(P.channelIdx)
                     c = P.channelIdx(cidx);
-                    [pks_, times_] = findpeaks(P.energyfun(X(:,c)), 'MINPEAKHEIGHT', smad(cidx)*P.thr,...
-                                                            'MINPEAKDISTANCE', P.minPeakDistance);
+                    
+                    % Switched by Felix 03 April 2018 to peakseek
+                    [times_, pks_] = matlabfilecentral.peakseek(P.energyfun(X(:,c)), P.minPeakDistance, smad(cidx)*P.thr);
+                    if isempty(pks_)
+                        nChunksChannelHasNoSpikes(cidx) = nChunksChannelHasNoSpikes(cidx)+1;
+                        countEmptyChannelsThisChunk = countEmptyChannelsThisChunk+1;
+                    end
                     pks_ = X(times_,c); % get the right amplitudes! (sign!)
                     pks_ = pks_(:);
                     times_ = times_(:);
+                    
                     % remove spikes that are outside this chunk
                     rmvIdx = (times_+chunkOvp(1) < chunk(1)) | (times_+chunkOvp(1) > chunk(2));
                     pks_(rmvIdx) = [];
@@ -387,8 +437,16 @@ classdef FileWrapperInterface < handle
                     pks{c,1} = [pks{c}; pks_];
                     times{c,1} = [times{c}; times_+chunkOvp(1)-1];
                 end
+                if countEmptyChannelsThisChunk > 0
+                    if ~strcmp(P.progressDisplay, 'none')
+                        fprintf('Warning, %d out of %d channels had no spike in this chunk!\n', countEmptyChannelsThisChunk, length(P.channelIdx));
+                    end
+                end
             end
-            disp('Done.'); toc    
+            if ~strcmp(P.progressDisplay, 'none')
+                disp('Done.');
+                toc
+            end
         end
         
         %------------------------------------------------------------------

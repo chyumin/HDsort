@@ -7,7 +7,7 @@ assert(~any(df<0), 'Frame numbers are not monotonically increasing!')
 idx = find(df);
 
 missingFrames.begin = frame_numbers(idx)+1;
-missingFrames.end = frame_numbers(idx)+1+df(idx);
+%missingFrames.end = frame_numbers(idx)+1+df(idx);
 missingFrames.length = df(idx);
 missingFrames.n = numel(missingFrames.begin);
 

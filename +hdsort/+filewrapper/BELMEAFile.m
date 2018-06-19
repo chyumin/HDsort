@@ -525,7 +525,7 @@ classdef BELMEAFile < hdsort.filewrapper.SingleFileWrapper
                 P.binFile = fullfile(pathstr, [name, '.dat']);
                 
                 % create a binary file where the data is stored
-                sig = hdsort.filewrapper.util.binaryFileMatrix(P.binFile, [1 nC_effective], 'writable', true);
+                sig = hdsort.filewrapper.util.BinaryFileMatrix(P.binFile, [1 nC_effective], 'writable', true);
                 
                 % Save a link to the binary file into /sig:
                 binFileName = [name, '.dat'];
