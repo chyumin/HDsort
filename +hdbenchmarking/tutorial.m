@@ -1,32 +1,9 @@
 %%
-if 0
-    rawFile = fullfile('.', 'Tutorial', 'file01.raw.h5')
-    RAW = hdsort.filewrapper.BELMEAFile(rawFile)
-    me = RAW.getMultiElectrode()
-    
-    %%
-    preprocessLocation = fullfile('.', 'Tutorial');
-    preprocessedFile = RAW.preprocessFile(preprocessLocation)
-    preprocessedFiles = {preprocessedFile}
-    
-    %%
-    sortingName = 'hd_sort_tutorial01';
-    rawFiles = {rawFile};
-    preprocessjob = hdsort.grid.PreprocessJob(sortingName, preprocessLocation, rawFiles, 'gridType', 'QSUB')
-    preprocessjob.alreadyPreprocessed()
-    if ~preprocessjob.alreadyPreprocessed()
-        preprocessjob.setTaskParameters();
-        preprocessjob.createAutoSubmitToken();
-        all_tasks_completed = preprocessjob.waitForTasksToFinish(10);
-    end
-    [preprocessedFiles, rawFiles, cmdFiles] = preprocessjob.getFileNames();
-    
-end
-
 baseFolder = './Tutorial';
 
+% -------------------------------------------------------------------------
 %% 1. Reshape the original recordings such that they contain two interchangable recording areas:
-original_rawFile = fullfile('.', 'Tutorial', 'file02.raw.h5')
+original_rawFile = fullfile('.', 'Tutorial', 'example_data', 'file01.raw.h5')
 originalRAW = hdsort.filewrapper.BELMEAFile(original_rawFile)
 originalME = originalRAW.getMultiElectrode()
 
@@ -59,30 +36,86 @@ for ii = 1:numel(newME.electrodeNumbers)
 end
 channelIdx = find(channelIdx_);
 
-new_rawFile = fullfile('.', 'Tutorial', 'new_file02.raw.h5')
+new_rawFile = fullfile('.', 'Tutorial', 'new_file01.raw.h5')
 if ~exist(new_rawFile)
     new_rawFile = hdsort.filewrapper.convertToBELMEAFile(new_rawFile, dataMatrix, frameNumbers, newME, channelIdx)
 end
 
-%% Preprocess this file:
-newRAW = hdsort.filewrapper.BELMEAFile(new_rawFile)
-preprocessLocation = fullfile('.', 'Tutorial');
-preprocessedFile = newRAW.preprocessFile(preprocessLocation)
-preprocessedFiles = {preprocessedFile}
-
-%% Sort original recordings in order to get neuron candidates:
-PRE = hdsort.filewrapper.CMOSMEA(preprocessedFiles);
+% -------------------------------------------------------------------------
+%% 2. Sort original recordings in order to get neuron candidates:
+sortingName = 'hd_sort_tutorial01'
 sortingLocation =  fullfile('.', 'Tutorial');
-sorting = hdsort.Sorting(PRE, sortingLocation, sortingName)
-[R, P] = sorting.startSorting('sortingMode', 'localHDSorting')
 
-%% Create artificialUnits:
-rawFileNames = {new_rawFile};
+newRAW = hdsort.filewrapper.BELMEAFile(new_rawFile)
 
-%%
-hdbenchmarking.generate.artificialUnits2
+sorting = hdsort.Sorting(newRAW, sortingLocation, sortingName)
+sorting.preprocess('forceFileDeletionIfExists', 1)
+sorting.sort('sortingMode', 'local')
+sorting.postprocess()
 
+% Create a SpikeSortingResult
+SpikeSortingResult = sorting.createSpikeSortingResult(sortingLocation)
+nSpikes = SpikeSortingResult.getSpikeCounts();
 
+% -------------------------------------------------------------------------
+%% 3. Generate artificial data (example)
+baseFolder = './Tutorial';
+
+rawFileName = fullfile(baseFolder, 'new_file01.raw.h5');
+preFileNames = sorting.files.preprocessed;
+
+% Select the electrodes that demark the corners of the hidens blocks by
+% hand:
+el1 = 381;
+el2 = 382;
+
+resultFile = fullfile(baseFolder, 'results.mat');
+load(resultFile)
+
+datasetName = 'amplitude_sweep01';
+gdf = double(R.gdf_merged);
+estimated_footprints =  R.T_merged;
+RAW_list = {hdsort.filewrapper.BELMEAFile(rawFileName)};
+PRE = hdsort.filewrapper.CMOSMEA(preFileNames);
+[~, swapElectrodePairs, blockIdx] = hdbenchmarking.generate.overlappingBlocks(PRE.MultiElectrode, el1, el2, true);
+
+[artificialFileList, artificialUnitFile] = hdbenchmarking.generate.artificialUnits(datasetName, ...
+    baseFolder, gdf, estimated_footprints, RAW_list, PRE, swapElectrodePairs, blockIdx)
+
+% -------------------------------------------------------------------------
+%% 4. Sort the artificial dataset:
+artificialPRE = hdsort.filewrapper.CMOSMEA(artificialFileList);
+artificialSortingName = 'hdbenchmarking_tutorial01';
+
+sortingLocation =  fullfile('.', 'Tutorial');
+
+sorting_artificial = hdsort.Sorting(artificialPRE, sortingLocation, artificialSortingName)
+sorting_artificial.preprocess('forceFileDeletionIfExists', 1, 'prefilter', 0)
+sorting_artificial.sort('sortingMode', 'local')
+sorting_artificial.postprocess()
+
+SpikeSortingResult_artificial = sorting_artificial.createSpikeSortingResult(sortingLocation)
+
+% -------------------------------------------------------------------------
+%% 5. Analyze the results by comparing them to the ground truth:
+analysisLocation =  fullfile('.', 'Tutorial');
+artificialUnits = load(artificialUnitFile)
+[sortingEvaluation, sortingEvaluationFile] = hdbenchmarking.evaluate.sorting(...
+    artificialUnits, SpikeSortingResult_artificial, analysisLocation);
+
+% -------------------------------------------------------------------------
+%% 6. Plot the results:
+figure; subplot(3,1,1)
+scatter(sortingEvaluation.gt.AMP, sortingEvaluation.matched.TPR)
+ylabel('sensitivity (TPR) [%]')
+
+subplot(3,1,2)
+scatter(sortingEvaluation.gt.AMP, sortingEvaluation.matched.PPV)
+ylabel('precision (PPV) [%]')
+
+subplot(3,1,3)
+scatter(sortingEvaluation.gt.AMP, sortingEvaluation.matched.ERR)
+ylabel('error rate [s^(-1)]')
 
 
 
