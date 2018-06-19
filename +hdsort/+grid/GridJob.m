@@ -152,7 +152,7 @@ classdef GridJob < handle
                 
                 % Only create new report files when it doesn't exist yet:
                 if exist(self.files.report{ii}, 'file') ~= 2
-                    rep = hdsort.filewrapper.util.BinaryFileMatrix(self.files.report{ii}, [1 2], 'writable', true);
+                    rep = hdsort.file.util.BinaryFileMatrix(self.files.report{ii}, [1 2], 'writable', true);
                     rep(:,:) = [0 0];
                 end
             end
@@ -226,7 +226,7 @@ classdef GridJob < handle
             end
             for ii = 1:self.nTasks
                 try
-                    rep = hdsort.filewrapper.util.BinaryFileMatrix(self.files.report{ii}, [1 2], 'writable', false);
+                    rep = hdsort.file.util.BinaryFileMatrix(self.files.report{ii}, [1 2], 'writable', false);
                 catch
                     myDisp([self.jobName ': Binary file for task ' num2str( self.taskIDs(ii) ) ' threw exception!']);
                     rep = [0 1];
@@ -305,7 +305,7 @@ classdef GridJob < handle
             summary.completedTasks = zeros(1, self.nTasks);
             summary.times = {};
             for ii = 1:self.nTasks
-                rep = hdsort.filewrapper.util.BinaryFileMatrix(self.files.report{ii}, [1 2], 'writable', false);
+                rep = hdsort.file.util.BinaryFileMatrix(self.files.report{ii}, [1 2], 'writable', false);
                 if rep(1,2) > 0
                     summary.tasksError = [summary.tasksError self.taskIDs(ii)];
                 end

@@ -16,7 +16,7 @@ function sortOneLEG(sortingName, wfsFile, covFile, legFolder, sortingParameters,
 % preprocessedFileList: List of preprocessed files for full template
 %                       estimation
 
-WFS = hdsort.filewrapper.WaveFormFile(wfsFile);
+WFS = hdsort.file.WaveFormFile(wfsFile);
 
 % Load noise covariance:
 N = load(covFile);
@@ -42,7 +42,7 @@ try
     disp('Templates already estimated.')
 catch
     disp('Starting template estimation...')
-    DS              = hdsort.filewrapper.CMOSMEA(preprocessedFileList);
+    DS              = hdsort.file.CMOSMEA(preprocessedFileList);
     MES             = DS.MultiElectrode;
     elGroupIndices  = groupidx;
     cutleft         = P_.templateEstimation.cutLeft;

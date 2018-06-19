@@ -23,7 +23,7 @@ classdef WfMatrix < hdsort.waveforms.WfManager
         %------------------------------------------------------------------
         function self = WfMatrix(X, eventTimes, eventChans, eventIDs, cutLeft, cutLength, ME)
             if nargin < 7
-                ME = hdsort.filewrapper.MultiElectrode(unique(eventChans)', unique(eventChans));
+                ME = hdsort.file.MultiElectrode(unique(eventChans)', unique(eventChans));
             end
             self = self@hdsort.waveforms.WfManager(eventTimes, eventChans, eventIDs, ME);
             self.X = X;

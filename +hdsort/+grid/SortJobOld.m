@@ -65,7 +65,7 @@ classdef SortJob < hdsort.grid.GridJob
             warning('grid.SortJob.createBOTMGroups() deprecated!')
             
             disp('Create DataStructure object...');
-            DSFull = hdsort.filewrapper.CMOSMEA(self.files.data, 'useFilter', self.sortJobP.useFilter, 'name', self.jobName);%'PREFILT');
+            DSFull = hdsort.file.CMOSMEA(self.files.data, 'useFilter', self.sortJobP.useFilter, 'name', self.jobName);%'PREFILT');
             self.MES = DSFull.MultiElectrode.toStruct();
             
             %% Create groups based on the electrode positions and save them to a file:
@@ -226,7 +226,7 @@ classdef SortJob < hdsort.grid.GridJob
         %                     %[dir_exists,mess,messid] = mkdir(self.folders.main, 'qcplot');
         %                     %self.folders.qcplot = fullfile( self.folders.main, 'qcplot');
         %
-        %                     %DSFull = hdsort.filewrapper.CMOSMEA(self.files.data);%, 'useFilter', self.sortJobP.useFilter, 'name', self.jobName);
+        %                     %DSFull = hdsort.file.CMOSMEA(self.files.data);%, 'useFilter', self.sortJobP.useFilter, 'name', self.jobName);
         %                     %MES = DSFull.MultiElectrode.toStruct();
         %                     save(self.destinationlocation.files.summary, 'units', 'nUnits');
         %
@@ -246,7 +246,7 @@ classdef SortJob < hdsort.grid.GridJob
                 [dir_exists,mess,messid] = mkdir(self.folders.main, 'qcplot');
                 self.folders.qcplot = fullfile( self.folders.main, 'qcplot');
                 
-                DSFull = hdsort.filewrapper.CMOSMEA(self.files.data);%, 'useFilter', self.sortJobP.useFilter, 'name', self.jobName);
+                DSFull = hdsort.file.CMOSMEA(self.files.data);%, 'useFilter', self.sortJobP.useFilter, 'name', self.jobName);
                 MES = DSFull.MultiElectrode.toStruct();
                 
             catch
@@ -353,7 +353,7 @@ classdef SortJob < hdsort.grid.GridJob
             for ii = 1:length(self.files.data)
                 
                 %% Check if the data (the first file at least) is binary:
-                m_test = hdsort.filewrapper.CMOSMEA(self.files.data{ii});
+                m_test = hdsort.file.CMOSMEA(self.files.data{ii});
                 
                 if ~m_test.isBinaryFile()
                     [pathstr,name,ext] = fileparts(self.files.data{ii});
@@ -362,7 +362,7 @@ classdef SortJob < hdsort.grid.GridJob
                     
                     %% Create a binary file on the scratch:
                     if exist(fileNameBin, 'file') ~= 2
-                        hdsort.filewrapper.util.copyH5toBinary(self.files.data{ii}, fileNameH5, fileNameBin);
+                        hdsort.file.util.copyH5toBinary(self.files.data{ii}, fileNameH5, fileNameBin);
                     end
                     newDataFileLocations{ii} = fileNameH5;
                 else
@@ -430,7 +430,7 @@ classdef SortJob < hdsort.grid.GridJob
             assert( isfield(taskP, 'taskID'), 'Task aborted: field taskParameters.taskID not specified!');
             
             %% (Re-)Set reporting file:
-            rep = hdsort.filewrapper.util.BinaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);
+            rep = hdsort.file.util.BinaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);
             rep(:,:) = [0 0];
             
             if ~debugFlag
@@ -446,7 +446,7 @@ classdef SortJob < hdsort.grid.GridJob
             function mainBlock()
                 disp('Creating DS...')
                 %% Sort:
-                DS = hdsort.filewrapper.CMOSMEA(taskP.dataFiles, 'useFilter', 0, 'name', 'PREFILT');
+                DS = hdsort.file.CMOSMEA(taskP.dataFiles, 'useFilter', 0, 'name', 'PREFILT');
                 MES = DS.MultiElectrode.toStruct();
                 
                 DS.restrictToChannels(taskP.groupidx);
@@ -462,7 +462,7 @@ classdef SortJob < hdsort.grid.GridJob
                 
                 %% Write to reporter file:
                 disp('Writing results...')
-                rep = hdsort.filewrapper.util.BinaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);
+                rep = hdsort.file.util.BinaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);
                 rep(:,:) = [1 0];
             end
             
@@ -472,7 +472,7 @@ classdef SortJob < hdsort.grid.GridJob
                 errStr = hdsort.util.buildLastErrString(ME);
                 disp(errStr)
                 
-                rep = hdsort.filewrapper.util.BinaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);
+                rep = hdsort.file.util.BinaryFileMatrix(taskP.reportFile, [1 2], 'writable', true);
                 rep(:,:) = [0 1];
                 rethrow(ME)
             end

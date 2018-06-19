@@ -103,7 +103,7 @@ classdef SortJob < hdsort.grid.GridJob
             assert( isfield(taskParameters, 'sortingParameters'), 'Task aborted: field taskParameters.sortingParameters does not exist!')
             
             %% (Re-)Set reporting file:
-            rep = hdsort.filewrapper.util.BinaryFileMatrix(taskParameters.reportFile, [1 2], 'writable', true);
+            rep = hdsort.file.util.BinaryFileMatrix(taskParameters.reportFile, [1 2], 'writable', true);
             rep(:,:) = [0 0];
             
             if ~debugFlag
@@ -127,7 +127,7 @@ classdef SortJob < hdsort.grid.GridJob
                                             taskParameters.preprocessedFileList);
                 
                 %% Write to reporter file:
-                rep = hdsort.filewrapper.util.BinaryFileMatrix(taskParameters.reportFile, [1 2], 'writable', true);
+                rep = hdsort.file.util.BinaryFileMatrix(taskParameters.reportFile, [1 2], 'writable', true);
                 rep(:,:) = [1 0];
             end
             
@@ -137,7 +137,7 @@ classdef SortJob < hdsort.grid.GridJob
                 errStr = hdsort.util.buildLastErrString(ME);
                 disp(errStr)
                 
-                rep = hdsort.filewrapper.util.BinaryFileMatrix(taskParameters.reportFile, [1 2], 'writable', true);
+                rep = hdsort.file.util.BinaryFileMatrix(taskParameters.reportFile, [1 2], 'writable', true);
                 rep(:,:) = [0 1];
                 rethrow(ME)
             end

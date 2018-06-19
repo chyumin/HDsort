@@ -73,7 +73,7 @@ classdef Preprocessor < handle
             
             % PRE CHECKS
             for i=1:length(self.DSlist)
-                assert(isa(self.DSlist{i}, 'hdsort.filewrapper.FileWrapperInterface'), 'Must be a cell array of Data Sources!');
+                assert(isa(self.DSlist{i}, 'hdsort.file.FileWrapperInterface'), 'Must be a cell array of Data Sources!');
                 if i==1
                     self.nC = size(self.DSlist{i},2);
                     self.samplesPerSecond = self.DSlist{i}.samplesPerSecond;
@@ -149,7 +149,7 @@ classdef Preprocessor < handle
                     dims =  size(self.DSlist{fi});
                     maxDims = dims;
                     chunkDims = []; %[1000 dims(2)];
-                    MS{fi} = hdsort.filewrapper.Mea1KFileSaver(OutFolder, P_.saveRawH5FileNameList{fi}, ...
+                    MS{fi} = hdsort.file.Mea1KFileSaver(OutFolder, P_.saveRawH5FileNameList{fi}, ...
                         h5type, dims, maxDims, chunkDims, deflation, gainmultiplier, samplesPerSecond_, ...
                         ME.electrodePositions(:,1), ME.electrodePositions(:,2), ME.electrodeNumbers, ...
                         'save_as_binary', 1, 'forceFileDeletionIfExists', P_.forceFileDeletionIfExists);
@@ -258,7 +258,7 @@ classdef Preprocessor < handle
                         end
                         
                         % Spike detection:
-                        M = hdsort.filewrapper.DataMatrix(X_);
+                        M = hdsort.file.DataMatrix(X_);
                         if bIsFirstChunk
                             % In the first chunk, compute the smad
                             [spikesDetectedDown(c), pks_down(c), ~, global_smad_per_channel(c)] = ...
@@ -318,7 +318,7 @@ classdef Preprocessor < handle
                             if exist(L.wfsFileName, 'file')
                                 delete(L.wfsFileName);
                             end
-                            wfsFile = hdsort.filewrapper.WaveFormFile(L.wfsFileName, 'cutLeft', cutLeft, 'Tf', Tf, 'nC', L.nC);
+                            wfsFile = hdsort.file.WaveFormFile(L.wfsFileName, 'cutLeft', cutLeft, 'Tf', Tf, 'nC', L.nC);
                             if P_.debug
                                 gdf = wfsFile.getGdf();
                                 wfs = wfsFile(:,:);
@@ -442,7 +442,7 @@ classdef Preprocessor < handle
                             ts_sorting = ts_file + sum([0 samplesPerDS(1:fi-1)]);
                             
                             gdf = [ts_sorting*0+1, ts_sorting, ts(:,2)];
-                            wfsFilepf = hdsort.filewrapper.WaveFormFile(Lpf2.wfsFileName, 'writable', true);
+                            wfsFilepf = hdsort.file.WaveFormFile(Lpf2.wfsFileName, 'writable', true);
                             wfsFilepf.addWaveforms(wfs, gdf);
                             if parfor_debug
                                 N = size(gdf, 1);

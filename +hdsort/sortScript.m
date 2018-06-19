@@ -288,7 +288,7 @@ function [S P] = sortScript(DS, dpath, name, varargin)
                 
                 % Check if file is complete (if the variable does not
                 % exist, this might be an old file and we simply load it)
-                if hdsort.filewrapper.hdf5.exist(S.files.spike_cut_file, '/bFileIsComplete')
+                if hdsort.file.hdf5.exist(S.files.spike_cut_file, '/bFileIsComplete')
                     bFileIsComplete = hdf5read(S.files.spike_cut_file, '/bFileIsComplete');
                     if ~bFileIsComplete
                         warning('Spike cutting was not complete, overwriting old files');
@@ -308,7 +308,7 @@ function [S P] = sortScript(DS, dpath, name, varargin)
                 end
             end
             load(S.files.spike_cut_file);
-            spikeCut.wfs = hdsort.filewrapper.hdf5.matrix(fname, '/wfs', 1);
+            spikeCut.wfs = hdsort.file.hdf5.matrix(fname, '/wfs', 1);
             
             if ~any(any(spikeCut.wfs(:,:) ~= 0.0))
                 try
@@ -364,7 +364,7 @@ function [S P] = sortScript(DS, dpath, name, varargin)
                 spikeCut.nSpikesToAlign = length(spikeCut.alignIdx);
                 spikeCut.unalignedwfs = zeros(spikeCut.nSpikesToAlign, L);
                 
-                spikeCut.wfs = hdsort.filewrapper.hdf5.matrix(fname, '/wfs', 0, dims, maxDims, h5type, chunkDims, deflation);
+                spikeCut.wfs = hdsort.file.hdf5.matrix(fname, '/wfs', 0, dims, maxDims, h5type, chunkDims, deflation);
 
                 chk = hdsort.util.Chunker(nSP, 'chunkSize', P.spikeCutting.chunkSize, ...
                                  'chunkOverlap', 0);

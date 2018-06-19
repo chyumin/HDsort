@@ -24,7 +24,7 @@ classdef WfManager < handle
             end
             self.eventIDs = eventIDs;
 %             if nargin < 4 || isempty(ME)
-%                 ME = hdsort.filewrapper.MultiElectrode(unique(eventChans));
+%                 ME = hdsort.file.MultiElectrode(unique(eventChans));
 %             end
             self.MultiElectrode = ME;
         end

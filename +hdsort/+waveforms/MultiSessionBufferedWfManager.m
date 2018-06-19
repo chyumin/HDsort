@@ -44,7 +44,7 @@ classdef MultiSessionBufferedWfManager < hdsort.waveforms.WfManagerWithDataSourc
                     wfDataSource.sessionList(self.wfSessionIdx(i)), eventTimes(idx), eventChans(idx), eventIDs(idx), cutleft, cutlength);
             end
             assert(~isempty(self.MultiElectrode), 'A MultiElectrode must be set!');
-            assert(isa(self.MultiElectrode, 'hdsort.filewrapper.MultiSessionMultiElectrode'), 'The MultiElectrode must be a multiSession Electrode!');
+            assert(isa(self.MultiElectrode, 'hdsort.file.MultiSessionMultiElectrode'), 'The MultiElectrode must be a multiSession Electrode!');
         end
         
         %------------------------------------------------------------------

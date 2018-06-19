@@ -20,6 +20,7 @@ classdef Sorting < handle
         function self = Sorting(rawDSList, mainFolder, sortingName, varargin)
             P.maxElPerGroup = 9;
             P.legsFile = '';
+            P.rawResultFile = '';
             P.resultFile = '';
             P.preprocessFile = '';
             P.sortingParameters = hdsort.defaultParameters();
@@ -60,6 +61,12 @@ classdef Sorting < handle
                 self.files.preprocessor = fullfile(self.folders.main, [self.name '_preprocessor.mat']);
             else
                 self.files.preprocessor = P.preprocessFile;
+            end
+            
+            if isempty(P.rawResultFile)
+                self.files.rawResults = fullfile(self.folders.main, [self.name '_rawres.mat']);
+            else
+                self.files.rawResults = P.rawResultFile;
             end
             
             if isempty(P.resultFile)
@@ -186,16 +193,16 @@ classdef Sorting < handle
         end
         
         % -----------------------------------------------------------------
-        function R = loadSortingResult(self)
-            if isempty(self.buffer.results)
+        function R = loadRawResults(self)
+            if isempty(self.buffer.rawResults)
                 try
-                    load(self.files.results);
-                    self.buffer.results = R;
+                    load(self.files.rawResults);
+                    self.buffer.rawResults = R;
                 catch
                     error('Could not load sorting result, run sorter first!');
                 end
             end
-            R = self.buffer.results;
+            R = self.buffer.rawResults;
         end
         
         % -----------------------------------------------------------------
@@ -223,27 +230,7 @@ classdef Sorting < handle
             progress.(key) = value;
             save(self.files.sortingclass, 'progress', '-append');
         end
-        %function progress = resetProgress(self)
-        %    delete(self.files.sortingclass)
-        %    progress = self.loadProgress();
-        %end
-        % -----------------------------------------------------------------
-        
-%         function [fullNameList, nameList] = getPreprocessedFileNames(self)
-%             % Set preprocessed file names:
-%             for ii = 1:numel(self.rawDS)
-%                 try
-%                     [~, name_, ~] = fileparts(self.rawDS{ii}.fileName);
-%                     [~, name,  ~] = fileparts(name_);
-%                 catch
-%                     name = sprintf('%04d', ii);
-%                 end
-%                 nameList{ii} = [name, '.h5'];
-%                 fullNameList{ii} = fullfile(self.folders.groups, nameList{ii});
-%             end
-%             self.files.preprocessed = fullNameList;
-%         end
-%         
+
         % -----------------------------------------------------------------
         function preprocess_summary = preprocess(self, varargin)
             P = self.sortingParameters;
@@ -253,7 +240,7 @@ classdef Sorting < handle
             progress = self.loadProgress();
             
             if isempty(P.saveRawH5FileNameList)
-                if isa(self.rawDS{1}, 'hdsort.filewrapper.CMOSMEA')
+                if isa(self.rawDS{1}, 'hdsort.file.CMOSMEA')
                     fileList = self.rawDS{1}.fileNames;
                 else
                     try
@@ -376,16 +363,15 @@ classdef Sorting < handle
                 end
             end
             
-            % Save summary:
+            %% Save summary:
             sort_summary = self.buffer.sortjob.summarizeReports();
             self.saveProgress('sortedLEGs', sort_summary.completedTasks);
             self.saveProgress('sort_summary', sort_summary);
-            
         end
         
         
         % -----------------------------------------------------------------
-        function [R, P] = reuptake(self, varargin)
+        function sort_summary = reuptake(self, varargin)
             
             P.sortingMode = 'grid'; % as opposed to 'local' , 'local_parfor'
             P.queue = 'regular';
@@ -408,19 +394,20 @@ classdef Sorting < handle
             all_tasks_completed = self.buffer.sortjob.waitForTasksToFinish(60);
             assert(all_tasks_completed, 'Error in at least a few tasks!')
             
-            % Save summary:
+            %% Save summary:
             sort_summary = self.buffer.sortjob.summarizeReports();
             self.saveProgress('sortedLEGs', sort_summary.completedTasks);
             self.saveProgress('sort_summary', sort_summary);
         end
         
-        function results = postprocess(self, varargin)
+        % -----------------------------------------------------------------
+        function rawResults = postprocess(self, varargin)
             
             P.forceExecution = false;
             P = hdsort.util.parseInputs(P, varargin, 'merge');
             
-            if exist(self.files.results) && ~P.forceExecution
-                results = load(self.files.results);
+            if exist(self.files.rawResults) && ~P.forceExecution
+                rawResults = load(self.files.rawResults);
                 self.saveProgress('postprocess', true);
                 return;
             end
@@ -434,43 +421,43 @@ classdef Sorting < handle
                 'templateFileName', self.groupFilesList('templates'), ...
                 'covFileName', self.groupFilesList('cov') )
             
-            results = self.buffer.postprocessor.run();
+            rawResults = self.buffer.postprocessor.run();
             postprocess_summary = self.buffer.postprocessor.summarizeReports();
             
             %% Check output:
             disp('Check and save data...');
-            units = unique(results.gdf_merged(:,1));
+            units = unique(rawResults.gdf_merged(:,1));
             nU = length(units);
-            assert(length(results.localSorting) == nU, 'must be identical');
-            assert(length(results.localSortingID) == nU, 'must be identical');
-            assert(size(results.T_merged,3) == nU, 'must be identical');
+            assert(length(rawResults.localSorting) == nU, 'must be identical');
+            assert(length(rawResults.localSortingID) == nU, 'must be identical');
+            assert(size(rawResults.T_merged,3) == nU, 'must be identical');
             
             %% Save summary:
             self.saveProgress('postprocess_summary', postprocess_summary);
             self.saveProgress('postprocessed', true);
             
-            %% Save results:
-            disp('Saving postprocessing results...')
+            %% Save rawResults:
+            disp('Saving postprocessing rawResults...')
             progress = self.loadProgress();
             
-            results.summary.preprocess  = progress.preprocess_summary;
-            results.summary.sort        = progress.sort_summary;
-            results.summary.postprocess = progress.postprocess_summary;
+            rawResults.summary.preprocess  = progress.preprocess_summary;
+            rawResults.summary.sort        = progress.sort_summary;
+            rawResults.summary.postprocess = progress.postprocess_summary;
             
-            save(self.files.results, '-struct', 'results', '-v7.3');
+            save(self.files.rawResults, '-struct', 'rawResults', '-v7.3');
             disp('Done.')
             
-            self.buffer.results = results;
+            self.buffer.rawResults = rawResults;
         end
 
         % -----------------------------------------------------------------
-        function fileName = lsaFileName(self, outputLocation)
-            fileName = fullfile(outputLocation, ['lsa_' self.name '.mat']);
-        end
-        function lsa_exists = lsaExists(self, outputLocation)
-            lsaFileName = self.lsaFileName(outputLocation)
-            lsa_exists = exist(lsaFileName) > 0;
-        end
+        %function fileName = sortingResultFileName(self, outputLocation)
+        %    fileName = fullfile(outputLocation, [ self.name '_results.mat']);
+        %end
+        %function srf_exists = sortingResultFileExists(self, outputLocation)
+        %    sortingResultFileName = self.sortingResultFileName(outputLocation)
+        %    srf_exists = exist(sortingResultFileName) > 0;
+        %end
         
         % -----------------------------------------------------------------
         function [SortingResults, SortingResults_discarded] = createSpikeSortingResult(self, outputLocation)
@@ -482,22 +469,23 @@ classdef Sorting < handle
                 
                 self.files.lsa = self.lsaFileName(outputLocation);
                 try
-                    assert(self.lsaExists(outputLocation), 'Create file...');
+                    %assert(self.sortingResultFileExists(outputLocation), 'Create file...');
+                    assert( exist(self.files.results), 'Create results file...')
                     disp('Loading SortingResults file...')
                     load(self.files.lsa);
                     disp(['SortingResults ' SortingResults.name ' file loaded.'])
                 catch
                     disp('Create SortingResults SpikeSorting structure...')
                     
-                    if ~isfield(self.buffer, 'results') || isempty(self.buffer.results)
-                        self.buffer.results = load(self.files.results);
+                    if ~isfield(self.buffer, 'rawResults') || isempty(self.buffer.rawResults)
+                        self.buffer.rawResults = load(self.files.rawResults);
                     end
                     
                     preprocessor = load(self.files.preprocessor)
                     noiseStd = preprocessor.smadPerEl;
                     
                     [SortingResults, SortingResults_discarded] = hdsort.results.createSpikeSorting(...
-                        self.name, self.buffer.results, self.rawDS, noiseStd);
+                        self.name, self.buffer.rawResults, self.rawDS, noiseStd);
                     
                     SortingResults.filePath = outputLocation;
                     SortingResults_discarded.filePath = outputLocation;
@@ -514,6 +502,8 @@ classdef Sorting < handle
         
         
         
+        % -----------------------------------------------------------------
+        % ---------------------- DEBUGGING FUNCTIONS ----------------------
         % -----------------------------------------------------------------
         %% GROUP ORGANISATION
         function keys = listFilesInGroup(self)
@@ -534,7 +524,7 @@ classdef Sorting < handle
             fname = self.getFileNameInGroup(legNr, key);
             
             if strcmp(key, 'spikes_cut')
-                spikes_cut = hdsort.filewrapper.WaveFormFile(fname);
+                spikes_cut = hdsort.file.WaveFormFile(fname);
                 x.spikes_cut = spikes_cut;
             else
                 x = load(fname);
@@ -558,27 +548,6 @@ classdef Sorting < handle
         end
         
         % -----------------------------------------------------------------
-        function out = deleteResultsFile(self)
-            out = true;
-            try
-                delete(self.files.results);
-            catch
-                out = false;
-            end
-            
-        end
-        
-%         % -----------------------------------------------------------------
-%         %% LOADING GROUP FILES
-%         function G = loadGroupFile(self)
-%             error('Not supported anymore!')
-%             if isempty(self.buffer.groupFile)
-%                 self.buffer.groupFile = load(self.files.groupFile);
-%             end
-%             G = self.buffer.groupFile;
-%         end
-        
-        % -----------------------------------------------------------------
         function G = loadGroupStruct(self)
             self.files.GroupStruct   = fullfile(self.folders.groups, 'G_struct.mat');
             if isempty(self.buffer.GroupStruct)
@@ -594,51 +563,8 @@ classdef Sorting < handle
         end
         
         % -----------------------------------------------------------------
-        %% LOADING GROUP FILES (INDIVIDUAL GROUPS)
-        function S = loadDetectedSpikes4Group(self, legNr)
-            groupFolder = self.getGroupFolder(legNr);
-            S = load(fullfile(groupFolder, [self.name '.020spikes_det.mat']));
-        end
-        
+        % ------------------------- PLOT FUNCTIONS ------------------------
         % -----------------------------------------------------------------
-        function [wfs, electrodePositions, channelNumbers] = getAllSpikesFromUnitID(self, unitID)
-            
-            %% Get all the spikes of one neuron:
-            % Get the group and the id within the group:
-            groupNumber = floor(unitID/1000);
-            number_within_group = mod(unitID, 1000);
-            
-            %% Get the units in each group:
-            G_struct = self.loadGroupStruct();
-            %gdf_in_group = G_struct.G(groupNumber).gdf;
-            %units_in_group = G_struct.G(groupNumber).units;
-            
-            units_idx_in_group = find(G_struct.G(groupNumber).units == number_within_group);
-            unit_id_in_group = G_struct.G(groupNumber).units(units_idx_in_group);
-            gdf_in_group = G_struct.G(groupNumber).gdf;
-            
-            % Get the spike indices for the unit:
-            spike_idx = gdf_in_group(:,1) == unit_id_in_group;
-            
-            % Get the spike waveforms:
-            spikes_struct = self.loadFileInGroup(groupNumber, 'spikes_cut');
-            try
-                wfs = hdsort.filewrapper.hdf5.matrix(spikes_struct.spikeCut.wfs.fname, '/wfs', 1)
-            catch
-                warning('Could not read waveforms!')
-                wfs = [];
-            end
-            
-            % Get the electrode positions:
-            G = self.loadGroupFile();
-            electrodePositions = G.electrodePositions(G.groupsidx{groupNumber},:);
-            channelNumbers = G_struct.G(groupNumber).sortedElectrodes;
-            
-            wfs = wfs(:,:,spike_idx);
-        end
-        
-        % -----------------------------------------------------------------
-        %% PLOT FUNCTIONS
         function P = plotLEGs(self, varargin)
             P.fh = [];
             P.ah = [];

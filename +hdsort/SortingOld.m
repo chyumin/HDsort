@@ -173,8 +173,8 @@ classdef Sorting < handle
         function P = prepareSortJob(self, varargin)
             P = hdsort.util.parseInputs(struct(), varargin, 'merge');
             
-            %assert(isa(self.DS, 'hdsort.filewrapper.CMOSMEA'), 'At the moment, the grid framework can only be run with CMOSMEA objects! If you want to test the sorter with something else, use the flag ''sortingMode'', ''localHDSorting''');
-            assert(isa(self.DS, 'hdsort.filewrapper.FileWrapperInterface'), 'The spike-sorter needs an object derived from a FileWrapperInterface as input!');
+            %assert(isa(self.DS, 'hdsort.file.CMOSMEA'), 'At the moment, the grid framework can only be run with CMOSMEA objects! If you want to test the sorter with something else, use the flag ''sortingMode'', ''localHDSorting''');
+            assert(isa(self.DS, 'hdsort.file.FileWrapperInterface'), 'The spike-sorter needs an object derived from a FileWrapperInterface as input!');
             
             if ~strcmp(P.sortingMode, 'QSUB') && ~strcmp(P.sortingMode, 'euler')
                 gridType = 'QSUB';
@@ -402,7 +402,7 @@ classdef Sorting < handle
             % Get the spike waveforms:
             spikes_struct = self.loadFileInGroup(groupNumber, 'spikes_cut');
             try
-                wfs = hdsort.filewrapper.hdf5.matrix(spikes_struct.spikeCut.wfs.fname, '/wfs', 1)
+                wfs = hdsort.file.hdf5.matrix(spikes_struct.spikeCut.wfs.fname, '/wfs', 1)
             catch
                 warning('Could not read waveforms!')
                 wfs = [];
