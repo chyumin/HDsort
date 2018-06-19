@@ -137,8 +137,8 @@ classdef GridJob < handle
             for ii = 1:self.nTasks
                 taskParameters = self.allTaskParameters{ii};
                 
-                taskParameters.reportFile = hdsort.grid.GridJob.convertToLinux(self.files.report{ii});
-                taskParameters.reportFolder = hdsort.grid.GridJob.convertToLinux(self.folders.report);
+                taskParameters.reportFile = self.files.report{ii};
+                taskParameters.reportFolder = self.folders.report;
                 
                 taskType = self.taskType;
                 save( [self.files.tasks num2str(taskParameters.taskID)], 'taskParameters', 'taskType');
@@ -266,7 +266,7 @@ classdef GridJob < handle
         end
         
         % -----------------------------------------------------------------
-        function summarizeReports(self, cmdLineOutput)
+        function summary = summarizeReports(self, cmdLineOutput)
             % This function reads all reports files and creates a summary of
             % them.
             if nargin == 1
@@ -279,7 +279,7 @@ classdef GridJob < handle
             
             %% Check for most recent job id:
             try
-                currentJobId = fullfile(self.folders.report, 'currentJobID.txt')
+                currentJobId = fullfile(self.folders.report, 'currentJobID.txt');
                 fid = fopen(currentJobId);
                 job_id_str = fread(fid, '*char')'; fclose(fid);
             catch
@@ -383,15 +383,9 @@ classdef GridJob < handle
                 str = [str '#$ -V\n'];
                 str = [str '#$ -cwd\n'];
                 
-                %if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
-                    %warning('Sorting not started from a linux machine might cause problems!')
-                    logFolder = hdsort.grid.GridJob.convertToLinux(self.folders.log);
-                    str = [str '#$ -o ' logFolder '\n'];
-                    str = [str '#$ -e ' logFolder '\n'];
-                %else
-                %    str = [str '#$ -o ' self.folders.log '\n'];
-                %    str = [str '#$ -e ' self.folders.log '\n'];
-                %end
+                logFolder = hdsort.util.convertPathToOS(self.folders.log, 'LIN');
+                str = [str '#$ -o ' logFolder '\n'];
+                str = [str '#$ -e ' logFolder '\n'];
                 
                 str = [str '#$ -q ' self.P.queue '.q\n'];
                 if strcmp(self.P.queue, 'regular')
@@ -404,12 +398,8 @@ classdef GridJob < handle
                     error('Unknown Queue!');
                 end
                 str = [str sprintf('#$ -t %d-%d\n', self.startIndex, self.endIndex)];
-                %if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
-                    taskFile = hdsort.grid.GridJob.convertToLinux(self.files.tasks)
-                    str = [str sprintf('matlab -nodisplay -r "hdsort.grid.GridJob.runQSubTask(''%s\''); exit();"', taskFile)];
-                %else
-                %    str = [str sprintf('matlab -nodisplay -r "hdsort.grid.GridJob.runQSubTask(''%s\''); exit();"', self.files.tasks)];
-                %end
+                taskFile = hdsort.util.convertPathToOS(self.files.tasks, 'LIN')
+                str = [str sprintf('matlab -nodisplay -r "hdsort.grid.GridJob.runQSubTask(''%s\''); exit();"', taskFile)];
                 
             elseif strcmp(self.gridType, 'BSUB')
                 str = [str sprintf('#BSUB -W %d:%d\n', self.runtime.hours, self.runtime.minutes)]; %# wall-clock time (hrs:mins)
@@ -505,29 +495,16 @@ classdef GridJob < handle
         %              FOR DEBUGGING:
         % -----------------------------------------------------------------
         function runTaskLocally(self, task_id)
-            if 0
-                setenv('SGE_TASK_ID', num2str(task_id))
-                
-                setenv('JOB_ID', '0')
-                jobFolder = fullfile(self.folders.report, '0')
-                try
-                    rmdir(jobFolder, 's');
-                catch
-                end
-                mkdir(jobFolder);
-                hdsort.grid.GridJob.runTask(self.files.tasks, false);
-            else
-                task_id_str = num2str(task_id);
-                job_id_str = '0';
-                jobFolder = fullfile(self.folders.report, job_id_str)
-                debugFlag = false;
-                try
-                    rmdir(jobFolder, 's');
-                catch
-                end
-                mkdir(jobFolder);
-                hdsort.grid.GridJob.runTask(self.files.tasks, task_id_str, job_id_str, debugFlag);
+            task_id_str = num2str(task_id);
+            job_id_str = '0';
+            jobFolder = fullfile(self.folders.report, job_id_str)
+            debugFlag = false;
+            try
+                rmdir(jobFolder, 's');
+            catch
             end
+            mkdir(jobFolder);
+            hdsort.grid.GridJob.runTask(self.files.tasks, task_id_str, job_id_str, debugFlag);
         end
         
         
@@ -580,63 +557,6 @@ classdef GridJob < handle
     methods (Static)
         
         % -----------------------------------------------------------------
-        function linuxPath = convertToLinux(path)
-            % This function transforms absolute file names from a Windows
-            % or Mac system to a linux system. The necessary settings are
-            % must be set in +hdsort/+grid/config.m.
-            % The path is reduced to a string called
-            % 'gridConfig.commonFolderName' and then rebuilt based on
-            % 'gridConfig.linuxSortingPath'.
-            if iscell(path)
-                linuxPath = {};
-                for ii = 1:numel(path)
-                    linuxPath{ii} = hdsort.grid.GridJob.convertToLinux(path{ii});
-                end
-                return
-            end
-            linuxPath = path;
-            
-            if ~isempty(strfind(computer, 'WIN')) || ~isempty(strfind(computer, 'MACI64'))
-                gridConfig = hdsort.grid.config();
-                
-                p = regexp(path, filesep, 'split');
-                while ~strcmp(p{2}, gridConfig.commonFolderName)
-                    p = {p{2:end}};
-                end
-                
-                linuxPath = gridConfig.linuxSortingPath;
-                while ~isempty(p)
-                    linuxPath =  [linuxPath '/' p{1}];
-                    p = {p{2:end}};
-                end
-            end
-        end
-        
-        % -----------------------------------------------------------------
-        function localPath = convertToLocal(path)
-            if iscell(path)
-                localPath = {};
-                for ii = 1:numel(path)
-                    localPath{ii} = hdsort.grid.GridJob.convertToLocal(path{ii});
-                end
-                return
-            end
-            
-            gridConfig = hdsort.grid.config();
-            
-            p = regexp(path, filesep, 'split');
-            while ~strcmp(p{2}, 'Mea1k')
-                p = {p{2:end}};
-            end
-            
-            localPath = gridConfig.localSortingPath;
-            while ~isempty(p)
-                localPath =  [localPath '/' p{1}];
-                p = {p{2:end}};
-            end
-        end
-        
-        % -----------------------------------------------------------------
         function out = runQSubTask(taskName, debugFlag)
             if nargin < 2 debugFlag = false; end
             task_id_str = getenv('SGE_TASK_ID')
@@ -675,10 +595,8 @@ classdef GridJob < handle
             [dir_exists,mess,messid] = mkdir(processFolder);
             uniqueProcessFile = fullfile( processFolder, ['task' task_id_str 'exists.dat'])
             
-            if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
-                uniqueProcessFile = hdsort.grid.GridJob.convertToLocal(uniqueProcessFile);
-                f.taskParameters.reportFolder = hdsort.grid.GridJob.convertToLocal(f.taskParameters.reportFolder);
-            end
+            uniqueProcessFile = hdsort.util.convertPathToOS(uniqueProcessFile);
+            f.taskParameters.reportFolder = hdsort.util.convertPathToOS(f.taskParameters.reportFolder);
             
             if exist(uniqueProcessFile, 'file') == 2
                 error(['Task ' task_id_str ' in job ' job_id_str ' already exists!'])
