@@ -7,10 +7,10 @@ P.lpf = 6000;
 P.fir_filterOrder = 110;
 P.frameRate = 20000;
 P.doZeroPad = false;
-P = util.parseInputs(P, varargin, 'error');
+P = hdsort.util.parseInputs(P, varargin, 'error');
 
 %% Create Filter:
-P.fir_filter = mysort.mea.filter_design_fir(P.hpf, P.lpf, P.frameRate, P.fir_filterOrder);
+P.fir_filter = hdsort.util.filter_design_fir(P.hpf, P.lpf, P.frameRate, P.fir_filterOrder);
 
 %%
 [nTf, nCh, nU] = size(FP);
@@ -36,10 +36,8 @@ else
     
     for ch = 1:nCh
         for uu = 1:nU
-            %filteredFP(:, ch, uu)  = conv(FP(:,ch,uu), P.fir_filter, 'same');
             f = conv(FP(:,ch,uu), P.fir_filter, 'same');
             filteredFP(:, ch, uu) = f(1+L:end-L);
-            
         end
     end
     

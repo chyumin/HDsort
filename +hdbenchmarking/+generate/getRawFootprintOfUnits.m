@@ -2,10 +2,17 @@ function [footprint, P, Q, wfs] = getRawFootprintOfUnits(baseFolder, RAW_list, S
 
 P.nTf = 150;
 P.cutLeft = 50;
-P.fir_filterOrder = 110;
 P.zeroingThreshold = 4.8;
 P.minNChannels = 10;
 P.nSubtractMeanChannelIdx = 200;
+
+% For filter:
+P.filter.hpf = 300;
+P.filter.lpf = 6000;
+P.filter.fir_filterOrder = 110;
+P.filter.frameRate = 20000;
+P.filter.doZeroPad = false;
+
 P = hdsort.util.parseInputs(P, varargin, 'error');
 
 %%
@@ -54,14 +61,16 @@ catch
             f = RAW_list(fi);
             rel_st = ST(ST >= Q.cutLeftUnfiltered & ST < size(f, 1) - (Q.nTfUnfiltered - Q.cutLeftUnfiltered));
             
-            if ~isempty(rel_st)
-                wfs_ = [wfs_; f.getWaveform(rel_st, Q.cutLeftUnfiltered, Q.nTfUnfiltered)];
-            end
+            %if ~isempty(rel_st)
+                for ii = 1:numel(rel_st)
+                    wfs_ = [wfs_; f.getWaveform(rel_st(ii), Q.cutLeftUnfiltered, Q.nTfUnfiltered)];
+                end
+            %end
             
             ST = ST - size(f, 1);
             nSpikes = nSpikes + numel(rel_st);
         end
-        wfs = mysort.wf.v2t(wfs_, nCh);
+        wfs = hdsort.waveforms.v2t(wfs_, nCh);
         cutLeft = P.cutLeft;
         
         assert(numel(ST)*0.9 < size(wfs, 3), 'Make sure that at least 90% of all spikes are actually cut out!');
@@ -75,7 +84,7 @@ catch
     meanWFS = mean(wfs, 3);
     
     %% Bandpass filter the mean waveforms:
-    [meanWFSFiltered, filterProperties] = hdbenchmarking.generate.filterFootprints(meanWFS, 'fir_filterOrder', P.fir_filterOrder);
+    [meanWFSFiltered, filterProperties] = hdbenchmarking.generate.filterFootprints(meanWFS, P.filter); %'fir_filterOrder', P.fir_filterOrder);
     Q.filterProperties = filterProperties;
     
     %% Subtract the mean of the waveforms on each channel and assertain a smooth onset and offset:
