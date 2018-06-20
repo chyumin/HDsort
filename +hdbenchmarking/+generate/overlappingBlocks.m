@@ -14,57 +14,40 @@ idx = kmeans(elP, 2);
 block1 = find(idx==1)';
 block2 = find(idx==2)';
 
-Nmax = 0; newElP = []; newElN = []; swapPairsEl = [];
-for b1 = block1
-    [newElP_, newElN_, swapPairsEl_] = swapPairs(b1, block2(1));
-    if size(swapPairsEl_, 1) > Nmax;
-        Nmax = size(swapPairsEl_, 1);
-        newElP = newElP_;
-        newElN = newElN_;
-        swapPairsEl = swapPairsEl_;
-    end
-end
-for b2 = block2
-    [newElP_, newElN_, swapPairsEl_] = swapPairs(block1(1), b2);
-    if size(swapPairsEl_, 1) > Nmax;
-        Nmax = size(swapPairsEl_, 1);
-        newElP = newElP_;
-        newElN = newElN_;
-        swapPairsEl = swapPairsEl_;
-    end
-end
 
+%% Order blocks:
+blockIdx1 = orderBlock(block1);
+blockIdx2 = orderBlock(block2);
 
-%%
+%% Keep the electrodes that are matching:
+combinedBlockIdx = ~isnan( blockIdx1 + blockIdx2);
+newBlock1 = blockIdx1(combinedBlockIdx);
+newBlock2 = blockIdx2(combinedBlockIdx);
+
+%% Create the new MultiElectrode:
+newElP = [elP(newBlock1, :); elP(newBlock2, :)];
+newElN = [elN(newBlock1); elN(newBlock2)];
+
 newME = copy(ME);
 newME.electrodePositions = newElP;
 newME.electrodeNumbers = newElN;
 
-%% Assign each electrode to a block:
-blockIdx = ismember(newME.electrodeNumbers, swapPairsEl(:,1));
+swapPairsEl = [elN(newBlock1), elN(newBlock2)];
+blockIdx = [zeros(numel(newBlock1), 1); ones(numel(newBlock2), 1)];
 
-
-    function [newElP, newElN, swapPairsEl] = swapPairs(el1, el2)
-        d = elP(el2,:)-elP(el1,:);
+    function blockIdx = orderBlock(block)
+        ux = unique(elP(block, 1));
+        uy = unique(elP(block, 2));
         
-        newElP = [];
-        newElN = [];
-        %swapPairsIdx = [];
-        swapPairsEl = [];
-        for ii = 1:size(elP, 1)
-            for jj = 1:size(elP, 1)
-                if jj == ii
-                    continue;
-                end
-                if ~any(round(elP(ii,:)-elP(jj,:)+d))
-                    newElP = [newElP; elP(ii,:); elP(jj,:)];
-                    newElN = [newElN; elN(ii); elN(jj)];
-                    swapPairsEl = [swapPairsEl; elN(ii) elN(jj)];
-                    %swapPairsIdx = [swapPairsIdx; ii, jj];
-                end
-            end
+        %[~, sidx1] = sort( elP(block, 1) );
+        %[~, sidx2] = sort( elP(block, 2) );
+        
+        blockIdx = nan(numel(ux), numel(uy));
+        for b = block
+            x = find( ismember( ux, elP(b, 1)) );
+            y = find( ismember( uy, elP(b, 2)) );
+            blockIdx(x,y) = b;
         end
-
     end
 
 end
