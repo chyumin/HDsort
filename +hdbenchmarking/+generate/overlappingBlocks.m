@@ -1,4 +1,4 @@
-function [newME, swapPairsEl, blockIdx] = overlappingBlocks(ME)
+function [newME, swapPairsEl, channelIdx, blockIdx] = overlappingBlocks(ME)
 % Input:
 % DS - Has a MultiElectrode with two high density blocks
 %
@@ -34,6 +34,10 @@ newME.electrodeNumbers = newElN;
 
 swapPairsEl = [elN(newBlock1), elN(newBlock2)];
 blockIdx = [zeros(numel(newBlock1), 1); ones(numel(newBlock2), 1)];
+
+for ii = 1:size(newElN,1)
+channelIdx(ii) = find( ismember( elN, newElN(ii) ));
+end
 
     function blockIdx = orderBlock(block)
         ux = unique(elP(block, 1));
