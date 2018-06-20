@@ -56,6 +56,19 @@ classdef SingleFileWrapper < hdsort.file.FileWrapperInterface
         %    error('Must be implemented in the derived class!')
         %end
         
+        function X = getFilteredData(self, varargin)
+            hpf = 300;
+            lpf = 7000;
+            fir_filterOrder = 110;
+            b  = hdsort.util.filter_design_fir(hpf, lpf, self.getSampleRate(), fir_filterOrder);
+            
+            X = self.getData(varargin{:});
+            
+            X = double(X);
+            X = bsxfun(@minus, X, mean(X,1));
+            X = conv2(X, b(:), 'same');
+        end
+        
         %------------------------------------------------------------------
         % Do this in an individual function since certain
         % DataSourceInterface Implementations might want to overwrite the
