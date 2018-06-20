@@ -1,8 +1,6 @@
-function [newME, swapPairsEl, blockIdx] = overlappingBlocks(ME, el1, el2, do_plot)
+function [newME, swapPairsEl, blockIdx] = overlappingBlocks(ME)
 % Input:
 % DS - Has a MultiElectrode with two high density blocks
-% el1 - corner electrode of first high density block
-% el2 - corner electrode of second high density block
 %
 % Output:
 % newDS
@@ -11,39 +9,62 @@ function [newME, swapPairsEl, blockIdx] = overlappingBlocks(ME, el1, el2, do_plo
 elP = ME.getElectrodePositions;
 elN = ME.getElectrodeNumbers;
 
-if nargin < 4
-    do_plot = false;
+%% Find the blocks and match the pairs:
+idx = kmeans(elP, 2);
+block1 = find(idx==1)';
+block2 = find(idx==2)';
+
+Nmax = 0; newElP = []; newElN = []; swapPairsEl = [];
+for b1 = block1
+    [newElP_, newElN_, swapPairsEl_] = swapPairs(b1, block2(1));
+    if size(swapPairsEl_, 1) > Nmax;
+        Nmax = size(swapPairsEl_, 1);
+        newElP = newElP_;
+        newElN = newElN_;
+        swapPairsEl = swapPairsEl_;
+    end
 end
-
-d = elP(el2,:)-elP(el1,:);
-
-newElP = [];
-newElN = [];
-swapPairsIdx = [];
-swapPairsEl = [];
-for ii = 1:size(elP, 1)
-    for jj = 1:size(elP, 1)
-        if jj == ii
-            continue;
-        end
-        if ~any(round(elP(ii,:)-elP(jj,:)+d))
-            newElP = [newElP; elP(ii,:); elP(jj,:)];
-            newElN = [newElN; elN(ii); elN(jj)];
-            swapPairsEl = [swapPairsEl; elN(ii) elN(jj)];
-            swapPairsIdx = [swapPairsIdx; ii, jj];
-        end
+for b2 = block2
+    [newElP_, newElN_, swapPairsEl_] = swapPairs(block1(1), b2);
+    if size(swapPairsEl_, 1) > Nmax;
+        Nmax = size(swapPairsEl_, 1);
+        newElP = newElP_;
+        newElN = newElN_;
+        swapPairsEl = swapPairsEl_;
     end
 end
 
-%newCh = sort(newCh);
-if do_plot
-    hold on; scatter(newElP(:,1), newElP(:,2))
-end
+
+%%
 newME = copy(ME);
 newME.electrodePositions = newElP;
 newME.electrodeNumbers = newElN;
 
 %% Assign each electrode to a block:
 blockIdx = ismember(newME.electrodeNumbers, swapPairsEl(:,1));
+
+
+    function [newElP, newElN, swapPairsEl] = swapPairs(el1, el2)
+        d = elP(el2,:)-elP(el1,:);
+        
+        newElP = [];
+        newElN = [];
+        %swapPairsIdx = [];
+        swapPairsEl = [];
+        for ii = 1:size(elP, 1)
+            for jj = 1:size(elP, 1)
+                if jj == ii
+                    continue;
+                end
+                if ~any(round(elP(ii,:)-elP(jj,:)+d))
+                    newElP = [newElP; elP(ii,:); elP(jj,:)];
+                    newElN = [newElN; elN(ii); elN(jj)];
+                    swapPairsEl = [swapPairsEl; elN(ii) elN(jj)];
+                    %swapPairsIdx = [swapPairsIdx; ii, jj];
+                end
+            end
+        end
+
+    end
 
 end
