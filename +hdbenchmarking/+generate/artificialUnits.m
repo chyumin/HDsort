@@ -18,7 +18,7 @@ parameters.refractoryPeriod_s = 0.0015;
 parameters.jitterFactor = 10;
 
 parameters.unitselection.footprintSelectionCriterium = 'random'; % | 'targetamplitude' --> 1.5 mean amplitude of all units
-parameters.unitselection.forbiddenUnits = [1, 3, 5]; % Specify a list of units that should be excluded from the possible candidates
+parameters.unitselection.forbiddenUnits = []; % Specify a list of units that should be excluded from the possible candidates
 
 parameters.footprints.amplitudeCorrectionFactor = 0.5; % footprintSelectionCriterium == 'random' --> 0.5 ; 1.0 otherwise
 parameters.footprints.nTf = 150;

@@ -14,12 +14,14 @@ originalME = originalRAW.getMultiElectrode()
 % location in the other block. They will be the anchor to overlap the
 % blocks:
 originalME.plotConfig();
-el1 = 515;
-el2 = 589;
+%el1 = 515;
+%el2 = 589;
 
 % Generate new ME:
 [newME, swapElectrodePairs, blockIdx] = ...
-    hdbenchmarking.generate.overlappingBlocks(originalME, el1, el2, 1);
+    hdbenchmarking.generate.overlappingBlocks(originalME);
+%[newME, swapElectrodePairs, blockIdx] = ...
+%    hdbenchmarking.generate.overlappingBlocks(originalME, el1, el2, 1);
 [~, name_] = fileparts(original_rawFile); [~, fileBaseName] = fileparts(name_);
 newMultiElectrodeFile = fullfile(outputFolder, [fileBaseName '_newMultiElectrode.mat']);
 save(newMultiElectrodeFile, 'newME', 'swapElectrodePairs', 'blockIdx', 'fileBaseName');
@@ -71,18 +73,20 @@ preFileNames = sorting.files.preprocessed;
 el1 = 381;
 el2 = 382;
 
-resultFile = fullfile(outputFolder, 'results.mat');
-load(resultFile)
-
-datasetName = 'amplitude_sweep01';
-gdf = double(R.gdf_merged);
-estimated_footprints =  R.T_merged;
 RAW_list = {hdsort.file.BELMEAFile(rawFileName)};
 PRE = hdsort.file.CMOSMEA(preFileNames);
 [~, swapElectrodePairs, blockIdx] = hdbenchmarking.generate.overlappingBlocks(PRE.MultiElectrode, el1, el2, true);
+%
+datasetName = 'amplitude_sweep01';
+gdf = SpikeSortingResult.getGdf();
+estimated_footprints = SpikeSortingResult.getFootprints();
+
+parameters.spikingRatesHz = 10;
+parameters.unitselection.footprintSelectionCriterium = 'random'; % | 'targetamplitude' --> 1.5 mean amplitude of all units
 
 [artificialFileList, artificialUnitFile] = hdbenchmarking.generate.artificialUnits(datasetName, ...
-    baseFolder, gdf, estimated_footprints, RAW_list, PRE, swapElectrodePairs, blockIdx)
+    baseFolder, gdf, estimated_footprints, RAW_list, PRE, ...
+    swapElectrodePairs, blockIdx, 'parameters', parameters)
 
 % -------------------------------------------------------------------------
 %% 4. Sort the artificial dataset:
