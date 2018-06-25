@@ -467,12 +467,11 @@ classdef Sorting < handle
                 SortingResults_discarded = self.buffer.SortingResults_discarded;
             else
                 
-                self.files.lsa = self.lsaFileName(outputLocation);
                 try
                     %assert(self.sortingResultFileExists(outputLocation), 'Create file...');
                     assert( exist(self.files.results), 'Create results file...')
                     disp('Loading SortingResults file...')
-                    load(self.files.lsa);
+                    load(self.files.results);
                     disp(['SortingResults ' SortingResults.name ' file loaded.'])
                 catch
                     disp('Create SortingResults SpikeSorting structure...')
@@ -490,7 +489,7 @@ classdef Sorting < handle
                     SortingResults.filePath = outputLocation;
                     SortingResults_discarded.filePath = outputLocation;
                     
-                    save(self.files.lsa, 'SortingResults', 'SortingResults_discarded', '-v7.3');
+                    save(self.files.results, 'SortingResults', 'SortingResults_discarded', '-v7.3');
                     disp('New SortingResults SpikeSorting saved!')
                 end
                 
