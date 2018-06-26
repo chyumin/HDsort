@@ -4,9 +4,8 @@ function [clustCent, data2cluster, cluster2dataCell] = MeanShiftCluster2(X, band
     P.maxNBandwidthIncreases = [];
     P.bandwidthIncreaseFactor = [];
     P.maxNGradientSpikes = 2 *1e6;
-    P = mysort.util.parseInputs(P, varargin, 'error');
+    P = hdsort.util.parseInputs(P, varargin, 'error');
     
-
     % INIT
     [numPts, numDim] = size(X);
     numClust         = 0;

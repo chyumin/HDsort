@@ -46,7 +46,7 @@ cluFuns = {'Std MS', @(x) MeanShiftCluster(x, bandwidth)
            'BW+Speed', @(x) MeanShiftClusterSpeedBWInc(x, bandwidth, maxBWFact, nMinPointsInCluster, maxNBandwidthIncreases, bandwidthIncreaseFactor)
            };
 nP = size(cluFuns,1);
-mysort.plot.figure('w', 1000, 'h', 600);
+figure;
 for i=1:nP
     tic
     [clustCent,point2cluster,clustMembsCell] = cluFuns{i,2}(x);

@@ -35,7 +35,7 @@ P.templateEstimation.maxSpikes = 100;
 
 end
 
-% %% mysort.sorters.sort.m Parameters:
+% %% hdsort.sortScript.m Parameters:
 % P.artefactDetection.use = 0;
 % P.artefactDetection.width = 350;
 % P.artefactDetection.threshold = size(DS,2)*41; % should be sampling frequency dependent!

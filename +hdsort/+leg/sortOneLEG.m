@@ -1,7 +1,7 @@
 function sortOneLEG(sortingName, wfsFile, covFile, legFolder, sortingParameters, groupidx, preprocessedFileList)
 % INPUT:
 % wfsFile:              Cut waveforms of all detected spikes (in the format
-%                       that can be opened with mysort.wf.WaveFormFile
+%                       that can be opened with hdsort.waveforms.WaveFormFile
 %
 % covFile:              File containing the noise covariance (.060cov.mat)
 %

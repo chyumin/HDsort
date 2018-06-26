@@ -56,7 +56,6 @@ for fi = 1:nFiles
     end
     
     %%
-    %DS = mysort.mea.CMOSMEA(sourceFile);
     ME = DS.MultiElectrode;
     [nSamples, nC_] = size(DS);
     assert(nC_ == nC, 'Channel-numbers must correspond!');
@@ -64,7 +63,7 @@ for fi = 1:nFiles
     %% Set File as being in process
     assert(~exist(newFileName, 'file'), ['Output File does already exist! ' newFileName]);
     
-    proc = mysort.h5.createVariableAndOrFile(newFileName, '/bFileIsInProcess', [1 1], [1 1], 'H5T_NATIVE_INT');
+    proc = hdsort.file.hdf5.createVariableAndOrFile(newFileName, '/bFileIsInProcess', [1 1], [1 1], 'H5T_NATIVE_INT');
     proc(1,1) = int32(1);
     
     sessionName = '/Sessions/Session0';
@@ -73,64 +72,64 @@ for fi = 1:nFiles
     hdf5write(newFileName,'/artificialUnits/checksum', auFileChecksum, 'WriteMode', 'append')
     
     %% Set filter info:
-    pref = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/filter/prefiltered'], [1 1], [1 1], 'H5T_NATIVE_INT');
+    pref = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/filter/prefiltered'], [1 1], [1 1], 'H5T_NATIVE_INT');
     pref(1,1) = h5read(sourceFile, [sessionName '/filter/prefiltered']);
     clear pref
-    high = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/filter/highpass'], [1 1], [1 1], 'H5T_NATIVE_INT');
+    high = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/filter/highpass'], [1 1], [1 1], 'H5T_NATIVE_INT');
     high(1,1) = h5read(sourceFile, [sessionName '/filter/highpass']);
     clear high
-    low = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/filter/lowpass'], [1 1], [1 1], 'H5T_NATIVE_INT');
+    low = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/filter/lowpass'], [1 1], [1 1], 'H5T_NATIVE_INT');
     low(1,1) = h5read(sourceFile, [sessionName '/filter/lowpass']);
     clear low
-    down = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/filter/downsamplefactor'], [1 1], [1 1], 'H5T_NATIVE_INT');
+    down = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/filter/downsamplefactor'], [1 1], [1 1], 'H5T_NATIVE_INT');
     down(1,1) = h5read(sourceFile, [sessionName '/filter/downsamplefactor']);
     clear down
-    ord = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/filter/order'], [1 1], [1 1], 'H5T_NATIVE_INT');
+    ord = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/filter/order'], [1 1], [1 1], 'H5T_NATIVE_INT');
     ord(1,1) =  h5read(sourceFile, [sessionName '/filter/order']);
     clear type
-    ord = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/filter/type'], [1 20], [1 20], 'H5T_C_S1');
+    ord = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/filter/type'], [1 20], [1 20], 'H5T_C_S1');
     filterType = h5read(sourceFile, [sessionName '/filter/type']); filterType = [filterType{:}];
     ord(1,1:length(filterType)) = filterType;
     clear ord
-    gd = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/filter/gainmultiplier'], [1 1], [1 1], 'H5T_NATIVE_INT');
+    gd = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/filter/gainmultiplier'], [1 1], [1 1], 'H5T_NATIVE_INT');
     gainmultiplier = double(h5read(sourceFile, [sessionName '/filter/gainmultiplier']));
     gd(1,1) = 1; %gainmultiplier;
     clear gd
     
     % SAVE THE SOURCEFILES
     ffile = h5read(sourceFile, [sessionName '/source_files/raw_h5']); ffile = [ffile{:}];
-    ord = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/source_files/raw_h5'], [1 length(ffile)], [1 length(ffile)], 'H5T_C_S1');
+    ord = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/source_files/raw_h5'], [1 length(ffile)], [1 length(ffile)], 'H5T_C_S1');
     ord(1,1:length(ffile)) = ffile;
     clear ord
     %mfile = h5read(sourceFile, [sessionName '/source_files/mapping_file']); mfile = [mfile{:}];
-    %ord = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/source_files/mapping_file'], [1 length(mfile)], [1 length(mfile)], 'H5T_C_S1');
+    %ord = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/source_files/mapping_file'], [1 length(mfile)], [1 length(mfile)], 'H5T_C_S1');
     %ord(1,1:length(mfile)) = mfile;
     %clear ord
     
     % CHIP ID
-    chipid = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/chipid'], [1 1], [1 1], 'H5T_NATIVE_INT');
+    chipid = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/chipid'], [1 1], [1 1], 'H5T_NATIVE_INT');
     chipid(1,1) =  h5read(sourceFile, [sessionName '/chipid']);
     clear chipid
     
     % ADC range and resolution
-    gain = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/adc_resolution'], [1 1], [1 1], 'H5T_NATIVE_DOUBLE');
+    gain = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/adc_resolution'], [1 1], [1 1], 'H5T_NATIVE_DOUBLE');
     gain(1,1) = 1;%h5read(sourceFile, [sessionName '/adc_resolution']);
-    gain = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/adc_range'], [1 1], [1 1], 'H5T_NATIVE_DOUBLE');
+    gain = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/adc_range'], [1 1], [1 1], 'H5T_NATIVE_DOUBLE');
     gain(1,1) = 1;%h5read(sourceFile, [sessionName '/adc_range']);
     clear gain;
     
     % VERSION
-    version = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/version'], [1 1], [1 1], 'H5T_NATIVE_INT');
+    version = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/version'], [1 1], [1 1], 'H5T_NATIVE_INT');
     version(1,1) =  h5read(sourceFile, [sessionName '/version']);
     clear version
     
     % GAIN
-    gain = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/gain'], [1 4], [1 4], 'H5T_NATIVE_DOUBLE');
+    gain = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/gain'], [1 4], [1 4], 'H5T_NATIVE_DOUBLE');
     gain(1,1:4) = h5read(sourceFile, [sessionName '/gain']);
     clear gain
     
     % SR
-    sr_ = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/sr'], [1 1], [1 1], 'H5T_NATIVE_INT');
+    sr_ = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/sr'], [1 1], [1 1], 'H5T_NATIVE_INT');
     sr_(1,1) = h5read(sourceFile, [sessionName '/sr']); %int32(DS.getSampleRate);
     clear sr_
     
@@ -140,18 +139,18 @@ for fi = 1:nFiles
     for i=1:length(names)
         H5T.insert(type_id, names{i}, (i-1)*32, 'H5T_NATIVE_INT');
     end
-    cl = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/channel_list'], nC, nC, type_id);
+    cl = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/channel_list'], nC, nC, type_id);
     
-    x = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/channel_nr'], [1 nC], [1 nC], 'H5T_NATIVE_DOUBLE');
+    x = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/channel_nr'], [1 nC], [1 nC], 'H5T_NATIVE_DOUBLE');
     x(1,1:nC) = ME.electrodeNumbers;
     clear x
-    x = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/channel_posx'], [1 nC], [1 nC], 'H5T_NATIVE_DOUBLE');
+    x = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/channel_posx'], [1 nC], [1 nC], 'H5T_NATIVE_DOUBLE');
     x(1,1:nC) = ME.electrodePositions(:,1)';
     clear x
-    x = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/channel_posy'], [1 nC], [1 nC], 'H5T_NATIVE_DOUBLE');
+    x = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/channel_posy'], [1 nC], [1 nC], 'H5T_NATIVE_DOUBLE');
     x(1,1:nC) = ME.electrodePositions(:,2)';
     clear x
-    x = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/channel_connected'], [1 nC], [1 nC], 'H5T_NATIVE_DOUBLE');
+    x = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/channel_connected'], [1 nC], [1 nC], 'H5T_NATIVE_DOUBLE');
     x(1,1:nC) = ones(1,nC);
     clear x
     
@@ -161,19 +160,19 @@ for fi = 1:nFiles
     dims = [nSamples nC];
     maxDims = [nSamples nC];
     if ~P.save_as_binary
-        sig = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/sig'], ...
+        sig = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/sig'], ...
             dims, maxDims, h5Type, [], P.deflation);
     else
         % create a binary file where the data is stored
-        sig = mysort.ds.binaryFileMatrix(binFile, [1 nC], 'writable', true);
+        sig = hdsort.file.util.BinaryFileMatrix(binFile, [1 nC], 'writable', true);
         
         % Save a link to the binary file into /sig:
         binFileName = [name, '.dat'];
-        sig_link = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/sig'], [1 length(binFileName) ], [1 length(binFileName) ], 'H5T_C_S1');
+        sig_link = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/sig'], [1 length(binFileName) ], [1 length(binFileName) ], 'H5T_C_S1');
         sig_link(1,1:length(binFileName)) = binFileName;
         clear sig_link;
         
-        bin_dims = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/bin_dims'], [1 2], [1 2], 'H5T_NATIVE_LONG');
+        bin_dims = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/bin_dims'], [1 2], [1 2], 'H5T_NATIVE_LONG');
         bin_dims(1, :) = [nSamples nC];
         clear bin_dims;
     end
@@ -217,16 +216,16 @@ for fi = 1:nFiles
     % FRAME NUMBERS
     FRAMES = DS.getFrameNumbers();
     
-    ffn = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/frame_numbers/first_fn'], [1 1], [1 1], 'H5T_NATIVE_INT');
+    ffn = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/frame_numbers/first_fn'], [1 1], [1 1], 'H5T_NATIVE_INT');
     ffn(1,1) = int32(FRAMES.first_fn);
     clear ffn
-    ffn = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/frame_numbers/last_fn'], [1 1], [1 1], 'H5T_NATIVE_INT');
+    ffn = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/frame_numbers/last_fn'], [1 1], [1 1], 'H5T_NATIVE_INT');
     ffn(1,1) = int32(FRAMES.last_fn);
     clear ffn
-    ffn = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/frame_numbers/dataDims'], [1 2], [1 2], 'H5T_NATIVE_INT');
+    ffn = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/frame_numbers/dataDims'], [1 2], [1 2], 'H5T_NATIVE_INT');
     ffn(1,:) = int32(FRAMES.dataDims');
     clear ffn
-    ffn = mysort.h5.createVariableAndOrFile(newFileName, [sessionName '/frame_numbers/missing_fns'], size(FRAMES.missing_fns'), size(FRAMES.missing_fns'), 'H5T_NATIVE_INT');
+    ffn = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/frame_numbers/missing_fns'], size(FRAMES.missing_fns'), size(FRAMES.missing_fns'), 'H5T_NATIVE_INT');
     ffn(:,:) = FRAMES.missing_fns';
     clear ffn
     
