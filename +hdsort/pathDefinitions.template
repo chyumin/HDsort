@@ -8,31 +8,29 @@ function def = pathDefinitions(varargin)
     def.pdefsPath = pwd;
     def.callerPath = [];
     
-    user_config = hdsort.global_user_config();
+    user_config = global_user_config();
     user_name = user_config.user_name;
     
     if ~isempty(strfind(OStype, 'WIN'))
-        
         def.server01 = '\\bs-filesvr01\';
         def.server02 = '\\bs-filesvr02\';
+        def.localData = '\\C:[add something]';
         
-    elseif ~isempty(strfind(OStype, 'MACI64'))
-        
-        def.server01 = fullfile('/Volumes', 'filesvr01'); 
-        def.server01 = fullfile('/Volumes', 'filesvr02');
+    elseif ~isempty(strfind(OStype, 'MAC'))
+        def.server01 = fullfile('/Volumes', 'filesvr01');
+        def.server02 = fullfile('/Volumes', 'filesvr02'); 
+        def.localData = fullfile('/Users', user_name, 'tmp'); 
 
-        %if ~exist(def.server01) warning('/Volumes/filesvr01 does not exist!'); end
-        %if ~exist(def.server01) warning('/Volumes/filesvr02 does not exist!'); end
-        
     elseif ~isempty(strfind(OStype, 'GLNXA64'))
-        
-        def.server01 = fullfile('/net', 'bs-filesvr01', 'export', 'group', 'groupname');
-        def.server02 = fullfile('/net', 'bs-filesvr02', 'export', 'group', 'groupname');
-    
+        def.server01 = fullfile('/net', 'bs-filesvr01');
+        def.server02 = fullfile('/net', 'bs-filesvr02');
+        def.localData = fullfile('home', user_name, 'tmp');
     else
         error('OS unknown!')
     end
     
-    def.recordings = fullfile(def.server01, 'recordings');
-    def.local = '.';
+    def.analyzed = fullfile(def.server01, 'analysed');
+    def.recordings = fullfile(def.server02, 'recordings');
+    def.buffer = fullfile(def.server02, 'intermediate_data');
+ 
 end
