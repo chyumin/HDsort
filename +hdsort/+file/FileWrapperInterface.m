@@ -209,9 +209,19 @@ classdef FileWrapperInterface < handle
                 warning('Could not cut all hdsort.waveforms. replacing the ones at the edges with zeros (%d from %d cut)', nCut, nT);
             end
             
-            wf_t = self.getWaveform_(nCut, channelindex, cutLength, t1, t2);
-            %wf_t = self.getWaveform_(t, cutLeft, cutLength, channelindex)
+            chunksize = 200;
+            C = hdsort.util.Chunker(length(t1), ...
+                'chunkSize', chunksize, 'progressDisplay', 'console');
             
+            wf_t = zeros(nCut, cutLength*length(channelindex));
+            while C.hasNextChunk()
+                chunk = C.getNextChunk();
+                chunkIdx = chunk(1):chunk(2);
+                %
+                wf_t(chunkIdx, :) = self.getWaveform_(length(chunkIdx), ...
+                    channelindex, cutLength, t1(chunkIdx), t2(chunkIdx));
+                %wf_t = self.getWaveform_(t, cutLeft, cutLength, channelindex)
+            end
             assert(isa(wf_t, 'double'), 'Function getWaveform_ must be return a double!');
             
             % Copy cut hdsort.waveforms.back into original order, leaving those

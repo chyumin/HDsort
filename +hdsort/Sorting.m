@@ -45,34 +45,43 @@ classdef Sorting < handle
             [dir_exists,mess,messid] = mkdir( self.folders.main );
             assert(dir_exists, 'Main directory could not be created!');
             
-            self.files.sortingclass = fullfile(self.folders.main, [ self.name '_sorting.mat']);
+            %self.files.sortingclass = fullfile(self.folders.main, [ self.name '_sorting.mat']);
+            self.setFile(fullfile(self.folders.main, [ self.name '_sorting.mat']), 'sortingclass');
             
             if ~exist(self.files.sortingclass)
                 save(self.files.sortingclass, 'sortingName');
             end
             
             if isempty(P.legsFile)
-                self.files.legs = fullfile(self.folders.main, 'legsFile.mat');
+                self.setFile(fullfile(self.folders.main, 'legsFile.mat'), 'legs');
+                %self.files.legs = fullfile(self.folders.main, 'legsFile.mat');
             else
-                self.files.legs = P.legsFile;
+                self.setFile(P.legsFile, 'legs');
+                %self.files.legs = P.legsFile;
             end
             
-            if isempty(P.resultFile)
-                self.files.preprocessor = fullfile(self.folders.main, [self.name '_preprocessor.mat']);
+            if isempty(P.preprocessFile)
+                self.setFile(fullfile(self.folders.main, [self.name '_preprocessor.mat']), 'preprocessor');
+                %self.files.preprocessor = fullfile(self.folders.main, [self.name '_preprocessor.mat']);
             else
-                self.files.preprocessor = P.preprocessFile;
+                self.setFile(P.preprocessFile, 'preprocessor');
+                %self.files.preprocessor = P.preprocessFile;
             end
             
             if isempty(P.rawResultFile)
-                self.files.rawResults = fullfile(self.folders.main, [self.name '_rawres.mat']);
+                self.setFile(fullfile(self.folders.main, [self.name '_rawres.mat']), 'rawResults');
+                %self.files.rawResults = fullfile(self.folders.main, [self.name '_rawres.mat']);
             else
-                self.files.rawResults = P.rawResultFile;
+                self.setFile(P.rawResultFile, 'rawResults');
+                %self.files.rawResults = P.rawResultFile;
             end
             
             if isempty(P.resultFile)
-                self.files.results = fullfile(self.folders.main, [self.name '_results.mat']);
+                self.setFile(fullfile(self.folders.main, [self.name '_results.mat']), 'results');
+                %self.files.results = fullfile(self.folders.main, [self.name '_results.mat']);
             else
-                self.files.results = P.resultFile;
+                self.setFile(P.resultFile, 'results');
+                %self.files.results = P.resultFile;
             end
             
             %% Create LEGs and group folders
@@ -272,15 +281,17 @@ classdef Sorting < handle
                 
                 
                 if ~isempty(preprocess_summary.preprocessedFiles)
-                    self.files.preprocessed = preprocess_summary.preprocessedFiles;
+                    %self.files.preprocessed = hdsort.util.convertPathToOS(preprocess_summary.preprocessedFiles);
+                    self.setFile(preprocess_summary.preprocessedFiles, 'preprocessed');
                 else
                     try
-                        self.files.preprocessed = self.rawDS{1}.fileNames;
+                        %self.files.preprocessed = hdsort.util.convertPathToOS(self.rawDS{1}.fileNames);
+                        self.setFile(self.rawDS{1}.fileNames, 'preprocessed');
                     catch
                         self.files.preprocessed = {};
                     end
                 end
-                    
+                
                 % Save summary:
                 self.saveProgress('preprocessed', true);
                 self.saveProgress('preprocessedFiles', self.files.preprocessed);
@@ -289,8 +300,23 @@ classdef Sorting < handle
                 disp('Preprocessing finished.')
             else
                 preprocess_summary = progress.preprocess_summary;
-                self.files.preprocessed = progress.preprocessedFiles;
+                %self.files.preprocessed = hdsort.util.convertPathToOS(progress.preprocessedFiles);
+                self.setFile(progress.preprocessedFiles, 'preprocessed');
                 disp('Preprocessing already completed.')
+            end
+        end
+        
+        function file_exists = setFile(self, fileName, name)
+            self.files.(name) = hdsort.util.convertPathToOS(fileName);
+            
+            if ~iscell(self.files.(name))
+                file_exists = exist(self.files.(name));
+            else
+                file_exists = false;
+                for f = self.files.(name)
+                    if ~exist(f{1}) return; end
+                end
+                file_exists = true;
             end
         end
         
@@ -469,7 +495,7 @@ classdef Sorting < handle
                 
                 try
                     %assert(self.sortingResultFileExists(outputLocation), 'Create file...');
-                    assert( exist(self.files.results), 'Create results file...')
+                    assert( exist(self.files.results) > 0, 'Create results file...')
                     disp('Loading SortingResults file...')
                     load(self.files.results);
                     disp(['SortingResults ' SortingResults.name ' file loaded.'])
@@ -548,7 +574,8 @@ classdef Sorting < handle
         
         % -----------------------------------------------------------------
         function G = loadGroupStruct(self)
-            self.files.GroupStruct   = fullfile(self.folders.groups, 'G_struct.mat');
+            %self.files.GroupStruct   = fullfile(self.folders.groups, 'G_struct.mat');
+            self.setFile(fullfile(self.folders.groups, 'G_struct.mat'), 'GroupStruct');
             if isempty(self.buffer.GroupStruct)
                 self.buffer.GroupStruct = load(self.files.GroupStruct);
             end

@@ -276,7 +276,7 @@ classdef BELMEAFile < hdsort.file.SingleFileWrapper
             %   assert(~any(bb(:)<=0) && ~any(any(bb>repmat(sz(1:size(bb,2)),size(bb,1),1))), 'Indexing out of bounds!');
             block = bb(2,:) - bb(1,:) +1;
             numEl = prod(block);
-            assert(numEl < 10^9, sprintf('Loading that much data (%d = %s) at once is not recommended!', numEl, sprintf('%d x ', block)));
+            assert(numEl < 10^10, sprintf('Loading that much data (%d = %s) at once is not recommended!', numEl, sprintf('%d x ', block)));
             offset = bb(1,:) - 1;
             % read outer bounding box of requested data, this is usually faster
             % than reading individual rows or indices

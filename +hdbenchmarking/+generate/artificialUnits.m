@@ -77,7 +77,8 @@ else
     FP.unitIdx = [FP.originalCellIdxBlock0 FP.originalCellIdxBlock1];
     
     %% Compute full footprints for the selected units:
-    [fp_, P_, Q_] = hdbenchmarking.generate.getRawFootprintOfUnits(bufferFolder, RAW_list, [1000], 1, parameters.footprints);
+    mf = RAW_list.getMissingFrameNumbers();
+    [fp_, P_, Q_] = hdbenchmarking.generate.getRawFootprintOfUnits(bufferFolder, RAW_list, [mf.first + 1000], 1, parameters.footprints);
     footprints_unswapped = zeros(size(fp_, 1), size(fp_, 2), 2*parameters.nCellsPerBlock);
     
     for ii = 1:parameters.nCellsPerBlock

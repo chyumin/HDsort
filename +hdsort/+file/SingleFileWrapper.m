@@ -70,11 +70,6 @@ classdef SingleFileWrapper < hdsort.file.FileWrapperInterface
         end
         
         %------------------------------------------------------------------
-        % Do this in an individual function since certain
-        % DataSourceInterface Implementations might want to overwrite the
-        % exact way in which the file is accessed. E.g., the H5 matrix,
-        % cannot access an irregular index set and has to do this either
-        % chunked or individual
         function wf = getWaveform_(self, nCut, channelindex, cutLength, t1, t2)
             wf = zeros(nCut, length(channelindex)*cutLength);
             % Build complete index set and access data with a single
@@ -90,6 +85,9 @@ classdef SingleFileWrapper < hdsort.file.FileWrapperInterface
                 wf(i,:) = hdsort.waveforms.m2v(squeeze(X(:, i, :))');
             end
         end
+        
+        
+        
         
         
     end

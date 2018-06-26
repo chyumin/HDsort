@@ -241,7 +241,12 @@ classdef CMOSMEAFile < hdsort.file.SingleFileWrapper
         
         %------------------------------------------------------------------
         function gainMultiplier = getGainMultiplier(self)
-            gainMultiplier = double(h5read(self.fileName, '/Sessions/Session0/filter/gainmultiplier'));
+            try
+                gainMultiplier = double(h5read(self.fileName, '/Sessions/Session0/filter/gainmultiplier'));
+            catch
+                gainMultiplier = 1.0;
+                warning('GainMultiplier not defined!')
+            end
         end
         
     end
