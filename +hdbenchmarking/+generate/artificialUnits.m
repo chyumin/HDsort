@@ -106,7 +106,7 @@ else
     FP.cutLeft = footprintP(1).cutLeft;
     
     %% Swap the footprints:
-    [swappedFP, blockIdx] = hdbenchmarking.generate.swapFootprint(footprints_unswapped, MultiElectrode, FP.swapElectrodePairs);
+    swappedFP = hdbenchmarking.generate.swapFootprint(footprints_unswapped, MultiElectrode, FP.swapElectrodePairs);
     [nTf, nCh, nU] = size(swappedFP);
     FP.footprints = swappedFP;
     

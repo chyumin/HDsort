@@ -232,6 +232,28 @@ classdef Mea1KFileSaver < handle
             clear h   
         end        
 
+        % -----------------------------------------------------------------
+        function saveMissingFrames(self, missingFrames)
+            ffn = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/frame_numbers/first_fn'], [1 1], [1 1], 'H5T_NATIVE_INT');
+            ffn(1,1) = int32(missingFrames.first);
+            clear ffn
+            ffn = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/frame_numbers/last_fn'], [1 1], [1 1], 'H5T_NATIVE_INT');
+            ffn(1,1) = int32(missingFrames.last);
+            clear ffn
+            ffn = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/frame_numbers/dataDims'], [1 2], [1 2], 'H5T_NATIVE_INT');
+            ffn(1,:) = int32(self.dims);
+            clear ffn
+            if missingFrames.n > 0
+                lL = numel(missingFrames.begin);
+                ffn = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/frame_numbers/missing_fns'], [lL 2], [lL 2], 'H5T_NATIVE_INT');
+                ffn(:,:) = [missingFrames.begin(:) missingFrames.length(:)];
+            else
+                ffn = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/frame_numbers/missing_fns'], [1 1], [1 1], 'H5T_NATIVE_INT');
+                ffn(1,1) = int32(-1);
+            end
+            clear ffn
+        end
+        
         % ---------------------------------------------------------------------
         function saveNewChannelList(self)
             nC = self.h5infos.maxDims(2);

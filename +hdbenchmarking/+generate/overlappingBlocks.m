@@ -32,7 +32,7 @@ newME = copy(ME);
 newME.electrodePositions = newElP;
 newME.electrodeNumbers = newElN;
 
-swapPairsEl = [elN(newBlock1), elN(newBlock2)];
+swapPairsEl = [elN(newBlock1)' elN(newBlock2)'];
 blockIdx = [zeros(numel(newBlock1), 1); ones(numel(newBlock2), 1)];
 
 for ii = 1:size(newElN,1)

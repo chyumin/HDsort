@@ -463,6 +463,9 @@ classdef Preprocessor < handle
                     bIsFirstChunk = false;
                 end % for loop over chunks
                 
+                missingFrames = ds.getMissingFrameNumbers();
+                MS{fi}.saveMissingFrames(missingFrames);
+                
                 R.runtime.perDS(fi) = toc(t_repTimesPerDS);
             end % for loop over files
             
