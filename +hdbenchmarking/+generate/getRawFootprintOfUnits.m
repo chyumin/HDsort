@@ -108,7 +108,7 @@ catch
             ST = ST - size(f, 1);
             nSpikes = nSpikes + numel(rel_st);
         end
-        wfs = mysort.wf.v2t(wfs_, nCh);
+        wfs = hdsort.waveforms.v2t(wfs_, nCh);
         cutLeft = P.cutLeft;
         
         assert(numel(ST)*0.9 < size(wfs, 3), 'Make sure that at least 90% of all spikes are actually cut out!');
