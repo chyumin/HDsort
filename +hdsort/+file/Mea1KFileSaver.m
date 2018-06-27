@@ -156,7 +156,7 @@ classdef Mea1KFileSaver < handle
             if isempty(self.handles)
                 error('File was already finalized!');
             end
-            self.handles.sig(self.nextIdx:self.nextIdx+size(X,1)-1,:) = X;
+            self.handles.sig(self.nextIdx:self.nextIdx+size(X,1)-1,:) = self.gainmultiplier*X;
             self.nextIdx = self.nextIdx+size(X,1);     
             if self.nextIdx == self.h5infos.maxDims(1)+1
                 self.finalizeFile();
@@ -171,7 +171,7 @@ classdef Mea1KFileSaver < handle
             if isempty(self.handles)
                 error('File was already finalized!');
             end
-            self.handles.sig.appendDataTransposed(Xt);
+            self.handles.sig.appendDataTransposed(self.gainmultiplier*Xt);
             self.nextIdx = self.nextIdx + size(Xt,2);     
             if self.nextIdx == self.h5infos.maxDims(1)+1
                 self.finalizeFile();
@@ -207,6 +207,84 @@ classdef Mea1KFileSaver < handle
                 ffn = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/frame_numbers/missing_fns'], [1 1], [1 1], 'H5T_NATIVE_INT');
                 ffn(1,1) = int32(-1);
             end
+            clear ffn
+        end
+        
+        
+        % ---------------------------------------------------------------------
+        function saveFilterSettings(self, filter)
+            % INPUT FORMAT:
+            % filter.prefiltered
+            % filter.highpass
+            % filter.lowpass
+            % filter.downsamplefactor
+            % filter.order
+            % filter.gainmultiplier;
+            % filter.type (string)
+            
+            %% Set filter info:
+            pref = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/filter/prefiltered'], [1 1], [1 1], 'H5T_NATIVE_INT');
+            pref(1,1) = int32(filter.prefiltered);
+            clear pref
+            high = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/filter/highpass'], [1 1], [1 1], 'H5T_NATIVE_INT');
+            high(1,1) = int32(filter.highpass);
+            clear high
+            low = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/filter/lowpass'], [1 1], [1 1], 'H5T_NATIVE_INT');
+            low(1,1) = int32(filter.lowpass);
+            clear low
+            down = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/filter/downsamplefactor'], [1 1], [1 1], 'H5T_NATIVE_INT');
+            down(1,1) = int32(filter.downsamplefactor);
+            clear down
+            ord = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/filter/order'], [1 1], [1 1], 'H5T_NATIVE_INT');
+            ord(1,1) = int32(filter.order);
+            clear type
+            
+            L = length(filter.type);
+            ord = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/filter/type'], [1 L], [1 L], 'H5T_C_S1');
+            ord(1,1:L) = filter.type;
+            clear ord
+            
+            gd = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/filter/gainmultiplier'], [1 1], [1 1], 'H5T_NATIVE_INT');
+            gd(1,1) = int32(self.gainmultiplier);
+            clear gd
+            
+        end
+        
+        % -----------------------------------------------------------------
+        function saveDetectedSpikes(self, spikeDetection)
+            gdf_spikesDetectedUp = hdsort.spiketrain.toGdf( spikeDetection.spikesDetectedUp, 1:size(spikeDetection.pks_down, 1));
+            gdf_pks_up = hdsort.spiketrain.toGdf( spikeDetection.pks_up, 1:size(spikeDetection.pks_down, 1));
+            gdf_spikesDetectedDown = hdsort.spiketrain.toGdf( spikeDetection.spikesDetectedDown, 1:size(spikeDetection.pks_down, 1));
+            gdf_pks_down = hdsort.spiketrain.toGdf( spikeDetection.pks_down, 1:size(spikeDetection.pks_down, 1));
+            
+            ffn = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/spike_detection/spikesDetectedUp'], size(gdf_spikesDetectedUp), size(gdf_spikesDetectedUp), 'H5T_NATIVE_DOUBLE');
+            ffn(:,:) = gdf_spikesDetectedUp;
+            clear ffn
+            
+            ffn = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/spike_detection/pks_up'], size(gdf_pks_up), size(gdf_pks_up), 'H5T_NATIVE_DOUBLE');
+            ffn(:,:) = gdf_pks_up;
+            clear ffn
+            
+            ffn = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/spike_detection/spikesDetectedDown'], size(gdf_spikesDetectedDown), size(gdf_spikesDetectedDown), 'H5T_NATIVE_DOUBLE');
+            ffn(:,:) = gdf_spikesDetectedDown;
+            clear ffn
+            
+            ffn = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/spike_detection/pks_down'], size(gdf_pks_down), size(gdf_pks_down), 'H5T_NATIVE_DOUBLE');
+            ffn(:,:) = gdf_pks_down;
+            clear ffn
+        
+            ffn = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/spike_detection/minDist'], size(spikeDetection.minDist), size(spikeDetection.minDist), 'H5T_NATIVE_DOUBLE');
+            ffn(:,:) = spikeDetection.minDist;
+            clear ffn
+            ffn = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/spike_detection/threshold'], size(spikeDetection.threshold), size(spikeDetection.threshold), 'H5T_NATIVE_DOUBLE');
+            ffn(:,:) = spikeDetection.threshold;
+            clear ffn
+        end
+        
+        % ---------------------------------------------------------------------
+        function saveNoiseStd(self, noiseStd)
+            ffn = hdsort.file.hdf5.createVariableAndOrFile(self.outFileNameH5, [self.P.sessionName '/spike_detection/noiseStd'], size(noiseStd), size(noiseStd), 'H5T_NATIVE_DOUBLE');
+            ffn(:,:) = noiseStd;
             clear ffn
         end
 

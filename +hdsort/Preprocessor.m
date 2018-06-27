@@ -36,6 +36,7 @@ classdef Preprocessor < handle
             P.hpf = 300;
             P.lpf = 7000;
             P.fir_filterOrder = 110;
+            P.gainmultiplier = 256;
             
             P.estimateNoise = true;
             P.deflation = 1;
@@ -142,7 +143,6 @@ classdef Preprocessor < handle
             %% Create Mea1kFileSaver:
             if ~isempty(P_.saveRawH5FileNameList)
                 MS = {};
-                gainmultiplier = 1;
                 deflation = 0;
                 h5type = 'H5T_NATIVE_FLOAT';
                 for fi=1:length(self.DSlist)
@@ -150,7 +150,7 @@ classdef Preprocessor < handle
                     maxDims = dims;
                     chunkDims = []; %[1000 dims(2)];
                     MS{fi} = hdsort.file.Mea1KFileSaver(OutFolder, P_.saveRawH5FileNameList{fi}, ...
-                        h5type, dims, maxDims, chunkDims, deflation, gainmultiplier, samplesPerSecond_, ...
+                        h5type, dims, maxDims, chunkDims, deflation, P_.gainmultiplier, samplesPerSecond_, ...
                         ME.electrodePositions(:,1), ME.electrodePositions(:,2), ME.electrodeNumbers, ...
                         'save_as_binary', 1, 'forceFileDeletionIfExists', P_.forceFileDeletionIfExists);
                     
@@ -159,11 +159,23 @@ classdef Preprocessor < handle
             end
             
             %% Initialize filter:
+            filterSettings.gainmultiplier = P_.gainmultiplier;
+            filterSettings.prefiltered = P_.prefilter;
             if P_.prefilter
                 FIRb = hdsort.util.filter_design_fir(P_.hpf, P_.lpf, samplesPerSecond_, P_.fir_filterOrder);
                 FIRb = FIRb(:);
+                filterSettings.highpass = P_.hpf;
+                filterSettings.lowpass = P_.lpf;
+                filterSettings.downsamplefactor = 1;
+                filterSettings.order = P_.fir_filterOrder;
+                filterSettings.type = 'FIR fircls';
             else
                 FIRb = [];
+                filterSettings.highpass = 0;
+                filterSettings.lowpass = 0;
+                filterSettings.downsamplefactor = 1;
+                filterSettings.order = 0;
+                filterSettings.type = 'None';
             end
             R.FIRb = FIRb;
             
@@ -198,6 +210,14 @@ classdef Preprocessor < handle
                 t_repTimesPerDS = tic;
                 
                 ds = self.DSlist{fi};
+                
+                combinedSpikeDetection = struct();
+                combinedSpikeDetection.minDist = P_.spikeDetection.minDist;
+                combinedSpikeDetection.threshold = P_.spikeDetection.thr;
+                combinedSpikeDetection.spikesDetectedUp = cell(nC_, 1);
+                combinedSpikeDetection.pks_up = cell(nC_, 1);
+                combinedSpikeDetection.spikesDetectedDown = cell(nC_, 1);
+                combinedSpikeDetection.pks_down = cell(nC_, 1);
                 
                 L = size(ds,1);
                 samplesPerDS(fi) = L;
@@ -282,6 +302,13 @@ classdef Preprocessor < handle
                     spikeDetection.pks_up = cell(nC_,1);
                     spikeDetection.spikesDetectedDown = spikesDetectedDown;
                     spikeDetection.pks_down = pks_down;
+                    
+                    for c = 1:nC_
+                        combinedSpikeDetection.spikesDetectedUp{c} = cat(1, combinedSpikeDetection.spikesDetectedUp{c}, spikeDetection.spikesDetectedUp{c});
+                        combinedSpikeDetection.pks_up{c} = cat(1, combinedSpikeDetection.pks_up{c}, spikeDetection.pks_up{c});
+                        combinedSpikeDetection.spikesDetectedDown{c} = cat(1, combinedSpikeDetection.spikesDetectedDown{c}, spikeDetection.spikesDetectedDown{c});
+                        combinedSpikeDetection.pks_down{c} = cat(1, combinedSpikeDetection.pks_down{c}, spikeDetection.pks_down{c});
+                    end
                     
                     if P_.debug
                         gdf_down = hdsort.spiketrain.toGdf(spikeDetection.spikesDetectedDown);
@@ -465,6 +492,9 @@ classdef Preprocessor < handle
                 
                 missingFrames = ds.getMissingFrameNumbers();
                 MS{fi}.saveMissingFrames(missingFrames);
+                MS{fi}.saveDetectedSpikes(combinedSpikeDetection);
+                MS{fi}.saveNoiseStd(global_smad_per_channel);
+                MS{fi}.saveFilterSettings(filterSettings);
                 
                 R.runtime.perDS(fi) = toc(t_repTimesPerDS);
             end % for loop over files
