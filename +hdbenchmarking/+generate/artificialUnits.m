@@ -137,7 +137,7 @@ else
     end
     assert( numel(parameters.spikingRatesHz) == nArtificialUnits, 'Give a spiking rate for each artificial unit!')
     
-    fn = double( hdsort.file.util.getFrameNumbersFromMissing(PRE.getFrameNumbers()) );
+    fn = double(PRE.getFrameNumbers());
     samplingRate = PRE.getSampleRate();
     
     ST = hdbenchmarking.generate.spikeTrains(samplingRate, fn(1), fn(end), ...
