@@ -34,7 +34,6 @@ parameters.footprints.filter.doZeroPad = false;
 
 parameters.datafile.save_as_binary = true;
 parameters.datafile.deleteOldFilesIfNecessary = false;
-
 parameters = hdsort.util.parseInputs(parameters, varargin, 'error');
 
 %% 0. Prepare generation:

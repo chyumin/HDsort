@@ -96,26 +96,11 @@ for fi = 1:nFiles
     gd(1,1) = 1; %gainmultiplier;
     clear gd
     
-    % SAVE THE SOURCEFILES
-    ffile = h5read(sourceFile, [sessionName '/source_files/raw_h5']); ffile = [ffile{:}];
-    ord = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/source_files/raw_h5'], [1 length(ffile)], [1 length(ffile)], 'H5T_C_S1');
-    ord(1,1:length(ffile)) = ffile;
-    clear ord
-    %mfile = h5read(sourceFile, [sessionName '/source_files/mapping_file']); mfile = [mfile{:}];
-    %ord = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/source_files/mapping_file'], [1 length(mfile)], [1 length(mfile)], 'H5T_C_S1');
-    %ord(1,1:length(mfile)) = mfile;
-    %clear ord
-    
-    % CHIP ID
-    chipid = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/chipid'], [1 1], [1 1], 'H5T_NATIVE_INT');
-    chipid(1,1) =  h5read(sourceFile, [sessionName '/chipid']);
-    clear chipid
-    
     % ADC range and resolution
     gain = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/adc_resolution'], [1 1], [1 1], 'H5T_NATIVE_DOUBLE');
-    gain(1,1) = 1;%h5read(sourceFile, [sessionName '/adc_resolution']);
+    gain(1,1) = h5read(sourceFile, [sessionName '/adc_resolution']);
     gain = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/adc_range'], [1 1], [1 1], 'H5T_NATIVE_DOUBLE');
-    gain(1,1) = 1;%h5read(sourceFile, [sessionName '/adc_range']);
+    gain(1,1) = h5read(sourceFile, [sessionName '/adc_range']);
     clear gain;
     
     % VERSION
