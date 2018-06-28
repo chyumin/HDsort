@@ -199,19 +199,25 @@ for fi = 1:nFiles
     end
     
     % FRAME NUMBERS
-    FRAMES = DS.getFrameNumbers();
+    FRAMES = DS.getMissingFrameNumbers();
     
     ffn = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/frame_numbers/first_fn'], [1 1], [1 1], 'H5T_NATIVE_INT');
-    ffn(1,1) = int32(FRAMES.first_fn);
+    ffn(1,1) = int32(FRAMES.first);
     clear ffn
     ffn = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/frame_numbers/last_fn'], [1 1], [1 1], 'H5T_NATIVE_INT');
-    ffn(1,1) = int32(FRAMES.last_fn);
+    ffn(1,1) = int32(FRAMES.last);
     clear ffn
+    
+    dataDims = size(DS);
     ffn = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/frame_numbers/dataDims'], [1 2], [1 2], 'H5T_NATIVE_INT');
-    ffn(1,:) = int32(FRAMES.dataDims');
+    ffn(1,:) = int32(dataDims);
     clear ffn
-    ffn = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/frame_numbers/missing_fns'], size(FRAMES.missing_fns'), size(FRAMES.missing_fns'), 'H5T_NATIVE_INT');
-    ffn(:,:) = FRAMES.missing_fns';
+    
+    assert(FRAMES.n == 0, 'Make sure that you do not have any missing frames!')
+    %ffn = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/frame_numbers/missing_fns'], size(FRAMES.missing_fns'), size(FRAMES.missing_fns'), 'H5T_NATIVE_INT');
+    %ffn(:,:) = FRAMES.missing_fns';
+    ffn = hdsort.file.hdf5.createVariableAndOrFile(newFileName, [sessionName '/frame_numbers/missing_fns'], [1 1], [1 1], 'H5T_NATIVE_INT');
+    ffn(:,:) = -1;
     clear ffn
     
     disp('Done copying.')
