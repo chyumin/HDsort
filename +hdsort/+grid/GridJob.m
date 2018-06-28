@@ -534,7 +534,7 @@ classdef GridJob < handle
             
             shFile = fullfile(self.folders.main, [self.jobName '_job.sh']);
             %if ~isempty(strfind(computer, 'WIN')) | ~isempty(strfind(computer, 'MACI64'))
-                shFile = hdsort.grid.GridJob.convertToLinux(shFile);
+                shFile = hdsort.grid.GridJob.convertPathToOS(shFile, 'LIN');
             %end
             
             save(token_file, 'shFile');
