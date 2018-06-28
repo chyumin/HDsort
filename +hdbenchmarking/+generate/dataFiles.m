@@ -166,7 +166,7 @@ for fi = 1:nFiles
     
     chunkSize = 250000;
     nextIdx = 1;
-    timer = util.ProcessTimer(ceil(nSamples/chunkSize));
+    timer = hdsort.util.ProcessTimer(ceil(nSamples/chunkSize));
     while lastSample < nSamples
         timer.next();
         timer.showProgress();
