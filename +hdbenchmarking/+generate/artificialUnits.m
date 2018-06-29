@@ -82,12 +82,12 @@ else
     AMPs = amplitudes([FP.originalCellIdxBlock0; FP.originalCellIdxBlock1]);
     
     
-    indices = [FP.originalCellIdxBlock0; FP.originalCellIdxBlock1]';
-    parfor ii = 1:length(indices) 
-        unitIdx = indices(ii);
-        hdbenchmarking.generate.getRawFootprintOfUnits(bufferFolder, RAW_list, ...
-            original_spiketrains{unitIdx}, unitIDs(unitIdx), parameters.footprints);
-    end
+    %indices = [FP.originalCellIdxBlock0; FP.originalCellIdxBlock1]';
+    %parfor ii = 1:length(indices) 
+    %    unitIdx = indices(ii);
+    %    hdbenchmarking.generate.getRawFootprintOfUnits(bufferFolder, RAW_list, ...
+    %        original_spiketrains{unitIdx}, unitIDs(unitIdx), parameters.footprints);
+    %end
     for ii = 1:parameters.nCellsPerBlock
         unitIdx = FP.originalCellIdxBlock0(ii);
         [fp_, footprintP(ii), footprintQ(ii)] = ...
