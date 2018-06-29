@@ -18,10 +18,10 @@ parameters.sigmaAmplitudes = 0.1;
 parameters.refractoryPeriod_s = 0.0015;
 parameters.jitterFactor = 10;
 
-parameters.unitselection.footprintSelectionCriterium = 'random'; % | 'targetamplitude' --> 1.5 mean amplitude of all units
+parameters.unitselection.footprintSelectionCriterium = 'amplitude_sweep'; % | 'targetamplitude' --> 1.5 mean amplitude of all units
 parameters.unitselection.forbiddenUnits = []; % Specify a list of units that should be excluded from the possible candidates
 
-%parameters.footprints.amplitudeCorrectionFactor = 0.5; % footprintSelectionCriterium == 'random' --> 0.5 ; 1.0 otherwise
+parameters.footprints.amplitudeCorrectionFactor = 2.0; % footprintSelectionCriterium == 'random' --> 0.5 ; 1.0 otherwise
 parameters.footprints.nTf = 150;
 parameters.footprints.cutLeft = 50;
 parameters.footprints.zeroingThreshold = 4.8;
@@ -105,7 +105,7 @@ else
             original_spiketrains{unitIdx}, unitIDs(unitIdx), parameters.footprints);
         
         %% Adjust the amplitudes:
-        footprints_unswapped(:, :, jj) = fp_; %* parameters.footprints.amplitudeCorrectionFactor;
+        footprints_unswapped(:, :, jj) = fp_;
     end
     
     %% Normalize:
@@ -116,7 +116,7 @@ else
     footprints_unswapped_normalized = AMP_rep .* footprints_unswapped_normalized_;
     FP.noiseStd = mean(PRE.noiseStd);
     
-    footprints_unswapped = FP.noiseStd * footprints_unswapped_normalized;
+    footprints_unswapped = FP.noiseStd * footprints_unswapped_normalized * parameters.footprints.amplitudeCorrectionFactor;
     FP.footprintP = footprintP;
     FP.footprintQ = footprintQ;
     FP.cutLeft = footprintP(1).cutLeft;

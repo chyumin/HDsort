@@ -18,25 +18,39 @@ blockMembership = blockIdx(im11);
 %     blockIdx(ii) = col-1;
 % end
 
+%% Find the amplitudes:
+AMP = [];
+for kk = 1:size(footprintT, 3);
+    m = hdsort.util.min2D(footprintT(:,:, kk));
+    AMP(kk) = m;
+end
+idxBlock0 = find(~blockMembership & eligibleUnits);
+idxBlock1 = find( blockMembership & eligibleUnits);
+
 %% Select the footprint accorting to the selection criterium
 if strcmp(unitselection_parameters.footprintSelectionCriterium, 'random')
     
     %% Choose good footprints based on their 'eligibility' alone:
-    originalCellIdxBlock0 = randsample(find(~blockMembership & eligibleUnits), nCellsPerBlock);
-    originalCellIdxBlock1 = randsample(find( blockMembership & eligibleUnits), nCellsPerBlock);
+    originalCellIdxBlock0 = randsample(idxBlock0, nCellsPerBlock);
+    originalCellIdxBlock1 = randsample(idxBlock1, nCellsPerBlock);
 
+elseif strcmp(unitselection_parameters.footprintSelectionCriterium, 'amplitude_sweep') 
+    
+    % Block 0:
+    amplitudes0 = AMP(idxBlock0);
+    [a_, sidx] = sort(amplitudes0);
+    block0sidx = sidx(round(linspace(1, length(amplitudes0), nCellsPerBlock)));
+    originalCellIdxBlock0 = idxBlock0(block0sidx);
+    
+    % Block 1:
+    amplitudes1 = AMP(idxBlock1);
+    [a_, sidx] = sort(amplitudes1);
+    block1sidx = sidx(round(linspace(1, length(amplitudes1), nCellsPerBlock)));
+    originalCellIdxBlock1 = idxBlock1(block1sidx);
+    
 elseif strcmp(unitselection_parameters.footprintSelectionCriterium, 'targetamplitude') 
     
     %% Choose good footprints based on their 'eligibility' AND their amplitude:
-    idxBlock0 = find(~blockMembership & eligibleUnits);
-    idxBlock1 = find( blockMembership & eligibleUnits);
-    
-    %% Find the amplitudes:
-    AMP = [];
-    for kk = 1:size(fp, 3);
-        m = util.min2D(fp(:,:, kk));
-        AMP(kk) = m;
-    end
     targetAMP = mean(AMP)*1.5;
     
     %% Block0:
@@ -61,6 +75,8 @@ end
 %%
 assert( numel(originalCellIdxBlock0) == nCellsPerBlock,  'Gaaaah!')
 assert( numel(originalCellIdxBlock1) == nCellsPerBlock,  'Gaaaah!')
+
+assert( ~any(ismember(originalCellIdxBlock0, originalCellIdxBlock1)), 'Gaaah!')
 
 assert( sum(ismember(originalCellIdxBlock0, unitselection_parameters.forbiddenUnits)) == 0, 'Gaaaah!')
 assert( sum(ismember(originalCellIdxBlock1, unitselection_parameters.forbiddenUnits)) == 0, 'Gaaaah!')
