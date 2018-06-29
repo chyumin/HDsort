@@ -27,7 +27,7 @@ spikeJitter = {};
 for jj = 1:nCells
     for ii = 1:length(lastFrames)
         durations(ii) = lastFrames(ii)-firstFrames(ii)+1;
-        spikeTrains{jj, ii} = round( poisson_spike_train(spikingRates_Hz(jj)/samplingRate, durations(ii)) );
+        spikeTrains{jj, ii} = round( hdbenchmarking.generate.poissonSpikeTrain(spikingRates_Hz(jj)/samplingRate, durations(ii)) );
         
         if ~isempty(refractoryPeriod_s)
             idx = diff(spikeTrains{jj, ii}) < refractoryPeriod_s*samplingRate;
