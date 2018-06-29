@@ -2,6 +2,7 @@ function [newFileList, artificialUnitFile] = artificialUnits(...
     datasetName, ...
     baseFolder, ...
     gdf, ... % matrix containing the unitID in the first row and the spike-times in the second
+    amplitudes, ... % Give the amplitudes in noiseStd that the estimated footprints should have
     estimated_footprints, ... % the characteristic waveforms of each unit on all channels
     RAW_list, .... % handle on raw file (to extract the footprints)
     PRE, ... % handle on pre-filtered file
@@ -20,7 +21,7 @@ parameters.jitterFactor = 10;
 parameters.unitselection.footprintSelectionCriterium = 'random'; % | 'targetamplitude' --> 1.5 mean amplitude of all units
 parameters.unitselection.forbiddenUnits = []; % Specify a list of units that should be excluded from the possible candidates
 
-parameters.footprints.amplitudeCorrectionFactor = 0.5; % footprintSelectionCriterium == 'random' --> 0.5 ; 1.0 otherwise
+%parameters.footprints.amplitudeCorrectionFactor = 0.5; % footprintSelectionCriterium == 'random' --> 0.5 ; 1.0 otherwise
 parameters.footprints.nTf = 150;
 parameters.footprints.cutLeft = 50;
 parameters.footprints.zeroingThreshold = 4.8;
@@ -68,7 +69,6 @@ else
     bufferFolder = fullfile(baseFolder, 'buffer');
     mkdir(bufferFolder)
     
-    FP.gainMultiplier = PRE.getGainMultiplier();
     FP.swapElectrodePairs = swapElectrodePairs;
     
     FP.originalCellIdxBlock0 = selectedUnits.originalCellIdxBlock0;
@@ -79,7 +79,15 @@ else
     mf = RAW_list(1).getMissingFrameNumbers();
     [fp_, P_, Q_] = hdbenchmarking.generate.getRawFootprintOfUnits(bufferFolder, RAW_list, [mf.first + 1000], 1, parameters.footprints);
     footprints_unswapped = zeros(size(fp_, 1), size(fp_, 2), 2*parameters.nCellsPerBlock);
+    AMPs = amplitudes([FP.originalCellIdxBlock0; FP.originalCellIdxBlock1]);
     
+    
+    indices = [FP.originalCellIdxBlock0; FP.originalCellIdxBlock1]';
+    parfor ii = 1:length(indices) 
+        unitIdx = indices(ii);
+        hdbenchmarking.generate.getRawFootprintOfUnits(bufferFolder, RAW_list, ...
+            original_spiketrains{unitIdx}, unitIDs(unitIdx), parameters.footprints);
+    end
     for ii = 1:parameters.nCellsPerBlock
         unitIdx = FP.originalCellIdxBlock0(ii);
         [fp_, footprintP(ii), footprintQ(ii)] = ...
@@ -87,7 +95,7 @@ else
             original_spiketrains{unitIdx}, unitIDs(unitIdx), parameters.footprints);
         
         %% Adjust the amplitudes:
-        footprints_unswapped(:, :, ii) = fp_ * parameters.footprints.amplitudeCorrectionFactor;
+        footprints_unswapped(:, :, ii) = fp_; % * parameters.footprints.amplitudeCorrectionFactor;
     end
     for jj = parameters.nCellsPerBlock+1:2*parameters.nCellsPerBlock
         
@@ -97,9 +105,18 @@ else
             original_spiketrains{unitIdx}, unitIDs(unitIdx), parameters.footprints);
         
         %% Adjust the amplitudes:
-        footprints_unswapped(:, :, jj) = fp_ * parameters.footprints.amplitudeCorrectionFactor;
+        footprints_unswapped(:, :, jj) = fp_; %* parameters.footprints.amplitudeCorrectionFactor;
     end
-    footprints_unswapped = FP.gainMultiplier * footprints_unswapped;
+    
+    %% Normalize:
+    footprints_unswapped_normalized_ = hdsort.waveforms.normalizeEachUnit(footprints_unswapped);
+    AMP_rep = repmat( reshape(AMPs, 1, 1, length(AMPs)), ...
+        size(footprints_unswapped_normalized_, 1), ...
+        size(footprints_unswapped_normalized_, 2), 1); 
+    footprints_unswapped_normalized = AMP_rep .* footprints_unswapped_normalized_;
+    FP.noiseStd = mean(PRE.noiseStd);
+    
+    footprints_unswapped = FP.noiseStd * footprints_unswapped_normalized;
     FP.footprintP = footprintP;
     FP.footprintQ = footprintQ;
     FP.cutLeft = footprintP(1).cutLeft;
