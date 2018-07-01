@@ -403,7 +403,7 @@ classdef Sorting < handle
             P.queue = 'regular';
             P.gridType = 'QSUB';
             P.sortjobFolder = self.folders.main;
-            P = util.parseInputs(P, varargin, 'error');
+            P = hdsort.util.parseInputs(P, varargin, 'error');
             
             if ~isfield(self.buffer, 'sortjob')
                 
