@@ -1,4 +1,3 @@
-
 classdef SpikeSorting < handle
     % Input
     %   gdf_or_st   - EITHER: matrix with 2 columns
@@ -97,7 +96,7 @@ classdef SpikeSorting < handle
         function [U, uIdx, uI] = getUnits(self, U_)
             if nargin == 1 || isempty(U_)
                 U = self.Units;
-            elseif isa(U_, 'lsa.Unit')
+            elseif isa(U_, 'hdsort.results.Unit')
                 U = U_;
             elseif islogical(U_)
                 U = self.Units(U_);

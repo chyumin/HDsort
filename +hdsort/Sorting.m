@@ -241,71 +241,6 @@ classdef Sorting < handle
         end
 
         % -----------------------------------------------------------------
-        function preprocess_summary = preprocess(self, varargin)
-            P = self.sortingParameters;
-            P.saveRawH5FileNameList = {};
-            P = hdsort.util.parseInputs(P, varargin, 'merge');
-            
-            progress = self.loadProgress();
-            
-            if isempty(P.saveRawH5FileNameList)
-                if isa(self.rawDS{1}, 'hdsort.file.CMOSMEA')
-                    fileList = self.rawDS{1}.fileNames;
-                else
-                    try
-                        fileList = cellfun(@(x) x.fileName, self.rawDS, 'UniformOutput', 0);
-                    catch
-                        fileList = arrayfun(@(x) num2str(x,'%04d.h5'), 1:numel(self.rawDS), 'un',0)
-                    end
-                end
-                
-                for ii = 1:numel(fileList)
-                    try
-                        [~, name_, ~] = fileparts(fileList{ii});
-                        [~, name,  ~] = fileparts(name_);
-                    catch
-                        name = sprintf('%04d', ii);
-                    end
-                    P.saveRawH5FileNameList{ii} = [name, '.h5'];
-                end
-            end
-            
-            if ~progress.preprocessed
-                self.buffer.preprocessor = hdsort.Preprocessor( ...
-                        self.rawDS, self.LEGs.groupsidx, self.name, P);
-                    
-                disp('Preprocessing...')
-                forceExecution = false;
-                preprocess_summary = self.buffer.preprocessor.preprocess(...
-                    self.folders.groups, self.files.preprocessor, forceExecution);
-                
-                
-                if ~isempty(preprocess_summary.preprocessedFiles)
-                    %self.files.preprocessed = hdsort.util.convertPathToOS(preprocess_summary.preprocessedFiles);
-                    self.setFile(preprocess_summary.preprocessedFiles, 'preprocessed');
-                else
-                    try
-                        %self.files.preprocessed = hdsort.util.convertPathToOS(self.rawDS{1}.fileNames);
-                        self.setFile(self.rawDS{1}.fileNames, 'preprocessed');
-                    catch
-                        self.files.preprocessed = {};
-                    end
-                end
-                
-                % Save summary:
-                self.saveProgress('preprocessed', true);
-                self.saveProgress('preprocessedFiles', self.files.preprocessed);
-                self.saveProgress('preprocess_summary', preprocess_summary);
-                
-                disp('Preprocessing finished.')
-            else
-                preprocess_summary = progress.preprocess_summary;
-                %self.files.preprocessed = hdsort.util.convertPathToOS(progress.preprocessedFiles);
-                self.setFile(progress.preprocessedFiles, 'preprocessed');
-                disp('Preprocessing already completed.')
-            end
-        end
-        
         function file_exists = setFile(self, fileName, name)
             self.files.(name) = hdsort.util.convertPathToOS(fileName);
             
@@ -321,23 +256,104 @@ classdef Sorting < handle
         end
         
         % -----------------------------------------------------------------
-        function sort_summary = sort(self, varargin)
+        function preprocess_summary = preprocess(self, varargin)
+            P = self.sortingParameters;
+            P.saveRawH5FileNameList = {};
+            P = hdsort.util.parseInputs(P, varargin, 'merge');
             
-            P.sortingMode = 'grid'; % as opposed to 'local' , 'local_parfor'
+            progress = self.loadProgress();
+            
+            if isempty(P.saveRawH5FileNameList)
+                if isa(self.rawDS{1}, 'hdsort.file.CMOSMEA')
+                    try
+                        fileList = cellfun(@(x) x.fileNames, self.rawDS, 'UniformOutput', 0);
+                    catch
+                        fileList = arrayfun(@(x) num2str(x,'%04d.h5'), 1:numel(self.rawDS), 'un',0)
+                    end
+                else
+                    try
+                        fileList = cellfun(@(x) x.fileName, self.rawDS, 'UniformOutput', 0);
+                    catch
+                        fileList = arrayfun(@(x) num2str(x,'%04d.h5'), 1:numel(self.rawDS), 'un',0)
+                    end
+                end
+                
+                for ii = 1:numel(fileList)
+                    try
+                        [~, name_, ~] = fileparts(fileList{ii});
+                        [~, name,  ~] = fileparts(name_);
+                    catch
+                        try
+                            [~, name_, ~] = fileparts(fileList{ii}{1});
+                            [~, name,  ~] = fileparts(name_);
+                        catch
+                            name = sprintf('%04d', ii);
+                        end
+                    end
+                    P.saveRawH5FileNameList{ii} = [name, '.h5'];
+                end
+            end
+            
+            if ~progress.preprocessed
+                self.buffer.preprocessor = hdsort.Preprocessor( ...
+                        self.rawDS, self.LEGs.groupsidx, self.name, P);
+                    
+                disp('Preprocessing...')
+                forceExecution = false;
+                preprocess_summary = self.buffer.preprocessor.preprocess(...
+                    self.folders.groups, self.files.preprocessor, forceExecution);
+                
+                if ~isempty(preprocess_summary.preprocessedFiles)
+                    self.setFile(preprocess_summary.preprocessedFiles, 'preprocessed');
+                else
+                    try
+                        self.setFile(self.rawDS{1}.fileNames, 'preprocessed');
+                    catch
+                        self.files.preprocessed = {};
+                    end
+                end
+                
+                % Save summary:
+                self.saveProgress('preprocessed', true);
+                self.saveProgress('preprocessedFiles', self.files.preprocessed);
+                self.saveProgress('preprocess_summary', preprocess_summary);
+                
+                disp('Preprocessing finished.')
+            else
+                preprocess_summary = progress.preprocess_summary;
+                self.setFile(progress.preprocessedFiles, 'preprocessed');
+                disp('Preprocessing already completed.')
+            end
+        end
+         
+        % -----------------------------------------------------------------
+        function sort_summary = sort(self, varargin)
+            % sortingMode Options: 
+            % 'local_parfor' (default) - processes LEGs in a parfor loop
+            % 'local'                  - processes LEGs in a for loop
+            % 'grid'                   - launches a batch process on a computer grid
+            % 'local_parfeval'         - processes LEGs using parfeval (mostly for debugging)
+            % 'local_parfor_chunked'   - processes LEGs using a parfor loop but step by step (mostly for debugging)
+            
+            P.sortingMode = 'local_parfor';
             P.forceExecution = false;
             P.queue = 'regular';
             P.gridType = 'QSUB';
             P.sortjobFolder = self.folders.main;
+            P.debug = false;
+            P.numWorkers = 8;
             P = hdsort.util.parseInputs(P, varargin, 'error');
             
-            if ~isfield(self.buffer, 'sortjob') || isempty(self.buffer.sortjob)
-            
+            if ~isfield(self.files, 'preprocessed')
                 progress = self.loadProgress();
-                preprocessedFiles = progress.preprocessedFiles;
+                self.files.preprocessed = progress.preprocessedFiles;
+            end
+            
+            if ~isfield(self.buffer, 'sortjob') || isempty(self.buffer.sortjob)
                 
                 self.buffer.sortjob = hdsort.grid.SortJob( self.name, P.sortjobFolder, ...
-                    self.folders.groups, self.LEGs, preprocessedFiles, self.sortingParameters, ...
-                    'gridType', P.gridType, 'queue', P.queue)
+                    self.folders.groups, self.LEGs, self.files.preprocessed, ...
+                    self.sortingParameters, 'gridType', P.gridType, 'queue', P.queue)
                 
                 self.buffer.sortjob.setTaskParameters();
             end
@@ -345,61 +361,73 @@ classdef Sorting < handle
             progress = self.loadProgress();
             if P.forceExecution || any(~progress.sortedLEGs)
                 
-                if strcmp(P.sortingMode, 'grid')
+                nCompleted = self.buffer.sortjob.summarySnapshot(true);
+                if self.buffer.sortjob.nTasks > nCompleted
                     
-                    self.buffer.sortjob.constructJobSH();
-                    
-                    [nCompleted, tasksNotCompleted, nErrors, tasksWithErrors] = self.buffer.sortjob.summarySnapshot(true);
-                    if self.buffer.sortjob.nTasks > nCompleted
+                    if strcmp(P.sortingMode, 'grid')
+                        self.buffer.sortjob.constructJobSH();
                         self.buffer.sortjob.createAutoSubmitToken();
                     else
-                        disp('All tasks seem to be completed...')
-                    end
-                    all_tasks_completed = self.buffer.sortjob.waitForTasksToFinish(60);
-                    assert(all_tasks_completed, 'Error in at least a few tasks!')
-                    
-                elseif strcmp(P.sortingMode, 'local')
-                    
-                    for t = 1:self.buffer.sortjob.nTasks()
-                        self.buffer.sortjob.runTaskLocally(t);
-                    end
-                    
-                    % This could be used to avoid hdsort.grid.SortJob, but
-                    % currently, we want to use the summarizeReports
-                    % function.
-%                     for t = 1:self.buffer.sortjob.nTasks()
-%                         groupFolder = self.folders.legs{t};
-%                         wfsFile = fullfile(groupFolder, [taskParameters.name '.040spikes_cut.h5']);
-%                         covFile = fullfile(groupFolder, [taskParameters.name '.060cov.mat']);
-%                         groupidx = self.LEGs.groupsidx{t};
-%                         
-%                         hdsort.leg.sortOneLEG(self.name, wfsFile, covFile, ...
-%                             groupFolder, self.sortingParameters, groupidx, ...
-%                             self.files.preprocessed);
-%                     end
-                    
-                elseif strcmp(P.sortingMode, 'local_parfor')
-                    
-                    parfor t = 1:self.buffer.sortjob.nTasks()
-                        self.buffer.sortjob.runTaskLocally(t);
+                        
+                        debugFlag = P.debug;
+                        [job_id_str, taskFile] = self.buffer.sortjob.prepareLocalTask();
+                        if strcmp(P.sortingMode, 'local')
+                            for t = 1:self.buffer.sortjob.nTasks()
+                                hdsort.grid.GridJob.runTask(taskFile, num2str(t), job_id_str, debugFlag);
+                            end
+                            
+                        elseif strcmp(P.sortingMode, 'local_parfeval')
+                            
+                            ppool = gcp();
+                            for t = 1:self.buffer.sortjob.nTasks()
+                                parfeval(ppool, @hdsort.grid.GridJob.runTask, 0, taskFile, num2str(t), job_id_str, debugFlag);
+                            end
+                            
+                        elseif strcmp(P.sortingMode, 'local_parfor')
+                            w = warning('off','all');
+                            
+                            N = self.buffer.sortjob.nTasks();
+                            parfor t = 1:N
+                                hdsort.grid.GridJob.runTask(taskFile, num2str(t), job_id_str, debugFlag);
+                            end
+                            
+                        elseif strcmp(P.sortingMode, 'local_parfor_chunked')
+                            w = warning('off','all');
+                            
+                            N = self.buffer.sortjob.nTasks();
+                            chunksize = P.numWorkers;
+                            C = util.Chunker(N, 'chunkSize', chunksize, ...
+                                'minChunkSize', 4, 'progressDisplay', 'console');
+                            while C.hasNextChunk()
+                                chunks = C.getNextChunk();
+                                chunkIdx = chunks(1):chunks(2);
+                                
+                                N_chunk = numel(chunkIdx);
+                                parfor t = 1:N_chunk
+                                    task_str = num2str( chunkIdx(t) );
+                                    hdsort.grid.GridJob.runTask(taskFile, task_str, job_id_str, debugFlag);
+                                end
+                            end
+                        end
                     end
                     
                 else
-                    error('sortingMode unknown - use either grid, local or local_parfor!')
+                    disp('All tasks seem to be completed...')
                 end
+                all_tasks_completed = self.buffer.sortjob.waitForTasksToFinish(60);
+                assert(all_tasks_completed, 'Error in at least a few tasks!')
             end
             
-            %% Save summary:
+            % Save summary:
             sort_summary = self.buffer.sortjob.summarizeReports();
             self.saveProgress('sortedLEGs', sort_summary.completedTasks);
             self.saveProgress('sort_summary', sort_summary);
+            
         end
-        
         
         % -----------------------------------------------------------------
         function sort_summary = reuptake(self, varargin)
             
-            P.sortingMode = 'grid'; % as opposed to 'local' , 'local_parfor'
             P.queue = 'regular';
             P.gridType = 'QSUB';
             P.sortjobFolder = self.folders.main;
@@ -475,15 +503,6 @@ classdef Sorting < handle
             
             self.buffer.rawResults = rawResults;
         end
-
-        % -----------------------------------------------------------------
-        %function fileName = sortingResultFileName(self, outputLocation)
-        %    fileName = fullfile(outputLocation, [ self.name '_results.mat']);
-        %end
-        %function srf_exists = sortingResultFileExists(self, outputLocation)
-        %    sortingResultFileName = self.sortingResultFileName(outputLocation)
-        %    srf_exists = exist(sortingResultFileName) > 0;
-        %end
         
         % -----------------------------------------------------------------
         function [SortingResults, SortingResults_discarded] = createSpikeSortingResult(self, outputLocation)
@@ -574,7 +593,6 @@ classdef Sorting < handle
         
         % -----------------------------------------------------------------
         function G = loadGroupStruct(self)
-            %self.files.GroupStruct   = fullfile(self.folders.groups, 'G_struct.mat');
             self.setFile(fullfile(self.folders.groups, 'G_struct.mat'), 'GroupStruct');
             if isempty(self.buffer.GroupStruct)
                 self.buffer.GroupStruct = load(self.files.GroupStruct);
@@ -586,21 +604,6 @@ classdef Sorting < handle
         function gdfs = loadGroupGDFs(self)
             G = self.loadGroupStruct();
             gdfs = {G.G.gdf};
-        end
-        
-        % -----------------------------------------------------------------
-        % ------------------------- PLOT FUNCTIONS ------------------------
-        % -----------------------------------------------------------------
-        function P = plotLEGs(self, varargin)
-            P.fh = [];
-            P.ah = [];
-            P = util.parseInputs(P, varargin, 'error');
-            
-            [col, markerSet] = bel_plots.PlotInterface.vectorColor(1:self.LEGs.N);
-            for ii = 1:self.LEGs.N
-                ep = self.LEGs.electrodePositions(self.LEGs.groupsidx{ii},:);
-                P = bel_plots.Gscatter(ep(:,1), ep(:,2), [], 'ah', P.ah, 'fh', P.fh, 'color', col(ii,:), 'Marker', markerSet{ii});%, 'MarkerSize', 16);
-            end
         end
         
     end

@@ -87,7 +87,7 @@ classdef Postprocessor < handle
                 
                 %% Load Parameters
                 parameters = load( fullfile( self.folders.legs{ii}, [self.name, self.P.parametersFileName]) );
-                G(ii).P = parameters.S.P;
+                G(ii).P = parameters.P;
                 
                 if ii > 1
                     assert(isequal(G(ii).P, G(1).P), 'The different LEGs were sorted with different parameters!')

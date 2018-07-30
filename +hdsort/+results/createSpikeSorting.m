@@ -33,7 +33,7 @@ startTimes = [];
 nFiles = numel(rawDSList);
 MultiElectrode = rawDSList{1}.MultiElectrode;
 for fi = 2:nFiles
-    assert(isequal(MultiElectrode, rawDSList{fi}.MultiElectrode), 'The raw files do not share the same Multielectrode!')
+    assert(MultiElectrode == rawDSList{fi}.MultiElectrode, 'The raw files do not share the same Multielectrode!')
 end
 
 %% Go through each raw file and create some statistics:

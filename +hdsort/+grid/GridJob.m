@@ -273,10 +273,6 @@ classdef GridJob < handle
                 cmdLineOutput = false;
             end
             
-            %if  ~cmdLineOutput
-            %    return
-            %end
-            
             %% Check for most recent job id:
             try
                 currentJobId = fullfile(self.folders.report, 'currentJobID.txt');
@@ -428,86 +424,11 @@ classdef GridJob < handle
             fclose(fh);
         end
         
-        
-        
-        % -----------------------------------------------------------------
-        function copyDataFilesToScratch(self)
-            error('Not supported anymore!')
-            
-            disp('Copy data file(s)...');
-            for i = 1:length(self.startlocation.files.data)
-                self.scratchlocation.files.data{i} = self.copyFile(self.startlocation.files.data{i}, self.scratchlocation.folders.data);
-                disp([ num2str(i) ' of ' num2str(length(self.startlocation.files.data)) ' copied.']);
-            end
-            
-        end
-        
-        
-        % -----------------------------------------------------------------
-        % Copy one file to destination folder and return new file name:
-        function fileName = copyFile(self, fileName, destFolder, forceCopy)
-            if nargin < 4 forceCopy = false; end
-            flags = '-q';%  '-vP'
-            
-            if forceCopy
-                system(['rsync ' flags ' ' fileName ' ' destFolder]);
-            else
-                system(['rsync ' flags ' --ignore-existing ' fileName ' ' destFolder]);
-            end
-            
-            [pathstr,name,ext] = fileparts(fileName);
-            fileName = fullfile(destFolder, [name ext]);
-        end
-        
-        % -----------------------------------------------------------------
-        function folderName = copyFolder(self, folderName, destFolder, forceCopy)
-            if nargin < 4 forceCopy = false; end
-            
-            if forceCopy
-                system(['rsync -vP -r' folderName ' ' destFolder]);
-            else
-                system(['rsync -vP -r --ignore-existing ' folderName ' ' destFolder]);
-            end
-            
-            folderName = fullfile(destFolder, folderName);
-        end
-        
-        % -----------------------------------------------------------------
-        function folderName = copyFolderContent(self, folderName, destFolder, forceCopy)
-            if nargin < 4 forceCopy = false; end
-            
-            if forceCopy
-                system(['rsync -vP -r' folderName '/* ' destFolder]);
-            else
-                system(['rsync -vP -r --ignore-existing ' folderName '/* ' destFolder]);
-            end
-            
-            folderName = fullfile(destFolder);
-        end
-        
         % -----------------------------------------------------------------
         function N = nTasks(self)
             N = self.endIndex - self.startIndex + 1;
         end
-        
-        
-        % -----------------------------------------------------------------
-        %              FOR DEBUGGING:
-        % -----------------------------------------------------------------
-        function runTaskLocally(self, task_id)
-            task_id_str = num2str(task_id);
-            job_id_str = '0';
-            jobFolder = fullfile(self.folders.report, job_id_str)
-            debugFlag = false;
-            try
-                rmdir(jobFolder, 's');
-            catch
-            end
-            mkdir(jobFolder);
-            hdsort.grid.GridJob.runTask(self.files.tasks, task_id_str, job_id_str, debugFlag);
-        end
-        
-        
+         
         % -----------------------------------------------------------------
         function prepareTest(self)
             self.startIndex = 3;
@@ -546,6 +467,18 @@ classdef GridJob < handle
                     break;
                 end
             end
+        end
+        
+         % -----------------------------------------------------------------
+        function [job_id_str, taskFiles] = prepareLocalTask(self)
+            job_id_str = '0';
+            jobFolder = fullfile(self.folders.report, job_id_str)
+            try
+                rmdir(jobFolder, 's');
+            catch
+            end
+            mkdir(jobFolder);
+            taskFiles = self.files.tasks;
         end
         
     end
