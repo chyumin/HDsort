@@ -1,7 +1,7 @@
 classdef Unit < handle
     
     properties
-        parentSpikeSorting
+        parentPopulation
         spikeTrain
         ID
         footprint
@@ -23,17 +23,23 @@ classdef Unit < handle
     
     methods
         % -----------------------------------------------------------------
-        function self = Unit(ID, spikeTrain, footprint, parentSpikeSorting, varargin)
+        function self = Unit(varargin)
+            
+            P.footprint = [];
             P.spikeAmplitudes = [];
+            P.parentPopulation = [];
+            P.spikeTrain = [];
+            P.ID = [];
             P.filePath = '';
-            P.cutLeft = [];
+            P.cutLeft = 1;
+            
             P = hdsort.util.parseInputs(P, varargin, 'error');
             
-            self.parentSpikeSorting = parentSpikeSorting;
-            self.MultiElectrode = parentSpikeSorting.MultiElectrode;
-            self.ID = ID;
-            self.spikeTrain = spikeTrain;
-            self.footprint = footprint;
+            self.parentPopulation = P.parentPopulation;
+            self.MultiElectrode = self.parentPopulation.MultiElectrode;
+            self.ID = P.ID;
+            self.spikeTrain = P.spikeTrain;
+            self.footprint = P.footprint;
             self.cutLeft = P.cutLeft;
             self.spikeAmplitudes = P.spikeAmplitudes;
             self.meanAmplitude = mean(self.spikeAmplitudes);
@@ -56,7 +62,7 @@ classdef Unit < handle
             P.spikeAmplitudes = [self.spikeAmplitudes; otherUnit.spikeAmplitudes];
             P.spikeTrain = [self.spikeTrain; otherUnit.spikeTrain];
             P.ID = newID;
-            P.parentSpikeSorting = self.parentSpikeSorting;
+            P.parentPopulation = self.parentPopulation;
             P.filePath = self.filePath;
             combinedUnit = hdsort.results.Unit(P);
         end
@@ -71,7 +77,7 @@ classdef Unit < handle
             for ii = 1:N
                 P.footprint = self.footprint;
                 P.spikeAmplitudes = self.spikeAmplitudes(splitIdx == uSplit(ii));
-                P.parentSpikeSorting = self.parentSpikeSorting;
+                P.parentPopulation = self.parentPopulation;
                 P.spikeTrain = self.spikeTrain(splitIdx  == uSplit(ii));
                 P.filePath = self.filePath;
                 P.ID = newIDs(ii);
@@ -88,8 +94,8 @@ classdef Unit < handle
             P = hdsort.util.parseInputs(P, varargin, 'error');
             
             self.QC.meanAmplitude = self.meanAmplitude;
-            self.QC.allAmplitudes = [self.parentSpikeSorting.Units.meanAmplitude];
-            self.QC.allNSpikes = [self.parentSpikeSorting.Units.nSpikes];
+            self.QC.allAmplitudes = [self.parentPopulation.Units.meanAmplitude];
+            self.QC.allNSpikes = [self.parentPopulation.Units.nSpikes];
             
             
             if any(self.spikeAmplitudes)
@@ -162,7 +168,7 @@ classdef Unit < handle
             end
             
             % starting as a Unit method --> have to find unit ID
-            selfID = find(self.parentSpikeSorting.unitIDs == self.ID);
+            selfID = find(self.parentPopulation.unitIDs == self.ID);
             
             fh = figure     
             x0=10;
@@ -182,9 +188,9 @@ classdef Unit < handle
             % plot spike amplitudes through the recording
             QCsp(2) = subplot(6,3,[7 8 10 11]);
             [selfRange, rasterColors, rasterNames]  = self.getRange(0);            
-            rasterUnitsTrains = {self.parentSpikeSorting.Units(selfRange).spikeTrain};
+            rasterUnitsTrains = {self.parentPopulation.Units(selfRange).spikeTrain};
             rasterUnitsTrains = cellfun(@(x) x/samplingRate,rasterUnitsTrains,'un',0);
-            rasterUnitsAmplitudes = {self.parentSpikeSorting.Units(selfRange).spikeAmplitudes};
+            rasterUnitsAmplitudes = {self.parentPopulation.Units(selfRange).spikeAmplitudes};
             
             %plot(rasterUnitsTrains{3}/20000, rasterUnitsAmplitudes{3});
             hold on
@@ -233,7 +239,7 @@ classdef Unit < handle
             
             % plot rasterplot
             [selfRange, rasterColors, rasterNames]  = self.getRange(5);
-            rasterUnits = {self.parentSpikeSorting.Units(selfRange).spikeTrain};
+            rasterUnits = {self.parentPopulation.Units(selfRange).spikeTrain};
             
             QCsp(6) = subplot(6,3,[16 17 18]);
             self.plotFootprint('ah', QCsp(1));
@@ -264,7 +270,7 @@ classdef Unit < handle
                 end
             end
             
-            selfID = find(self.parentSpikeSorting.unitIDs == self.ID);
+            selfID = find(self.parentPopulation.unitIDs == self.ID);
             SP = hdsort.plot.Subplots([2, 3], 'spacerX', 0.1, 'spacerY', 0.16, ... 
                 'title', ['Unit ID: ' num2str(self.ID) ' (unit ' num2str(selfID) ')']);
             
@@ -284,7 +290,7 @@ classdef Unit < handle
             %% ---
             
             [selfRange, rasterColors, rasterNames]  = self.getRange(7);
-            rasterUnits = {self.parentSpikeSorting.Units(selfRange).spikeTrain};
+            rasterUnits = {self.parentPopulation.Units(selfRange).spikeTrain};
             SP.add(hdsort.plot.Rasterplot(rasterUnits, ...
                 'color', rasterColors, 'title', 'Rasterplot of neighouring units'), 4);  
             set(SP.getSubplotHandle(4), 'YTickLabel', rasterNames);
@@ -321,7 +327,7 @@ classdef Unit < handle
             ME = self.MultiElectrode;
             if isempty(ME)
                 warning('hdsort.results.Units has no MultiElectrode')
-                ME = self.parentSpikeSorting.MultiElectrode;
+                ME = self.parentPopulation.MultiElectrode;
             end
             el_pos = ME.electrodePositions(ME.electrodePositions(:,1) > -1 & ME.electrodePositions(:,2) > -1, :);
             
@@ -342,27 +348,17 @@ classdef Unit < handle
         % -----------------------------------------------------------------
         function gdf = getGdf(self)
             if ~isfield(self.buffer, 'gdf') || isempty(self.buffer.gdf)
-                self.buffer.gdf = [];
-                if ~iscell(self.spikeTrain)
-                    st = {self.spikeTrain};
-                else
-                    st = self.spikeTrain;
-                end
-                for ii = 1:length(st)
-                    self.buffer.gdf = [self.buffer.gdf; st{ii} st{ii} st{ii}];
-                    self.buffer.gdf(:,1) = self.ID;
-                    self.buffer.gdf(:,3) = ii;
-                end
+                self.buffer.gdf = [repmat(self.ID, self.nSpikes, 1) self.spikeTrain self.spikeAmplitudes];
             end
             gdf = self.buffer.gdf;
         end
         
         % -----------------------------------------------------------------
         function [selfRange, rasterColors, rasterNames] = getRange(self, numb)
-            selfID = find(self.parentSpikeSorting.unitIDs == self.ID);
+            selfID = find(self.parentPopulation.unitIDs == self.ID);
             rRangeB = numb;
             rRangeA = numb;
-            numUnits = length(self.parentSpikeSorting.Units);
+            numUnits = length(self.parentPopulation.Units);
             
             if selfID < rRangeB+1
                 rRangeBef = rRangeB;

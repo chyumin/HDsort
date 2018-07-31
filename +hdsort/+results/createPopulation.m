@@ -1,10 +1,10 @@
-function [SpikeSortingResult, SpikeSortingResult_discarded, P] = ...
-    createSpikeSorting(sortingName, results, rawDSList, noiseStd, varargin)
+function [PopulationResult, PopulationResult_discarded, P] = ...
+    createPopulation(sortingName, results, rawDSList, noiseStd, varargin)
 
 P.analyisFolder = '';
 P = hdsort.util.parseInputs(P, varargin, 'error');
 
-disp('Creating SpikeSorting:')
+disp('Creating Population:')
 
 %% Turn results into double format:
 gdf_merged = double(results.gdf_merged);
@@ -67,27 +67,27 @@ for fi = 1:nFiles
 end
 clear 'FN'
 
-%% Create SpikeSorting:
+%% Create Population:
 sortingInfo.fileInfo = fileInfo;
 sortingInfo.startTimes = startTimes;
 sortingInfo.summary = results.summary;
 
-disp('Create SpikeSorting...');
-SpikeSortingResult = hdsort.results.SpikeSorting(sortingName, gdf_merged, ...
+disp('Create Population...');
+PopulationResult = hdsort.results.Population(sortingName, gdf_merged, ...
     footprints_merged, MultiElectrode, noiseStd, ...
     'cutLeft', 20,...
     'filePath', P.analyisFolder, ...
     'sortingInfo', sortingInfo)
 
 if ~isempty(gdf_discarded)
-    SpikeSortingResult_discarded = hdsort.results.SpikeSorting(sortingName, gdf_discarded, ...
+    PopulationResult_discarded = hdsort.results.Population(sortingName, gdf_discarded, ...
         footprints_discarded, MultiElectrode, noiseStd, ...
         'cutLeft', 20,...
         'filePath', P.analyisFolder, ...
         'sortingInfo', sortingInfo)
     
 else
-    SpikeSortingResult_discarded = [];
+    PopulationResult_discarded = [];
 end
 
 end

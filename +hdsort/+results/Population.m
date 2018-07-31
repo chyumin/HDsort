@@ -1,4 +1,4 @@
-classdef SpikeSorting < handle
+classdef Population < handle
     % Input
     %   gdf_or_st   - EITHER: matrix with 2 columns
     %                         first column : ID of neuron
@@ -30,7 +30,7 @@ classdef SpikeSorting < handle
     
     methods
         % -----------------------------------------------------------------
-        function self = SpikeSorting(sortingName, gdf_or_st, footprints, ...
+        function self = Population(sortingName, gdf_or_st, footprints, ...
              MultiElectrode, noiseStd, varargin)
             
             P.unitIDs    = [];
@@ -41,7 +41,7 @@ classdef SpikeSorting < handle
             P = hdsort.util.parseInputs(P, varargin, 'error');
             
             self.name = sortingName;
-            self.noiseStd = noiseStd;
+            self.noiseStd = noiseStd(:);
             self.MultiElectrode = MultiElectrode;
             
             self.filePath = P.filePath;
@@ -70,7 +70,7 @@ classdef SpikeSorting < handle
             
             %% Initialize amplitudes if possible:
             if size(gdf_or_st,2) >= 2
-                relAmpsV = gdf(:,3)./self.noiseStd(gdf(:,4))';
+                relAmpsV = gdf(:,3)./self.noiseStd(gdf(:,4));
             else
                 relAmpsV = gdf(:, 1)*0 + 1;
             end
@@ -79,12 +79,19 @@ classdef SpikeSorting < handle
             
             self.Units = hdsort.results.Unit.empty(0, length(unitIDs));
             for ui=1:length(unitIDs)
-                ID = unitIDs(ui);
+                IDs = unitIDs(ui);
                 spikeTrain = spikeTrains{ui};
-                footprint = footprints(:,:,ui);
                 
-                self.Units(ui) = hdsort.results.Unit(ID, spikeTrain, footprint, self, ...
-                    'cutLeft', P.cutLeft, 'spikeAmplitudes', relAmpsV(gdf(:, 1) == ID),...
+                if ~isempty(footprints)
+                    footprint = footprints(:,:,ui);
+                else
+                    footprint = [];
+                end
+                
+                self.Units(ui) = hdsort.results.Unit('ID', IDs, 'spikeTrain', spikeTrain, ...
+                    'parentPopulation', self, ...
+                    'footprint', footprint, 'cutLeft', P.cutLeft, ...
+                    'spikeAmplitudes', relAmpsV(gdf(:, 1) == IDs), ...
                     'filePath', self.filePath);
             end
             
@@ -193,7 +200,7 @@ classdef SpikeSorting < handle
             self.splitmerge = [self.splitmerge; {U}, {splitUnits}, {'split'}];
             self.Units(uI) = [];
             self.Units = cat(2, self.Units, splitUnits);
-            self.buffer = [];
+            self.reset();
         end
         
         % -----------------------------------------------------------------
@@ -217,12 +224,12 @@ classdef SpikeSorting < handle
             self.splitmerge = [self.splitmerge; {Units}, {mergedUnit}, {'merged'}];
             self.Units(uI) = [];
             self.Units = cat(2, self.Units, mergedUnit);
-            self.buffer = [];
+            self.reset();
         end
         
-        function revertSplit(self, originalUnits)
+        function revertSplit(self, splitUnits)
             %% Check whether there are units that have been splitted or merged more than once:
-            smidx = cellfun( @(x) isequal(x, originalUnits), self.splitmerge(:,1));
+            smidx = cellfun( @(x) isequal(x, splitUnits), self.splitmerge(:,2));
             assert( any(smidx), 'Error!')
             newUnits = self.splitmerge{smidx, 2};
             furtherSplitUnits = newUnits( ~ismember(newUnits, self.Units) );
@@ -232,7 +239,7 @@ classdef SpikeSorting < handle
             end
             
             %% Remove the split or merged units and reinstate the original one:
-            smidx = cellfun( @(x) isequal(x, originalUnits), self.splitmerge(:,1));
+            smidx = cellfun( @(x) isequal(x, splitUnits), self.splitmerge(:,2));
             assert( any(smidx), 'Error!')
             
             newUnits = self.splitmerge{smidx, 2};
@@ -240,8 +247,9 @@ classdef SpikeSorting < handle
             
             [~, ~, existingI] = self.getUnits(newUnits);
             self.Units(existingI) = [];
-            self.Units = cat(2, self.Units, originalUnits);
+            self.Units = cat(2, self.Units, self.splitmerge{smidx, 1});
             self.splitmerge(smidx, :) = [];
+            self.reset();
         end
         
         function revertMerge(self, mergedUnit)
@@ -255,6 +263,13 @@ classdef SpikeSorting < handle
             self.Units(existingI) = [];
             self.Units = cat(2, self.Units, oldUnits);
             self.splitmerge(smidx, :) = [];
+            self.reset();
+        end
+        
+        function reset(self)
+            [~, sidx] = sort(cat(1,self.Units.ID));
+            self.Units = self.Units(sidx);
+            self.buffer = [];
         end
         
         % -----------------------------------------------------------------
@@ -375,7 +390,7 @@ classdef SpikeSorting < handle
             savedObject = struct(self);
             for ii = 1:numel(savedObject.Units)
                 u_ = struct(savedObject.Units);
-                u_ = rmfield(u_, 'parentSpikeSorting');
+                u_ = rmfield(u_, 'parentPopulation');
                 u_ = rmfield(u_, 'registeredAnalysis');
                 u_ = rmfield(u_, 'plotManager');
 

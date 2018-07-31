@@ -505,21 +505,21 @@ classdef Sorting < handle
         end
         
         % -----------------------------------------------------------------
-        function [SortingResults, SortingResults_discarded] = createSpikeSortingResult(self, outputLocation)
+        function [SortedPopulation, SortedPopulation_discarded] = createSortedPopulation(self, outputLocation)
             
-            if isfield(self.buffer, 'SortingResults') && ~isempty(self.buffer.SortingResults) && ~isempty(self.buffer.SortingResults_discarded)
-                SortingResults = self.buffer.SortingResults;
-                SortingResults_discarded = self.buffer.SortingResults_discarded;
+            if isfield(self.buffer, 'SortedPopulation') && ~isempty(self.buffer.SortedPopulation) && ~isempty(self.buffer.SortedPopulation_discarded)
+                SortedPopulation = self.buffer.SortedPopulation;
+                SortedPopulation_discarded = self.buffer.SortedPopulation_discarded;
             else
                 
                 try
                     %assert(self.sortingResultFileExists(outputLocation), 'Create file...');
                     assert( exist(self.files.results) > 0, 'Create results file...')
-                    disp('Loading SortingResults file...')
+                    disp('Loading SortedPopulation file...')
                     load(self.files.results);
-                    disp(['SortingResults ' SortingResults.name ' file loaded.'])
+                    disp(['SortedPopulation ' SortedPopulation.name ' file loaded.'])
                 catch
-                    disp('Create SortingResults SpikeSorting structure...')
+                    disp('Create SortedPopulation Population structure...')
                     
                     if ~isfield(self.buffer, 'rawResults') || isempty(self.buffer.rawResults)
                         self.buffer.rawResults = load(self.files.rawResults);
@@ -528,18 +528,18 @@ classdef Sorting < handle
                     preprocessor = load(self.files.preprocessor)
                     noiseStd = preprocessor.smadPerEl;
                     
-                    [SortingResults, SortingResults_discarded] = hdsort.results.createSpikeSorting(...
+                    [SortedPopulation, SortedPopulation_discarded] = hdsort.results.createPopulation(...
                         self.name, self.buffer.rawResults, self.rawDS, noiseStd);
                     
-                    SortingResults.filePath = outputLocation;
-                    SortingResults_discarded.filePath = outputLocation;
+                    SortedPopulation.filePath = outputLocation;
+                    SortedPopulation_discarded.filePath = outputLocation;
                     
-                    save(self.files.results, 'SortingResults', 'SortingResults_discarded', '-v7.3');
-                    disp('New SortingResults SpikeSorting saved!')
+                    save(self.files.results, 'SortedPopulation', 'SortedPopulation_discarded', '-v7.3');
+                    disp('New sorted population saved!')
                 end
                 
-                self.buffer.SortingResults = SortingResults;
-                self.buffer.SortingResults_discarded = SortingResults_discarded;
+                self.buffer.SortedPopulation = SortedPopulation;
+                self.buffer.SortedPopulation_discarded = SortedPopulation_discarded;
             end
             
         end
