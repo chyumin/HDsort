@@ -412,7 +412,7 @@ classdef Sorter < handle
             if recalc
                 disp('BOTM matching...');
                 t_BOTMMatching = tic;
-                nSpCut = size(self.WFS(:,:),1);
+                nSpCut = size(self.WFS,1);
                 if nSpCut == 0
                     clusteringMatched.ids = [];
                     clusteringMatched.template_ids = [];
