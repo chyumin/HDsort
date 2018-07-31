@@ -39,6 +39,6 @@ HDSorting.sort()
 HDSorting.postprocess()
 
 %%
-[SortingResults, SortingResults_discarded] = HDSorting.createSpikeSortingResult(mainFolder)
+[sortedPopulation, sortedPopulation_discarded] = HDSorting.createSortedPopulation(mainFolder)
 
 
