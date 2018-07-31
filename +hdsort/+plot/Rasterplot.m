@@ -27,7 +27,10 @@ classdef Rasterplot < hdsort.plot.PlotInterface
             %% Create a gdf:
             if iscell(input)
                 self.gdf = hdsort.spiketrain.toGdf(input);
-            elseif isa(input,'lsa.Unit')
+             elseif isa(input,'hdsort.results.Population')
+                self.gdf = input.getGdf()
+                self.Units = input.Units;
+            elseif isa(input,'hdsort.results.Unit')
                 self.gdf = []; self.Units = [];
                 for U = input
                     self.gdf = [self.gdf; U.getGdf];
