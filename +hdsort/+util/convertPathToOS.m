@@ -37,45 +37,31 @@ pd_mac = hdsort.pathDefinitions('MACI64');
 pd_win = hdsort.pathDefinitions('PCWIN64');
 pd_lin = hdsort.pathDefinitions('GLNXA64');
 
-fields_ = [fields(pd_mac); fields(pd_lin); fields(pd_win)];
-fields_ = unique(fields_);
-for f_ = fields_'
-    f = f_{1};
+bestMatchRest = []; bestField = []; nBestMatch = 1e5;
+for pd_ = {pd_mac, pd_lin, pd_win}
+    fields_ = fields(pd_{1});
     
-    try
-        if ~isempty(strfind(path, getfield(pd_lin, f)))
-            rest = strsplit(path, getfield(pd_lin, f));
-            delim = '/';
-            break;
+    for f_ = fields_'
+        
+        
+        f = f_{1};
+        
+        if ~isempty( strfind(path, getfield(pd_{1}, f)) )
+            rest = strsplit(path, getfield(pd_{1}, f));
+            
+            N = length(rest{2});
+            
+            if N < nBestMatch
+                nBestMatch = N;
+                bestMatchRest = rest{2};
+                bestField = f;
+            end
         end
-    catch
     end
-    
-    try
-        if ~isempty(strfind(path, getfield(pd_mac, f)))
-            rest = strsplit(path, getfield(pd_mac, f));
-            delim = '/';
-            break;
-        end
-    catch
-    end
-    
-    try
-        if ~isempty(strfind(path, getfield(pd_win, f)))
-            rest = strsplit(path, getfield(pd_win, f));
-            delim = '\';
-            break;
-        end
-    catch
-    end
-    f = '';
 end
-assert(~isempty(f), 'Path not found, can not be converted!')
+assert(~isempty(bestField), 'Path not found, can not be converted!')
 
-rest = strsplit(rest{end}, delim);
-
-%%
 pd = hdsort.pathDefinitions(OStype);
-newPath = fullfile( getfield(pd, f), rest{:});
+newPath = fullfile( getfield(pd, bestField), bestMatchRest);
 
 end
