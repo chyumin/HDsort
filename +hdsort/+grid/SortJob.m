@@ -56,7 +56,7 @@ classdef SortJob < hdsort.grid.GridJob
                 taskParameters.groupFolder = hdsort.util.convertPathToOS(fullfile(self.folders.groups, self.LEGs.name{ii}));
                 assert(exist(taskParameters.groupFolder) == 7, 'groupFolder does not exist!')
                 
-                taskParameters.wfsFile = fullfile(taskParameters.groupFolder, [taskParameters.name '.040spikes_cut.h5']);
+                taskParameters.wfsFile = fullfile(taskParameters.groupFolder, [taskParameters.name '.040spikes_cut.mat']);
                 assert(exist(taskParameters.wfsFile) == 2, 'wfsFile does not exist!')
                 
                 taskParameters.covFile = fullfile(taskParameters.groupFolder, [taskParameters.name '.060cov.mat']);
@@ -118,7 +118,7 @@ classdef SortJob < hdsort.grid.GridJob
             
             function mainBlock()
                 
-                WFS = hdsort.file.WaveFormFile(taskParameters.wfsFile);
+                WFS = hdsort.file.WaveFormFileMat(taskParameters.wfsFile);
                 N = load(taskParameters.covFile);
                 DS = hdsort.file.CMOSMEA(taskParameters.preprocessedFileList);
                 LEGSorter = hdsort.leg.Sorter(...

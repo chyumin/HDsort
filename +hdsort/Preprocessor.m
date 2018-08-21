@@ -337,7 +337,7 @@ classdef Preprocessor < handle
                         
                         L.groupFolder = groupFolders{legi};
                         L.X = X(:, L.els);
-                        L.wfsFileName = fullfile(L.groupFolder, [name_ '.040spikes_cut.h5']);
+                        L.wfsFileName = fullfile(L.groupFolder, [name_ '.040spikes_cut.mat']);
                         L.noiseCovFile = fullfile(L.groupFolder, [name_ '.060cov.mat']);
                         
                         if bIsFirstChunk
@@ -345,7 +345,7 @@ classdef Preprocessor < handle
                             if exist(L.wfsFileName, 'file')
                                 delete(L.wfsFileName);
                             end
-                            wfsFile = hdsort.file.WaveFormFile(L.wfsFileName, 'cutLeft', cutLeft, 'Tf', Tf, 'nC', L.nC);
+                            wfsFile = hdsort.file.WaveFormFileMat(L.wfsFileName, 'cutLeft', cutLeft, 'Tf', Tf, 'nC', L.nC);
                             if P_.debug
                                 gdf = wfsFile.getGdf();
                                 wfs = wfsFile(:,:);
@@ -469,7 +469,7 @@ classdef Preprocessor < handle
                             ts_sorting = ts_file + sum([0 samplesPerDS(1:fi-1)]);
                             
                             gdf = [ts_sorting*0+1, ts_sorting, ts(:,2)];
-                            wfsFilepf = hdsort.file.WaveFormFile(Lpf2.wfsFileName, 'writable', true);
+                            wfsFilepf = hdsort.file.WaveFormFileMat(Lpf2.wfsFileName, 'writable', true);
                             wfsFilepf.addWaveforms(wfs, gdf);
                             if parfor_debug
                                 N = size(gdf, 1);

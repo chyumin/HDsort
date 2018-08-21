@@ -111,7 +111,7 @@ classdef Sorting < handle
                 'gdf',
                 'templates'};
             valueSet = ...
-                {'.040spikes_cut.h5',
+                {'.040spikes_cut.mat',
                 '.050spikes_aligned.mat',
                 '.060cov.mat',
                 '.070spikes_prewhitened.mat',
@@ -568,7 +568,7 @@ classdef Sorting < handle
             fname = self.getFileNameInGroup(legNr, key);
             
             if strcmp(key, 'spikes_cut')
-                spikes_cut = hdsort.file.WaveFormFile(fname);
+                spikes_cut = hdsort.file.WaveFormFileMat(fname);
                 x.spikes_cut = spikes_cut;
             else
                 x = load(fname);
