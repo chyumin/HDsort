@@ -12,18 +12,37 @@ function [fetX, pcs, T, pcs_shift] = dimReductionPCA(X, NDims, Templates, maxima
     pcs_shift = [];
     meanX = [];
     if numel(X) <= maximalElements && upsample == 1
-        [pcs fetX] = princomp(X);
+        try
+            [pcs, fetX] = pca(X);
+        catch
+            warning('Old version of PCA called princomp used!')
+            [pcs, fetX] = princomp(X);
+        end
+        
         fetX = fetX(:,1:NDims);
     else
         if numel(X) <= maximalElements
-            [pcs] = princomp(X);
+            try
+                [pcs] = pca(X);
+            catch
+                warning('Old version of PCA called princomp used!')
+                [pcs] = princomp(X);
+            end
+            
         else
             r = randperm(size(X,1));
-            nRows = ceil(maximalElements/size(X,2));    
+            nRows = ceil(maximalElements/size(X,2));
             warning('Too many rows selected for PCA. Only subset is used (%d of %d)!', nRows, size(X,1));
             % 'score' added in order to force matlab to use the svd pca
             % algorithm (might solve a bug with negative eigenvalues)
-            [pcs score] = princomp(X(r(1:nRows),:),'econ');            
+            
+            try
+                [pcs, score] = pca(X(r(1:nRows),:));
+            catch
+                warning('Old version of PCA called princomp used!')
+                [pcs, score] = princomp(X(r(1:nRows),:),'econ');
+            end
+            
         end
         % compute mean free X
         meanX = mean(X, 1);
@@ -32,7 +51,7 @@ function [fetX, pcs, T, pcs_shift] = dimReductionPCA(X, NDims, Templates, maxima
         if upsample == 1
             fetX = X_mf*pcs(:,1:NDims);     
         else
-            warning('This works but if of no use. Upsample and align hdsort.waveforms.on mean before PCA!');
+            warning('This works but if of no use. Upsample and align waveforms on mean before PCA!');
             % compute the shift == 0 case, this is the normal case.
             F(:,:,2*upsample) = X_mf*pcs(:,1:NDims);            
             upsample = upsample*2;
@@ -67,8 +86,8 @@ function [fetX, pcs, T, pcs_shift] = dimReductionPCA(X, NDims, Templates, maxima
             
             % find the projection that procuced the maximal value for each
             % row
-            [maxis proj_idx] = max(abs(F),[],3);
-            [maxis dim_idx]  = max(maxis,[],2);
+            [maxis, proj_idx] = max(abs(F),[],3);
+            [maxis, dim_idx]  = max(maxis,[],2);
             maxProjForEachRow = zeros(size(F,1),1);
             fetX = zeros(size(F,1), size(F,2));
             for i=1:size(F,1)
