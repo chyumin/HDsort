@@ -8,31 +8,33 @@ classdef Unit < handle
         cutLeft
         spikeAmplitudes
         meanAmplitude
+        detectionChannel
         
         MultiElectrode
         nSpikes
         QC
-        filePath
+        fileLocation
         myFile
         
         buffer
-        
-        
-        
     end
     
     methods
         % -----------------------------------------------------------------
         function self = Unit(varargin)
+            if nargin == 1 && isstruct(varargin{1})
+                self.fromStruct(varargin{1});
+                return
+            end
             
             P.footprint = [];
             P.spikeAmplitudes = [];
+            P.detectionChannel = [];
             P.parentPopulation = [];
             P.spikeTrain = [];
             P.ID = [];
-            P.filePath = '';
+            P.fileLocation = '';
             P.cutLeft = 1;
-            
             P = hdsort.util.parseInputs(P, varargin, 'error');
             
             self.parentPopulation = P.parentPopulation;
@@ -43,15 +45,46 @@ classdef Unit < handle
             self.cutLeft = P.cutLeft;
             self.spikeAmplitudes = P.spikeAmplitudes;
             self.meanAmplitude = mean(self.spikeAmplitudes);
+            self.detectionChannel = P.detectionChannel;
             
             self.nSpikes = numel(self.spikeTrain);
             
             self.createQC();
             
-            if ~isempty(P.filePath)
-                self.filePath = P.filePath;
-                self.myFile = fullfile(self.filePath, ['neuron_' num2str(self.ID) '.mat']); 
+            if ~isempty(P.fileLocation)
+                self.fileLocation = P.fileLocation;
+                self.myFile = fullfile(self.fileLocation, ['neuron_' num2str(self.ID) '.mat']); 
             end
+            
+            if ~isempty(self.detectionChannel)
+                assert(numel(self.detectionChannel) == numel(self.spikeAmplitudes), 'You must provide the same number!')
+            end
+        end
+        
+        %------------------------------------------------------------------
+        function fromStruct(self, S)
+            self.spikeTrain = S.spikeTrain;
+            self.nSpikes = numel(self.spikeTrain);
+            self.ID = S.ID;
+            self.footprint = S.footprint;
+            self.cutLeft = S.cutLeft;
+            self.spikeAmplitudes = S.spikeAmplitudes;
+            self.meanAmplitude = mean(self.spikeAmplitudes);
+            self.detectionChannel = S.detectionChannel;
+            self.MultiElectrode = hdsort.file.MultiElectrode(S.MultiElectrode);
+            self.myFile = S.myFile;
+        end
+        
+        %------------------------------------------------------------------
+        function S = toStruct(self)
+            S.spikeTrain = self.spikeTrain;
+            S.ID = self.ID;
+            S.footprint = self.footprint;
+            S.cutLeft = self.cutLeft;
+            S.spikeAmplitudes = self.spikeAmplitudes;
+            S.detectionChannel = self.detectionChannel;
+            S.MultiElectrode = self.MultiElectrode.toStruct();
+            S.myFile = self.myFile;
         end
         
         % -----------------------------------------------------------------
@@ -61,9 +94,10 @@ classdef Unit < handle
             P.footprint = (N1*self.footprint + N2*otherUnit.footprint) / (N1+N2);
             P.spikeAmplitudes = [self.spikeAmplitudes; otherUnit.spikeAmplitudes];
             P.spikeTrain = [self.spikeTrain; otherUnit.spikeTrain];
+            P.detectionChannel = [self.detectionChannel; otherUnit.detectionChannel];
             P.ID = newID;
             P.parentPopulation = self.parentPopulation;
-            P.filePath = self.filePath;
+            P.fileLocation = self.fileLocation;
             combinedUnit = hdsort.results.Unit(P);
         end
         
@@ -79,7 +113,8 @@ classdef Unit < handle
                 P.spikeAmplitudes = self.spikeAmplitudes(splitIdx == uSplit(ii));
                 P.parentPopulation = self.parentPopulation;
                 P.spikeTrain = self.spikeTrain(splitIdx  == uSplit(ii));
-                P.filePath = self.filePath;
+                P.detectionChannel = self.detectionChannel(splitIdx == uSplit(ii));
+                P.fileLocation = self.fileLocation;
                 P.ID = newIDs(ii);
                 splitUnits(ii) = hdsort.results.Unit(P);
             end
@@ -248,8 +283,8 @@ classdef Unit < handle
             set(QCsp(6), 'YTickLabel', rasterNames);
             
             if P.save
-                self.filePath = hdsort.util.convertPathToOS(self.filePath);
-                plotDir = fullfile(self.filePath, 'plots');
+                self.fileLocation = hdsort.util.convertPathToOS(self.fileLocation);
+                plotDir = fullfile(self.fileLocation, 'plots');
                 [dir_exists,mess,messid] = mkdir( plotDir );
                 figureName = fullfile(plotDir, ['u' num2str(self.ID) '_qc']);
                 
@@ -348,7 +383,15 @@ classdef Unit < handle
         % -----------------------------------------------------------------
         function gdf = getGdf(self)
             if ~isfield(self.buffer, 'gdf') || isempty(self.buffer.gdf)
-                self.buffer.gdf = [repmat(self.ID, self.nSpikes, 1) self.spikeTrain self.spikeAmplitudes];
+                self.buffer.gdf = [];
+                
+                st = self.spikeTrain;
+                samps = self.spikeAmplitudes;
+                
+                self.buffer.gdf = [self.buffer.gdf; st st st st];
+                self.buffer.gdf(:,1) = self.ID;
+                self.buffer.gdf(:,3) = samps;
+                self.buffer.gdf(:,4) = self.detectionChannel;
             end
             gdf = self.buffer.gdf;
         end

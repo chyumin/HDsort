@@ -24,80 +24,147 @@ classdef Population < handle
         MultiElectrode
         
         noiseStd
-        filePath
+        info
+        fileLocation
         file
     end
     
     methods
         % -----------------------------------------------------------------
-        function self = Population(sortingName, gdf_or_st, footprints, ...
-             MultiElectrode, noiseStd, varargin)
+        function self = Population(varargin)
+            if nargin == 1 && isstr(varargin{1})
+                fileName = varargin{1};
+                S = load(fileName);
+                self.fromStruct(S);
+                return
+            elseif nargin == 1 && isstruct(varargin{1})
+                self.fromStruct(varargin{1});
+                return
+            end
             
-            P.unitIDs    = [];
-            P.DataSource = [];
-            P.filePath = '';
-            P.sortingInfo = [];
+            P.gdf = []; % [unitID, spikeTimes, amplitude_multiple_of_noiseStd, detectionChannel]
+            P.noiseStd = []; % noiseStd for each channel
+            P.footprints = [];
             P.cutLeft = [];
+            P.MultiElectrode = [];
+            P.fileLocation = '';
+            P.name = '';
+            P.sortingInfo = [];
             P = hdsort.util.parseInputs(P, varargin, 'error');
             
-            self.name = sortingName;
-            self.noiseStd = noiseStd(:);
-            self.MultiElectrode = MultiElectrode;
+            assert(size(P.gdf,2) >= 4 , 'Must have at least 4 or more columns! [unitID, spiketime, amplitude, detection_channel]');
+            [spikeTrains, unitIDs] = mysort.spiketrain.fromGdf(P.gdf);
+            amplitdues = P.gdf(:,3);
+            detectionChannel = P.gdf(:,4);
+            [nTf, nC, nUnits] = size(P.footprints);
+            assert(nUnits == length(unitIDs), 'There must be one footprint per Unit!');
+            assert(nC == length(P.noiseStd), 'There must be a noiseStd value for each channel!');
+            assert(nC == length(P.MultiElectrode.electrodeNumbers), 'MultiElectrode not correct!');
             
-            self.filePath = P.filePath;
+            self.MultiElectrode = P.MultiElectrode;
+            self.noiseStd = P.noiseStd;
+            self.fileLocation = P.fileLocation;
+            self.name = P.name;
             self.sortingInfo = P.sortingInfo;
             
-            %% Set datasource if it is provided as argument:
-            if ~isempty(P.DataSource)
-                self.DataSource = P.DataSource;
-            else
-                self.DataSource = [];
-            end
-            
-            %% Initialize gdf, spikeTrains, unitIDs:
-            if iscell(gdf_or_st)
-                assert(length(P.unitIDs) == length(gdf_or_st), 'If spike trains are used to construct sorting, you MUST also give the unit IDs!');
-                unitIDs = P.unitIDs;
-                spikeTrains = gdf_or_st;
-                gdf = hdsort.spiketrain.toGdf(spikeTrains, unitIDs);
-            else
-                assert(isempty(P.unitIDs), 'If input is a gdf, do not provide unitIDs!')
-                s = size(gdf_or_st,2);
-                assert(s >= 2 , 'Must have 2 or more columns!');
-                gdf = gdf_or_st;
-                [spikeTrains, unitIDs] = hdsort.spiketrain.fromGdf(gdf_or_st);
-            end
-            
-            %% Initialize amplitudes if possible:
-            if size(gdf_or_st,2) >= 2
-                relAmpsV = gdf(:,3)./self.noiseStd(gdf(:,4));
-            else
-                relAmpsV = gdf(:, 1)*0 + 1;
-            end
-            
-            assert(size(footprints,3) == length(unitIDs), 'There must be one footprint per Unit!');
-            
             self.Units = hdsort.results.Unit.empty(0, length(unitIDs));
-            for ui=1:length(unitIDs)
-                IDs = unitIDs(ui);
-                spikeTrain = spikeTrains{ui};
+            for ui = 1:length(unitIDs)
+                unitID_ = unitIDs(ui);
+                spikeTrain_ = spikeTrains{ui};
+                footprint_ = P.footprints(:,:,ui);
+                amplitudes_ = amplitdues(P.gdf(:, 1) == unitID_);
+                detectionChannel_ = detectionChannel(P.gdf(:, 1) == unitID_);
                 
-                if ~isempty(footprints)
-                    footprint = footprints(:,:,ui);
-                else
-                    footprint = [];
-                end
-                
-                self.Units(ui) = hdsort.results.Unit('ID', IDs, 'spikeTrain', spikeTrain, ...
+                self.Units(ui) = hdsort.results.Unit('ID', unitID_, ...
+                    'spikeTrain', spikeTrain_, ...
                     'parentPopulation', self, ...
-                    'footprint', footprint, 'cutLeft', P.cutLeft, ...
-                    'spikeAmplitudes', relAmpsV(gdf(:, 1) == IDs), ...
-                    'filePath', self.filePath);
+                    'footprint', footprint_, 'cutLeft', P.cutLeft, ...
+                    'spikeAmplitudes', amplitudes_, ...
+                    'detectionChannel', detectionChannel_, ...
+                    'fileLocation', self.fileLocation);
             end
-            
             self.getSpikeCounts();
         
         end % End of constructor
+        
+        
+        %------------------------------------------------------------------
+        function fromStruct(self, S)
+            N = numel(S.Units);
+            self.Units = hdsort.results.Unit.empty(0, N);
+            for ii = 1:N
+                self.Units(ii) = hdsort.results.Unit(S.Units(ii));
+            end
+            
+            nSM = size(S.splitmerge,1);
+            for ii = 1:nSM
+                U = S.splitmerge{ii,1}; clear 'U_struct'
+                for jj = 1:numel(U)
+                    U_struct(jj) = hdsort.results.Unit(U(jj));
+                end
+                self.splitmerge{ii,1} = U_struct;
+                
+                U = S.splitmerge{ii,2}; clear 'U_struct'
+                for jj = 1:numel(U)
+                    U_struct(jj) = hdsort.results.Unit(U(jj));
+                end
+                self.splitmerge{ii,2} = U_struct;
+                self.splitmerge{ii,3} = S.splitmerge{ii,3};
+            end
+            if nSM == 0
+                self.splitmerge = {};
+            end
+            
+            self.name = S.name;
+            self.sortingInfo = S.sortingInfo;
+            self.noiseStd = S.noiseStd;
+            self.MultiElectrode = hdsort.file.MultiElectrode(S.MultiElectrode);
+            self.info = S.info;
+            try
+                self.fileLocation = hdsort.util.convertPathToOS(S.fileLocation);
+            catch
+                self.fileLocation = S.fileLocation;
+            end
+        end
+        
+        %------------------------------------------------------------------
+        function S = toStruct(self)
+            for ii = 1:numel(self.Units)
+                S.Units(ii) = self.Units(ii).toStruct();
+            end
+            
+            nSM = size(self.splitmerge,1);
+            for ii = 1:nSM
+                U = self.splitmerge{ii,1}; clear 'U_struct'
+                for jj = 1:numel(U)
+                    U_struct(jj) = U(jj).toStruct();
+                end
+                S.splitmerge{ii,1} = U_struct;
+                
+                U = self.splitmerge{ii,2}; clear 'U_struct'
+                for jj = 1:numel(U)
+                    U_struct(jj) = U(jj).toStruct();
+                end
+                S.splitmerge{ii,2} = U_struct;
+                S.splitmerge{ii,3} = self.splitmerge{ii,3};
+            end
+            if nSM == 0
+                S.splitmerge = {};
+            end
+            
+            S.name = self.name;
+            S.sortingInfo = self.sortingInfo;
+            S.noiseStd = self.noiseStd;
+            S.MultiElectrode = self.MultiElectrode.toStruct();
+            S.fileLocation = self.fileLocation;
+            S.info = self.info;
+        end
+        
+        %------------------------------------------------------------------
+        function save(self, fileName)
+            S = self.toStruct();
+            save(fileName, '-struct', 'S')
+        end
         
         % -----------------------------------------------------------------
         function [U, uIdx, uI] = getUnits(self, U_)
@@ -310,7 +377,7 @@ classdef Population < handle
         % -----------------------------------------------------------------
         function folderName = createQCPlots(self, folderName)
             if nargin == 1
-                folderName = fullfile(self.filePath, 'plots');
+                folderName = fullfile(self.fileLocation, 'plots');
                 mkdir(folderName);
             end
             
@@ -409,8 +476,8 @@ classdef Population < handle
     methods (Static)
         function savedObject = loadobj(savedObject)
             % Nothing to do yet
-            savedObject.filePath = hdsort.util.convertPathToOS(savedObject.filePath);
-            savedObject.file = hdsort.util.convertPathToOS(savedObject.file);
+            savedObject.fileLocation = hdsort.hdsort.util.convertPathToOS(savedObject.fileLocation);
+            savedObject.file = hdsort.hdsort.util.convertPathToOS(savedObject.file);
         end
     end
     

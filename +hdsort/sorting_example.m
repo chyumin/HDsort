@@ -41,4 +41,7 @@ HDSorting.postprocess()
 %%
 [sortedPopulation, sortedPopulation_discarded] = HDSorting.createSortedPopulation(mainFolder)
 
+%%
+POP = hdsort.results.Population(HDSorting.files.results)
+
 

@@ -78,10 +78,10 @@ classdef Sorting < handle
             
             if isempty(P.resultFile)
                 self.setFile(fullfile(self.folders.main, [self.name '_results.mat']), 'results');
-                %self.files.results = fullfile(self.folders.main, [self.name '_results.mat']);
+                self.setFile(fullfile(self.folders.main, [self.name '_results_discarded.mat']), 'results_discarded');
             else
                 self.setFile(P.resultFile, 'results');
-                %self.files.results = P.resultFile;
+                % Todo: Fix this self.setFile(P.resultDiscardedFile, 'results_discarded');
             end
             
             %% Create LEGs and group folders
@@ -531,11 +531,14 @@ classdef Sorting < handle
                     [SortedPopulation, SortedPopulation_discarded] = hdsort.results.createPopulation(...
                         self.name, self.buffer.rawResults, self.rawDS, noiseStd);
                     
-                    SortedPopulation.filePath = outputLocation;
-                    SortedPopulation_discarded.filePath = outputLocation;
+                    SortedPopulation.fileLocation = outputLocation;
+                    SortedPopulation_discarded.fileLocation = outputLocation;
                     
-                    save(self.files.results, 'SortedPopulation', 'SortedPopulation_discarded', '-v7.3');
-                    disp('New sorted population saved!')
+                    %save(self.files.results, 'SortedPopulation', 'SortedPopulation_discarded', '-v7.3');
+                    SortedPopulation.save(self.files.results)
+                    SortedPopulation_discarded.save(self.files.results_discarded);
+                    disp('New hdsort.results.Population saved!')
+                    
                 end
                 
                 self.buffer.SortedPopulation = SortedPopulation;
