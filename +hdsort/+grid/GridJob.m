@@ -471,8 +471,8 @@ classdef GridJob < handle
         
          % -----------------------------------------------------------------
         function [job_id_str, taskFiles] = prepareLocalTask(self)
-            job_id_str = '0';
-            jobFolder = fullfile(self.folders.report, job_id_str)
+            job_id_str = randsample('a':'z', 10);
+            jobFolder = fullfile(self.folders.report, job_id_str);
             try
                 rmdir(jobFolder, 's');
             catch
