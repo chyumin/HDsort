@@ -577,7 +577,7 @@ classdef Sorting < handle
                 x = load(fname);
             end
             
-            out = util.mergeStructs(out, x);
+            out = hdsort.util.mergeStructs(out, x);
         end
         
         % -----------------------------------------------------------------

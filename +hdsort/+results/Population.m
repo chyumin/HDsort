@@ -53,7 +53,7 @@ classdef Population < handle
             P = hdsort.util.parseInputs(P, varargin, 'error');
             
             assert(size(P.gdf,2) >= 4 , 'Must have at least 4 or more columns! [unitID, spiketime, amplitude, detection_channel]');
-            [spikeTrains, unitIDs] = mysort.spiketrain.fromGdf(P.gdf);
+            [spikeTrains, unitIDs] = hdsort.spiketrain.fromGdf(P.gdf);
             amplitdues = P.gdf(:,3);
             detectionChannel = P.gdf(:,4);
             [nTf, nC, nUnits] = size(P.footprints);
