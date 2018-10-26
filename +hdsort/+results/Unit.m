@@ -24,6 +24,7 @@ classdef Unit < handle
         function self = Unit(varargin)
             if nargin == 1 && isstruct(varargin{1})
                 self.fromStruct(varargin{1});
+                self.createQC();
                 return
             end
             
@@ -73,6 +74,7 @@ classdef Unit < handle
             self.detectionChannel = S.detectionChannel;
             self.MultiElectrode = hdsort.file.MultiElectrode(S.MultiElectrode);
             self.myFile = S.myFile;
+            self.parentPopulation = S.parentPopulation;
         end
         
         %------------------------------------------------------------------
@@ -183,6 +185,173 @@ classdef Unit < handle
             
             self.QC.P = P;
         end
+        
+        %% -----------------------------------------------------------------
+        
+        function F = plot(self, varargin)
+            
+            P.savingFolder = '';
+            P = hdsort.util.parseInputs(P, varargin, 'error');
+            
+            % starting as a Unit method --> have to find unit ID
+            AllunitsIDs = [self.parentPopulation.Units.ID];
+            selfID = find(AllunitsIDs == self.ID);
+            
+            F = hdsort.plot.Generic();
+            gcf = F.fh;
+            x0=10;
+            y0=10;
+            width=1100;
+            height=800;
+            set(gcf,'units','points','position',[x0,y0,width,height]);
+            
+            
+            samplingRate = 20000;
+            
+            % ****************************
+            % plot footprint
+            QCsp(1) = subplot(6,3,[1 2 4 5]);
+%             self.plotFootprint('ah', QCsp(1));
+            
+            ME = self.MultiElectrode;
+            if isempty(ME)
+                warning('hdsort.results.Units has not MultiElectrode')
+                ME = self.parentPopulation.MultiElectrode;
+            end
+            el_pos = ME.electrodePositions(ME.electrodePositions(:,1) > -1 & ME.electrodePositions(:,2) > -1, :);
+           
+            hdsort.plot.Waveforms2D(self.footprint, el_pos, 'ah', QCsp(1));            
+            set(QCsp(1),'box','on');
+            title(sprintf('Quality control - Unit ID: %d (unit: %d)', self.ID, selfID), ...
+                'Color','red', 'FontSize', 14, 'FontWeight', 'bold');
+              
+            % ***************************
+            % part about the amplitudes
+            % plot spike amplitudes through the recording
+            QCsp(2) = subplot(6,3,[7 8 10 11]); hold on;
+            set(QCsp(2),'box','off');
+            [selfRange, rasterColors, rasterNames]  = self.getRange(0);            
+            rasterUnitsTrains = {self.parentPopulation.Units(selfRange).spikeTrain};
+            rasterUnitsTrains = cellfun(@(x) x/samplingRate,rasterUnitsTrains,'un',0);
+            rasterUnitsAmplitudes = {self.parentPopulation.Units(selfRange).spikeAmplitudes};
+            
+            hold off;
+            
+            %plot(rasterUnitsTrains{3}/20000, rasterUnitsAmplitudes{3});
+            hold on
+            p = cellfun(@plot, rasterUnitsTrains,rasterUnitsAmplitudes, 'UniformOutput', false);
+            title('spike amplitudes');
+            
+            hline = refline([0 4]);
+            hline.Color = 'r';
+            
+            if max(self.spikeAmplitudes) > 40
+                ylim([0 40]);
+            else
+                ylim([0 inf]);
+            end
+            hold off 
+            
+            % ****************************
+            % plot spike amplitudes histogram
+            QCsp(3) = subplot(6,3,[9 12]); hold on;
+            %bins = linspace(min(self.spikeAmplitudes), max(self.spikeAmplitudes), 100);
+            %[nn,xx] = histc(self.spikeAmplitudes, bins);
+            %barh(bins, nn);
+            if ~isempty(self.QC)
+                barh(self.QC.AMPfit.bins, self.QC.AMPfit.y);
+            
+                % fit:
+                plot(self.QC.AMPfit.yfit, self.QC.AMPfit.bins, 'r--');
+                if max(self.spikeAmplitudes) > 40
+                    ylim([0 40]);
+                else
+                    ylim([0 inf]);
+                end
+            else
+                warning('Unit.QC is empty');
+            end 
+            
+            yl = ylim;
+            xl = xlim;
+            
+            % vertical line
+            hline = refline([0 4]);
+            hline.Color = 'r';
+            
+            quInput = [0.025 0.25 0.50 0.75 0.975];
+            qu = quantile([self.parentPopulation.Units.meanAmplitude],quInput);
+            
+            for i=1:length(qu)
+                dline = refline([0 qu(i)]);
+                dline.Color = 'm';
+                dline.LineStyle = ':';
+                text(xl(2)-xl(2)*0.2,qu(i)+0.2, ...
+                            sprintf('quantile (all units) %.2f',quInput(i)), ...
+                            'Color','black', 'FontSize', 8);
+            end
+            
+            % vertical line 2 -- mean Unit spike amplitude
+            hline = refline([0 self.meanAmplitude]);
+            hline.Color = 'b';
+            text(0.2*xl(2), self.meanAmplitude+0.08*yl(2), sprintf('mean amplitude %.4f', self.meanAmplitude), ...
+            'Color','black', 'FontSize', 10);
+            
+            % [text on chart
+            %barstrings = num2str(nn);
+            %text(nn+0.2,bins,barstrings,'horizontalalignment','left','verticalalignment','top', ...
+            %  'Fontsize',8);
+           
+            title('spike amplitude histogram');
+            hold off;
+            
+            % ****************************
+            % plot firing rate
+            QCsp(4) = subplot(6,3,[13 14]); hold on;
+            a = min(self.spikeTrain);
+            b = max(self.spikeTrain);
+            [fr, x] = hdsort.spiketrain.toFiringRate(self.spikeTrain/20000, [], .5, [a b]/20000); 
+            plot(x, fr);
+            title('spike firing rate (bin .5 sec)');
+            hold off;
+            
+            % ****************************
+            % plot ISIH
+            QCsp(5) = subplot(6,3,[15]); hold on;
+            hdsort.plot.ISIH( self.spikeTrain, 'title', 'ISIH', 'xlabel', 'ISI [ms]', 'ah', QCsp(5));
+            hold off;
+            
+            % ****************************
+            % plot rasterplot
+            [selfRange, rasterColors, rasterNames]  = self.getRange(5);
+            rasterUnits = {self.parentPopulation.Units(selfRange).spikeTrain};
+            
+            QCsp(6) = subplot(6,3,[16 17]); hold on;
+
+            hdsort.plot.Rasterplot(rasterUnits, ...
+                'color', rasterColors, 'title', 'Rasterplot of neighouring units', 'ah', QCsp(6));  
+            set(QCsp(6), 'YTickLabel', rasterNames);
+            
+            hold off;
+            
+            % link axes
+            linkaxes(QCsp([2 3]), 'y');
+            linkaxes(QCsp([2 4 6]), 'x');
+            
+            if ~isempty(P.savingFolder)
+                if exist(fullfile(P.savingFolder,'Units'))
+                else
+                    mkdir(fullfile(P.savingFolder,'Units'))
+                    disp('final output folder created')
+                end
+                
+                savefig(gcf,fullfile(P.savingFolder,'Units',strcat('Unit',num2str(selfID),'-QC.fig')));
+                saveas(gcf,fullfile(P.savingFolder,'Units',strcat('Unit',num2str(selfID),'-QC.png')),'png');
+
+                close all
+            end    
+        end
+        
         
         % -----------------------------------------------------------------
         function loadFile(self)

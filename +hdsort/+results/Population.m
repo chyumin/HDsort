@@ -24,6 +24,7 @@ classdef Population < handle
         MultiElectrode
         
         noiseStd
+        samplingRate
         info
         fileLocation
         file
@@ -50,6 +51,7 @@ classdef Population < handle
             P.fileLocation = '';
             P.name = '';
             P.sortingInfo = [];
+            P.samplingRate = 20000;
             P = hdsort.util.parseInputs(P, varargin, 'error');
             
             assert(size(P.gdf,2) >= 4 , 'Must have at least 4 or more columns! [unitID, spiketime, amplitude, detection_channel]');
@@ -66,6 +68,7 @@ classdef Population < handle
             self.fileLocation = P.fileLocation;
             self.name = P.name;
             self.sortingInfo = P.sortingInfo;
+            self.samplingRate = P.samplingRate;
             
             self.Units = hdsort.results.Unit.empty(0, length(unitIDs));
             for ui = 1:length(unitIDs)
@@ -93,6 +96,7 @@ classdef Population < handle
             N = numel(S.Units);
             self.Units = hdsort.results.Unit.empty(0, N);
             for ii = 1:N
+                S.Units(ii).parentPopulation = self;
                 self.Units(ii) = hdsort.results.Unit(S.Units(ii));
             end
             
@@ -100,12 +104,14 @@ classdef Population < handle
             for ii = 1:nSM
                 U = S.splitmerge{ii,1}; clear 'U_struct'
                 for jj = 1:numel(U)
+                    U(jj).parentPopulation = self;
                     U_struct(jj) = hdsort.results.Unit(U(jj));
                 end
                 self.splitmerge{ii,1} = U_struct;
                 
                 U = S.splitmerge{ii,2}; clear 'U_struct'
                 for jj = 1:numel(U)
+                    U(jj).parentPopulation = self;
                     U_struct(jj) = hdsort.results.Unit(U(jj));
                 end
                 self.splitmerge{ii,2} = U_struct;
@@ -124,6 +130,11 @@ classdef Population < handle
                 self.fileLocation = hdsort.util.convertPathToOS(S.fileLocation);
             catch
                 self.fileLocation = S.fileLocation;
+            end
+            if isfield(S, 'samplingRate')
+                self.samplingRate =  S.samplingRate;
+            else
+                self.samplingRate = 20000;
             end
         end
         
@@ -158,6 +169,7 @@ classdef Population < handle
             S.MultiElectrode = self.MultiElectrode.toStruct();
             S.fileLocation = self.fileLocation;
             S.info = self.info;
+            S.samplingRate = self.samplingRate;
         end
         
         %------------------------------------------------------------------
@@ -412,6 +424,287 @@ classdef Population < handle
             end
             amp = [self.Units.meanAmplitude];
             unit_idx = amp >= stdThreshold;
+        end
+        
+        %% -----------------------------------------------------------------
+        % PLOTS
+        % -----------------------------------------------------------------
+        function plot(self, varargin)
+            
+            P.Units = [];
+            P.savingFolder = '';
+            P = hdsort.util.parseInputs(P, varargin, 'error');
+            
+            [Units] = self.getUnits(P.Units);
+            
+            %  ############################################################
+            %%  plot init
+            F = hdsort.plot.Generic();
+            x0=10;
+            y0=10;
+            width=1100;
+            height=800;
+            set(F.fh,'units','points','position',[x0,y0,width,height]);
+            
+            %% basic numbers - Units --> TEXT rather than IMG??
+            % number of units
+            % # of units before / after split / merge
+            
+            %% other basic checks
+            % are bits included?
+            % do bits vary? is there homogenous spread?
+            % missing frames?
+            
+            %  ############################################################
+            %%  1. Electrode position
+            spah(1) = subplot(5,5,[1 2 6 7]);
+            
+            plot(self.MultiElectrode.electrodePositions(:,1), ...
+                self.MultiElectrode.electrodePositions(:,2), 'sk', 'MarkerFaceColor','k');
+            hold on;
+            title_str = strcat('Configuration (', num2str(length(self.MultiElectrode.electrodePositions)), ...
+                ' selected electrodes)');
+            title(title_str);
+            xlabel('μm')
+            ylabel('μm')
+            axis([0 3850 0 2100]);
+            %xl = xlim;
+            %yl = ylim;
+            clear title;
+            hold off;
+            
+            %  ############################################################
+            %%  2. Footprint heatmap position
+            % take 3 or 5 best electrode for each unit -- electrodes where footprints
+            % show the largest spread
+            spah(2) = subplot(5,5,[3 4 5 8 9 10]);
+            set(spah(2),'box','on');
+            hold on;
+            title_str = sprintf('Best 3 footprints of each unit per electrode (size of bubble) \nand position of all units with mean amplitude > 6 (red)');
+            title(title_str);
+            xlabel('μm')
+            ylabel('μm')
+            clear title_str;
+            
+            BestFPrange = 3;
+            
+            bestFp = [];
+            meanGoodFp = [];
+            numEl = length(self.MultiElectrode.electrodePositions(:,1));
+            % for each unit find 3 footprints with largest range of numbers (most
+            % prominant) and add their indexes to the array
+            for ii = 1:length(Units)
+                fpRange = range(Units(ii).footprint);
+                [val,Indeks] = maxk(fpRange, BestFPrange);
+                bestFp = [bestFp Indeks];
+                if Units(ii).meanAmplitude > 6
+                    meanGoodFp = [meanGoodFp Indeks];
+                end
+            end
+            clear ii;
+            
+            meanGoodFp = unique(meanGoodFp);
+            colorMatrix = repmat([0    0.4470    0.7410],numEl,1);
+            
+            for num = 1:length(meanGoodFp)
+                colorMatrix(meanGoodFp(num),:,:) = [0.8500    0.3250    0.0980];
+            end
+            clear num;
+            % part for marking individual electrodes with coor not size
+            % % map the array of 3 largest indexes per unit to the sum / count per
+            % % index. Size = # of electrodes
+            finalFPArray = accumarray(bestFp',1,[length(self.MultiElectrode.electrodePositions) 1])';
+            finalFPArray = finalFPArray + 1; % otherwise you can't construct a color matrix (need indexes > 0)
+            %
+            % % Find the largest number of occurrences (how many units show one of their
+            % % 3 "best" footprints in this electrode
+            % MaxElFp = max(finalFPArray)+1;
+            %
+            % % Create colors for each number of occurrence. We need at least as many
+            % % colors as there is the largest number of occurances
+            % colors = jet(MaxElFp);
+            % colors(1,:,:) = [0.85 0.85 0.85]; % making it more obvious where no best footprint is
+            % colormap(colors);
+            %
+            % % Construct a color matrix
+            % cMatrix = colors(finalFPArray, :);
+            
+            % Create scatter plot
+            sz = 140; % size of the mark
+            scatter(self.MultiElectrode.electrodePositions(:,1), ...
+                self.MultiElectrode.electrodePositions(:,2), ...
+                finalFPArray*6-5, colorMatrix, 'filled' );
+            hold off;
+            
+            
+            
+            %  ############################################################
+            %%  3. mean spike amplitudes
+            
+            % distribution
+            % num / % of units with mean amplitudes...
+            spah(3) = subplot(5,5,[11 12 13 16 17 18]);
+            
+            % create histogram of mean amplitudes
+            histogram([Units.meanAmplitude], 100, 'BinLimits', [0,20])
+            title_str = strcat('Mean amplitude of all (', num2str(length(Units)), ') units');
+            title(title_str);
+            xlabel('Mean signal-to-noise deviation')
+            ylabel('# of units')
+            clear title_str;
+            % add annotation
+            hold on;
+            xl = xlim;
+            yl = ylim;
+            line([4, 4], ylim, 'LineWidth', 2, 'Color', 'red');
+            text(4.2,yl(2)-10,'cutoff amplitude','Color','red');
+            set(spah(3),'box','off');
+            
+            % additional label of # of units
+            % text(xl(2)-0.25*xl(2),yl(2)-0.1*yl(2),strcat(num2str(length(RES.Units)), ' Units'),'Color','red', 'FontSize', 18);
+            
+            % add avg-max amplitude
+            allMax = [];
+            for j=1:length(Units)
+                allMax = [allMax, max(Units(j).spikeAmplitudes)];
+            end
+            meanMax = mean(allMax);
+            if meanMax < 50
+                maxText = sprintf('mean (of max \namplitudes of each unit)');
+                line([meanMax, meanMax], ylim, 'LineWidth', 1, 'Color', 'green', 'LineStyle', ':');
+                text(meanMax + 0.02*xl(2),yl(2)-0.15*yl(2), maxText, 'Color', 'green', 'FontSize', 10);
+            end
+            
+            % fit distribution
+            % https://ch.mathworks.com/help/stats/examples/curve-fitting-and-distribution-fitting.html
+            
+            % % of units
+            yPl = 30;
+            textDiff = 4;
+            splitDiff = 15;
+            
+            xVec = 0:2:20;
+            hc = histcounts([Units.meanAmplitude], xVec);
+            for ii = 1:length(hc)
+                line([xVec(ii)+0.2, xVec(ii+1)-0.2], [yPl,yPl], 'LineWidth', 1, 'Color', [60/255 60/255 60/255]);
+                numberPer = sprintf('%.2f',hc(ii)/length(Units)*100);
+                text(xVec(ii) + 0.5,yPl+textDiff, strcat(numberPer, '%'), ...
+                    'Color',[60/255 60/255 60/255], 'FontSize', 8);
+                clear numberPer;
+            end
+            clear ii;
+            
+            hold off;
+            
+            hcAbove6 = sum(hc(4:end));
+            line([xVec(4)+0.2, xVec(11)-0.2], [yPl+splitDiff,yPl+splitDiff], 'LineWidth', 1, 'Color', 'black');
+            text(xVec(5)+0.5, yPl+textDiff+splitDiff, strcat(num2str(hcAbove6/length(Units)*100), '%'), ...
+                'Color','black', 'FontSize', 10);
+            
+            %% 4. Noise Std
+            %  #############################
+            spah(4) = subplot(5,5,[14 15]);
+            
+            hold on;
+            histogram([self.noiseStd], 100)
+            title('Noise StD');
+            xlabel('Std');
+            ylabel('# of units');
+            xl = xlim;
+            yl = ylim;
+            maxText2 = sprintf('mean noise st. dev.');
+            line([mean(self.noiseStd), mean(self.noiseStd)], ylim, 'LineWidth', 1, 'Color', 'green', 'LineStyle', ':');
+            text(mean(self.noiseStd) + 0.02*xl(2),yl(2)-0.15*yl(2), maxText2, 'Color', 'green', 'FontSize', 10);
+            
+            hold off;
+            
+            %  ############################################################
+            %%  5. Footprint distribution
+            spah(5) = subplot(5,5,[19 20]);
+            
+            hold on;
+            
+            x = [];
+            for U = Units
+                stdUnit = std(U.footprint);
+                stdUnitSel = stdUnit > 3*mean(stdUnit);
+                x = [x sum(stdUnitSel)];
+            end
+            
+            histogram(x, 100)
+            title_str = sprintf('Footprint size (# of footprints that are \nlarger than 2*std(footprint of the unit)');
+            title(title_str);
+            xlabel('footprints');
+            ylabel('# of units');
+            %xl = xlim;
+            %yl = ylim;
+            % maxText2 = sprintf('mean noise st. dev.');
+            % line([mean(self.noiseStd), mean(self.noiseStd)], ylim, 'LineWidth', 1, 'Color', 'green', 'LineStyle', ':');
+            % text(mean(self.noiseStd) + 0.02*xl(2),yl(2)-0.15*yl(2), maxText2, 'Color', 'green', 'FontSize', 10);
+            
+            clear x; clear title_str;
+            hold off;
+            
+            %  ############################################################
+            %%  6. Comulative spike plot
+            spah(6) = subplot(5,5,[21 22 23 24]);
+            
+            ST = self.getSpikeTrains(Units);
+            nBins = 10000;
+            srate = 20000;
+            
+            window = 0.1; % seconds
+            bin_width = window*self.samplingRate;
+            [binnedST, bin_edges, bin_centers] = hdsort.spiketrain.binSpikeTrains(ST(:), window, self.samplingRate);
+            bin_centers = bin_centers - bin_centers(1);
+            freq = sum(binnedST)/(bin_width/srate);
+            
+            bar(bin_centers, freq, 'barWidth',1);
+            title('Total number of spikes (for all units)');
+            xlabel('time [s]')
+            ylabel('# of spikes')
+            
+            clear bin_edges; clear bin_width; clear bin_centers;
+            clear n; clear nBins; clear srate; clear freq;
+            
+            %  ############################################################
+            %%  7. Distribution of spike num per units
+            % get total duration of the recordings:
+            spah(7) = subplot(5,5,[25]);
+            totalDur = 0; % in sec
+            for td=1:length(self.sortingInfo.fileInfo)
+                totalDur = totalDur + self.sortingInfo.fileInfo{td}.duration;
+            end
+            
+            hold on;
+            nSpikesUnit = histogram([Units.nSpikes], 100,'BinLimits', [0,10000]);
+            barstrings = num2str(nSpikesUnit.Values);
+             
+            title('# Spikes per sec.');
+            xlabel('# of spikes / sec');
+            ylabel('# of units');
+%            xl = xlim;
+%            yl = ylim;
+            maxText2 = sprintf('mean # of spikes');
+            hold off;
+            
+            
+            %%  Saving figures
+            %  ############################################################
+            
+            if ~isempty(P.savingFolder)
+                if exist(P.savingFolder)
+                    disp('final output folder already exists')
+                else
+                    mkdir(P.savingFolder)
+                    disp('final output folder created')
+                end
+                
+                savefig(F.fh, fullfile(P.savingFolder, strcat(self.name,'-QC.fig')));
+                saveas(F.fh, fullfile(P.savingFolder, strcat(self.name,'-QC.png')),'png');
+                close all
+            end            
+            
         end
         
         % -----------------------------------------------------------------
