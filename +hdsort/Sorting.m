@@ -128,6 +128,7 @@ classdef Sorting < handle
             self.buffer.progress = self.loadProgress();
         end
         
+        % -----------------------------------------------------------------
         function display(self)
             disp(self)
             disp('##############################################')
