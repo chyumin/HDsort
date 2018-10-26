@@ -272,7 +272,7 @@ classdef Preprocessor < handle
                         X_ = X_ - mean(X_);
                         
                         if parfor_prefilter
-                            X_ = conv2(X_, FIRb, 'same');
+                            X_ = conv2(X_, FIRb(:), 'same');
                             % remove filter artifact at beginning
                             X_(1:parfor_fir_filterOrder, :) = 0;
                         end
