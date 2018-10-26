@@ -1,4 +1,13 @@
 function def = pathDefinitions(varargin)
+    % This is a template for a function that allows you to transform the path
+    % between different operation systems (Windows, macOS, linux) when they
+    % share a common file system. This function is called in the function 
+    % 'hdsort.util.convertPathToOS' which in turn is called at several
+    % locations in the code, especially in the tools for grid computing.
+    % Please define all the root paths that you are using, especially when 
+    % using several different servers.
+    % The example in this template should give you an idea on how to do that.
+    
     if nargin == 0
         OStype = computer;
     else
@@ -8,8 +17,7 @@ function def = pathDefinitions(varargin)
     def.pdefsPath = pwd;
     def.callerPath = [];
     
-    user_config = global_user_config();
-    user_name = user_config.user_name;
+    user_name = getenv('USER');
     
     if ~isempty(strfind(OStype, 'WIN'))
         def.server01 = '\\bs-filesvr01\';
