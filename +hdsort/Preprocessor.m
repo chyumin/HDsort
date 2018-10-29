@@ -264,8 +264,6 @@ classdef Preprocessor < handle
                     parfor_spikeDetection_thr = P_.spikeDetection.thr;
                     parfor_chunkSize = P_.chunkSize;
                     parfor (c = 1:nC_, NumWorkers)
-                        %for c = 1:nC_
-                        
                         X_ = X(:,c);
                         
                         % Subtract mean of this channel:
