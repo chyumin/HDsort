@@ -1,16 +1,15 @@
 classdef FileWrapperInterface < handle
+    
+    properties (Hidden)
+        buffer
+        fullMultiElectrode
+        activeChannels
+    end
+    
     properties
         derivedClassName
         samplesPerSecond
-        
         MultiElectrode
-        fullMultiElectrode
-        activeChannels
-        
-        memoryBufferNoiseSmad
-        
-        buffer
-        
         info
         name
     end
@@ -38,7 +37,7 @@ classdef FileWrapperInterface < handle
             self.derivedClassName = derivedClassName;
             self.samplesPerSecond = double(samplesPerSecond);
             
-            self.memoryBufferNoiseSmad = [];
+            self.buffer.noiseSmad = [];
             self.name = '';
         end
         
@@ -71,6 +70,11 @@ classdef FileWrapperInterface < handle
             varargout = matlabfilecentral.parseSize.parseSize(dims,nargout,varargin{:});
         end
         
+        %------------------------------------------------------------------
+        function clearBuffer(self)
+            self.buffer = [];
+        end
+        
         %------------------------------------------------------------------        
         function sr = getSamplesPerSecond(self)
             sr = self.samplesPerSecond;
@@ -86,6 +90,26 @@ classdef FileWrapperInterface < handle
                 return
             end
             si = 1/self.samplesPerSecond;
+        end
+        
+        %------------------------------------------------------------------
+        function gain = getGain(self)
+            gain = self.getGain_();
+        end
+        
+        %------------------------------------------------------------------
+        function gain = getGain_(self)
+            gain = 1.0;
+        end
+        
+        %------------------------------------------------------------------
+        function LSB_volts = getLSB(self)
+            LSB_volts = self.getLSB_();
+        end
+        
+        %------------------------------------------------------------------
+        function LSB_volts = getLSB_(self)
+            LSB_volts = 1.0;
         end
         
         %%
@@ -177,7 +201,7 @@ classdef FileWrapperInterface < handle
             wf = zeros(nT, length(channelindex)*cutLength);
             
             % Sort the spiketimes and keep the unsorting index:
-            [t idx_sort] = sort(t);
+            [t, idx_sort] = sort(t);
             [~, idx_unsort] = sort(idx_sort);
             
             tr = round(t);
@@ -360,10 +384,10 @@ classdef FileWrapperInterface < handle
                 end
             end
             
-            if isempty(self.memoryBufferNoiseSmad)
-                self.memoryBufferNoiseSmad = nan(1, nC);
+            if isempty(self.buffer.noiseSmad)
+                self.buffer.noiseSmad = nan(1, nC);
             end
-            notCalcIdx = isnan(self.memoryBufferNoiseSmad(fullChanIdx));
+            notCalcIdx = isnan(self.buffer.noiseSmad(fullChanIdx));
             if any(notCalcIdx)
                 cidx = P.channelIdx(notCalcIdx);
                 fullcidx = fullChanIdx(cidx);
@@ -375,13 +399,13 @@ classdef FileWrapperInterface < handle
                 smadL = min(Len, P.maxLen);
                 smad = hdsort.noise.estimateSigma(...
                         self.getData(1:smadL, cidx), P.Tf, P.thr);
-                self.memoryBufferNoiseSmad(fullcidx) = smad;
+                self.buffer.noiseSmad(fullcidx) = smad;
                 
                 if P.displayProgress
                     disp('Done.'); toc        
                 end
             end
-            smad = self.memoryBufferNoiseSmad(fullChanIdx);
+            smad = self.buffer.noiseSmad(fullChanIdx);
         end
         
         %------------------------------------------------------------------

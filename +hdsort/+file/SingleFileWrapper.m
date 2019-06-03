@@ -1,11 +1,12 @@
 classdef SingleFileWrapper < hdsort.file.FileWrapperInterface
+    
+    properties (Hidden)
+        file_idx
+    end
+    
     properties
         fileName
-        
-        file_idx
         parent
-        
-        bCovIsPrecalculated
     end
     
     methods
@@ -24,8 +25,6 @@ classdef SingleFileWrapper < hdsort.file.FileWrapperInterface
             self.parent = parent;
             self.file_idx = file_idx;
             
-            self.bCovIsPrecalculated = false;
-            
             self.name = fileName;
             self.info = 'If this info message is displayed, there has been an error in the construction of this object!';
         end
@@ -38,11 +37,6 @@ classdef SingleFileWrapper < hdsort.file.FileWrapperInterface
         %------------------------------------------------------------------
         function X = getScaledData(self, timeIndex, channelIndex)
             tmp = self.getData(timeIndex, channelIndex)*self.getLSB();
-        end
-        
-        %------------------------------------------------------------------
-        function lsb = getLSB(self)
-            lsb = self.lsb;
         end
         
         %------------------------------------------------------------------
@@ -80,6 +74,7 @@ classdef SingleFileWrapper < hdsort.file.FileWrapperInterface
                 IDX(idx_idx) = t1(i):t2(i); 
             end 
             X = self.getData_(IDX, channelindex);
+            %X = bsxfun(@minus, X, median(X));
             X = reshape(X, [cutLength nCut length(channelindex)]);
             for i = 1:nCut
                 wf(i,:) = hdsort.waveforms.m2v(squeeze(X(:, i, :))');

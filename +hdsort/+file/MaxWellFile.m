@@ -5,29 +5,24 @@ classdef MaxWellFile < hdsort.file.SingleFileWrapper
     % such that the data is in a format that can be used directly for
     % spike-sorting (see hdsort.file.CMOSMEA).
     
-    properties
-        P
-        h5info
+    properties (Hidden)
         fileID
-        
+    
         nDims
         dims
         maxDims
+        dimAddChans
+        dataSets
+    end
+    
+    properties
+        P
         connectedChannel
-        
-        bits
-        missingFrames
-        
         chip_version
         chip_number
         software_version
-        
-        hardware_settings
-        
-        dimAddChans
-        
-        dataSets
     end
+    
     
     methods
         
@@ -113,9 +108,16 @@ classdef MaxWellFile < hdsort.file.SingleFileWrapper
             self.dataSets.frame_numbers.name = '/ephys/frame_numbers';
             self.dataSets.bits.name = '/bits';
             self.dataSets.raw_spikes.name = '/proc0/spikeTimes';
+            self.dataSets.gain.name = '/settings/gain';
+            self.dataSets.version.name = '/version';
+            self.dataSets.raw_spikes.name = '/proc0/spikeTimes';
+            
             self.fileName = fileName;
             self.connectedChannel = find(self.MultiElectrode.electrodeNumbers > -1);
             self = self.openH5File();
+            
+            self.chip_version = 'MaxOne';
+            self.software_version = self.tryReadingDataset(self.dataSets.version.name, false);
             
             self.info = ['This object is intended to wrap a single MaxWell-MEA recording file.'];
         end
@@ -164,10 +166,10 @@ classdef MaxWellFile < hdsort.file.SingleFileWrapper
         
         %------------------------------------------------------------------
         function h5info_ = getH5Info(self)
-            if isempty(self.h5info_)
-                self.h5info_ = h5info(self.fileName);
+            if ~isfield(self.buffer, 'h5info') || isempty(self.buffer.h5info)
+                self.buffer.h5info = h5info(self.fileName);
             end
-            h5info_ = self.h5info_;
+            h5info_ = self.buffer.h5info;
         end
         
         %------------------------------------------------------------------
@@ -186,50 +188,50 @@ classdef MaxWellFile < hdsort.file.SingleFileWrapper
             end
         end
         
-%         %------------------------------------------------------------------
-%         function loadBits(self)
-%             bits = self.tryReadingDataset(self.dataSets.bits.name, false);
-%             if isempty(bits) return; end
-%             self.bits = [bits.x0x2Fephys0x2Fframe_numbers, bits.x0x2Fbits];
-%         end
-%         
-%         %------------------------------------------------------------------
-%         function hs = readHardwareSettings(self)
-%             try
-%                 hwinfo = h5info(self.fileName, self.dataSets.hardware_settings.name);
-%                 hws_names = {hwinfo.Datasets.Name};
-%             
-%                 for h_ = hws_names
-%                     hw_name = [self.dataSets.hardware_settings.name '/' h_{1}];
-%                     self.hardware_settings.(h_{1}) = self.tryReadingDataset(hw_name);
-%                 end
-%             catch
-%                 disp('No hardware info found!')
-%                 self.hardware_settings = [];
-%             end
-%             hs = self.hardware_settings;
-%         end
-        
         %------------------------------------------------------------------
         function getProps(self)
-            [self.nDims h5_dims h5_maxDims] = H5S.get_simple_extent_dims(self.dataSets.signal.dataspaceID);
+            [self.nDims, h5_dims, h5_maxDims] = H5S.get_simple_extent_dims(self.dataSets.signal.dataspaceID);
             self.dims = fliplr(h5_dims);
             self.maxDims = fliplr(h5_maxDims);
         end
         
         %------------------------------------------------------------------
-        function bits = getBits(self)
-            bits = self.bits;
+        function [missingFrames] = getMissingFrameNumbers(self)
+            if ~isfield(self.buffer, 'missingFrames') || isempty(self.buffer.missingFrames)
+                self.buffer.missingFrames = hdsort.file.util.getMissingFrameNumbers(self.getFrameNumbers());
+            end
+            missingFrames = self.buffer.missingFrames;
         end
         
         %------------------------------------------------------------------
-        function hws = getHardwareSettings(self)
-            hws = self.hardware_settings;
+        function gain = getGain(self)
+            if ~isfield(self.buffer, 'gain') || isempty(self.buffer.gain)
+                self.buffer.gain = self.tryReadingDataset(self.dataSets.gain.name, false);
+            end
+            gain = self.buffer.gain;
         end
         
         %------------------------------------------------------------------
-        function hws = getGain(self)
-            error('Not implemented yet!')
+        function LSB_volts = getLSB_(self)
+            gain = self.getGain();
+            LSB_volts = 3.3 / (1024.0 * gain);
+        end
+        
+        %------------------------------------------------------------------
+        function rawSpikes = getRawSpikes(self)
+            if ~isfield(self.buffer, 'rawSpikes') || isempty(self.buffer.rawSpikes)
+                rawSpikes_ = self.tryReadingDataset(self.dataSets.raw_spikes.name, false);
+                if ~isempty(rawSpikes_)            
+                    self.buffer.rawSpikes.spiketimes = double(rawSpikes_.frameno);
+                    self.buffer.rawSpikes.channel = double(rawSpikes_.channel) + 1;
+                    self.buffer.rawSpikes.positions = self.MultiElectrode.electrodePositions(self.buffer.rawSpikes.channel, :);
+                    self.buffer.rawSpikes.electrode = self.MultiElectrode.electrodeNumbers(self.buffer.rawSpikes.channel);
+                    self.buffer.rawSpikes.amplitude = double(rawSpikes_.amplitude);
+                else
+                    self.buffer.rawSpikes = [];
+                end
+            end
+            rawSpikes = self.buffer.rawSpikes;
         end
         
         %------------------------------------------------------------------
@@ -247,8 +249,8 @@ classdef MaxWellFile < hdsort.file.SingleFileWrapper
         end
         
         %------------------------------------------------------------------
-        function display(self)
-            disp(self)
+        function disp(self)
+            details(self)
             disp(['Channels: [' num2str(self.dims(1)) ' ' num2str(size(self.MultiElectrode.electrodePositions,1)) ']']);
         end
         
@@ -277,18 +279,17 @@ classdef MaxWellFile < hdsort.file.SingleFileWrapper
         
         %------------------------------------------------------------------
         function frameNo=getFrameNoAt(self, index)
-                X = h5read( self.fileName , self.dataSets.signal.name, [index 1027], [1, 2]);
-                frameNo = bitor( bitshift( double(X(:,2)) , 16 ) , double(X(:,1)) );
+            X = h5read( self.fileName , self.dataSets.signal.name, [index 1027], [1, 2]);
+            frameNo = bitor( bitshift( double(X(:,2)) , 16 ) , double(X(:,1)) );
         end
+        
         %------------------------------------------------------------------
         function [frameNo] = getFrameNumbers(self, varargin)
-            if isfield(self.buffer, 'frame_numbers') & ~isempty(self.buffer.frame_numbers)
-                frameNo = self.buffer.frame_numbers;
-                return;
-            end            
-            X = h5read( self.fileName , self.dataSets.signal.name, [1 1027], [self.size(1), 2]);
-            frameNo = bitor( bitshift( double(X(:,2)) , 16 ) , double(X(:,1)) )';
-            self.buffer.frame_numbers = frameNo;
+            if ~isfield(self.buffer, 'frame_numbers') || isempty(self.buffer.frame_numbers)
+                X = h5read( self.fileName , self.dataSets.signal.name, [1 1027], [self.size(1), 2]);
+                self.buffer.frame_numbers = bitor( bitshift( double(X(:,2)) , 16 ) , double(X(:,1)) )';
+            end
+            frameNo = self.buffer.frame_numbers;
         end
         
         %------------------------------------------------------------------
