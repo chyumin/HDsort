@@ -9,6 +9,9 @@ classdef Waveforms2D < hdsort.plot.PlotInterface
         IDs
         absThreshold
         maxNumberOfChannels
+        
+        subtractMedianPerChannel
+        
         plotAllTraces
         plotMeanConfidenceWithSigma
         plotElNumbers
@@ -23,6 +26,7 @@ classdef Waveforms2D < hdsort.plot.PlotInterface
         medianColor
         medianLineWidth
         
+        ME
         flipud
     end
     
@@ -50,7 +54,7 @@ classdef Waveforms2D < hdsort.plot.PlotInterface
             P.scaling = [];
             P.wfsButtonDownFcn = [];
             P.electrodeWidth = 15;
-            
+            P.subtractMedianPerChannel = true;
             
             P.xlabel = '[\mum]';
             P.ylabel = '[\mum]';
@@ -64,9 +68,16 @@ classdef Waveforms2D < hdsort.plot.PlotInterface
             if ~self.flipud
                 self.wfs = -self.wfs;
             end
+            
+            if isa(electrodePositions, 'hdsort.file.MultiElectrode')
+                self.ME = electrodePositions;
+                electrodePositions = self.ME.electrodePositions;
+            end
+            self.electrodePositions = electrodePositions;
+            
             if ndims(self.wfs) == 2
-                [nT nU] = size(self.wfs);
-                nC = size(electrodePositions, 1);
+                [nT, nU] = size(self.wfs);
+                nC = size(self.electrodePositions, 1);
                 
                 if nU == nC
                     nC = nU;
@@ -77,8 +88,6 @@ classdef Waveforms2D < hdsort.plot.PlotInterface
                     self.wfs = reshape(self.wfs, [nT/nC, nC, nU]);
                 end
             end
-            
-            self.electrodePositions = electrodePositions;
             
             % prepare IDs
             if isempty(self.IDs)
@@ -165,7 +174,7 @@ classdef Waveforms2D < hdsort.plot.PlotInterface
                 
                 for u = 1:nU
                     uIdx = self.IDs == uIDs(u);
-                    [m mTf mchan_] =  hdsort.util.max2D(abs(self.wfs(:,:,uIdx) ), 'each column');
+                    [m, mTf, mchan_] =  hdsort.util.max2D(abs(self.wfs(:,:,uIdx) ), 'each column');
                     
                     nC = min(self.maxNumberOfChannels, nC);
                     mchan = mchan_(1:nC);
@@ -177,7 +186,14 @@ classdef Waveforms2D < hdsort.plot.PlotInterface
                         s1 = ((Tf+1)*(ii-1)+1);
                         idx = s1:s1+Tf-1;
                         pIdx(idx) = self.electrodePositions(mchan(ii),1) + self.electrodeWidth*(0:Tf-1)/Tf;
-                        Y(idx)    = self.electrodePositions(mchan(ii),2) - squeeze(self.wfs(:,mchan(ii),uIdx))*self.scaling;
+                        
+                        if self.subtractMedianPerChannel
+                            wfs_ = squeeze(self.wfs(:,mchan(ii),uIdx));
+                            wfs_ = bsxfun(@minus, wfs_, median(wfs_));
+                            Y(idx)    = self.electrodePositions(mchan(ii),2) - wfs_*self.scaling;
+                        else
+                            Y(idx)    = self.electrodePositions(mchan(ii),2) - squeeze(self.wfs(:,mchan(ii),uIdx))*self.scaling;
+                        end
                     end
                     
                     plot(self.ah, pIdx, Y, self.LineSpec, ...
