@@ -7,7 +7,13 @@ function [groups nGroupsPerElectrode] = constructLocalElectrodeGroups(x, y, vara
     P = hdsort.util.parseInputs(P, varargin, 'error');
 
     groups = {};
-
+    
+    if any(x<0)
+       x = x + abs(min(x));
+    end
+    if any(y<0)
+       y = y + abs(min(y)); 
+    end
     assert(~any(x<0) && ~any(y<0), 'Electrode coordinates cannot be negative! Try running the function hdsort.file.[MYFILEINTERFACE].restrictToConnectedChannels()')
     
     N = length(x);

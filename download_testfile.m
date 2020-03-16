@@ -1,4 +1,4 @@
-function rawFile = download_testfile(rawFile)
+function rawFile = download_testfile(rawFile, mainFolder)
 if exist(rawFile, 'file') == 0
     userInput = input(['Do you want to download test file to ' mainFolder ' (~2GB)? Y/N:'],'s');
     assert(strcmp(userInput, 'Y'), 'User denied');

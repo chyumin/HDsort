@@ -152,9 +152,9 @@ classdef BELMEAFile < hdsort.file.SingleFileWrapper
             end
             
             %% Other info:
-            self.chip_version = self.tryReadingDataset(self.dataSets.chip_version.name);
+            self.chip_version = self.tryReadingDataset(self.dataSets.chip_version.name, false);
             self.chip_number  = self.tryReadingDataset(self.dataSets.chip_number.name, false);
-            self.software_version = self.tryReadingDataset(self.dataSets.software_version.name);
+            self.software_version = self.tryReadingDataset(self.dataSets.software_version.name, false);
         end
         
         %------------------------------------------------------------------

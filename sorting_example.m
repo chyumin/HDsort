@@ -5,7 +5,7 @@ setup()
 mainFolder = fullfile('.', 'Tutorial');
 fileName = 'chirpsweep01.raw.h5';
 rawFile = fullfile(mainFolder, fileName);
-download_testfile(rawFile)
+download_testfile(rawFile, mainFolder)
 assert(exist(rawFile, 'file')>0, 'This tutorial requires a raw data file!')
 
 %% Get a handle onto the raw file, which will then be used as input to the sorter:
@@ -50,5 +50,3 @@ sortedPopulation = hdsort.results.Population(HDSorting.files.results)
 %% Plot some results right away:
 sortedPopulation.plot();
 sortedPopulation.Units(10).plot();
-
-
