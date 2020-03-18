@@ -1,9 +1,15 @@
 function P = defaultParameters()
 
 P = struct();
+
 P.spikeDetection.method = '-';
 P.spikeDetection.thr = 4.2;
 P.artefactDetection.use = 0;
+
+P.legs.maxElPerGroup = 9;
+P.legs.minElPerGroup = 1;
+P.legs.addIfNearerThan = 20; % always add direct neighbors
+P.legs.maxDistanceWithinGroup = 52;
 
 P.botm.run = 0;
 P.botm.Tf = 75;

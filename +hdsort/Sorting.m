@@ -18,7 +18,6 @@ classdef Sorting < handle
     methods
         % -----------------------------------------------------------------
         function self = Sorting(rawDSList, mainFolder, sortingName, varargin)
-            P.maxElPerGroup = 9;
             P.legsFile = '';
             P.rawResultFile = '';
             P.resultFile = '';
@@ -89,7 +88,7 @@ classdef Sorting < handle
             [dir_exists,mess,messid] = mkdir( self.folders.groups );
             assert(dir_exists, 'Output directory could not be created!');
             
-            self.LEGs = self.createLocalElectrodeGroups(MultiElectrode, P.maxElPerGroup);
+            self.LEGs = self.createLocalElectrodeGroups(MultiElectrode);
             
             for ii = 1:self.LEGs.N
                 self.folders.legs{ii} = fullfile(self.folders.groups, self.LEGs.name{ii});
@@ -170,7 +169,10 @@ classdef Sorting < handle
         end
         
         % -----------------------------------------------------------------
-        function LEGs = createLocalElectrodeGroups(self, MultiElectrode, maxElPerGroup)
+        function LEGs = createLocalElectrodeGroups(self, MultiElectrode, varargin)
+            P = self.sortingParameters.legs;
+            P = hdsort.util.parseInputs(P, varargin, 'error');
+            
             try
                 LEGs = load(self.files.legs)
                 if ~isfield(LEGs, 'N') || ~isfield(LEGs, 'name')
@@ -183,12 +185,12 @@ classdef Sorting < handle
             catch
                 LEGs.electrodeNumbers = MultiElectrode.electrodeNumbers;
                 LEGs.electrodePositions = MultiElectrode.electrodePositions;
-                LEGs.maxElPerGroup = maxElPerGroup;
+                LEGs.P = P;
                 
                 disp('Create groups...');
                 [LEGs.groupsidx, LEGs.nGroupsPerElectrode] = hdsort.leg.constructLocalElectrodeGroups(...
-                    LEGs.electrodePositions(:,1), LEGs.electrodePositions(:,2), ...
-                    'maxElPerGroup', maxElPerGroup);
+                    LEGs.electrodePositions(:,1), LEGs.electrodePositions(:,2), LEGs.P);
+                
                 disp(['Number of groups created: ' num2str(length(LEGs.groupsidx))])
                 
                 LEGs.groups = {};
