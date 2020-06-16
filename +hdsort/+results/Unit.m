@@ -72,8 +72,12 @@ classdef Unit < handle
             self.spikeAmplitudes = S.spikeAmplitudes;
             self.meanAmplitude = mean(self.spikeAmplitudes);
             self.detectionChannel = S.detectionChannel;
-            self.MultiElectrode = hdsort.file.MultiElectrode(S.MultiElectrode);
-            self.myFile = S.myFile;
+            if isfield(S, 'MultiElectrode')
+                self.MultiElectrode = hdsort.file.MultiElectrode(S.MultiElectrode);
+            end
+            if isfield(S, 'myFile')
+                self.myFile = S.myFile;
+            end        
             self.parentPopulation = S.parentPopulation;
         end
         

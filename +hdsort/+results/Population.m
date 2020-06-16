@@ -93,11 +93,26 @@ classdef Population < handle
         
         %------------------------------------------------------------------
         function fromStruct(self, S)
+            
+            %% Turn S.Units into a struct array in case they are cells:
+            if iscell(S.Units)
+                S_Units = cat(1,S.Units{:});
+                S.Units = S_Units;
+            end
+            
+            %% First create a MultiElectrode:
+            self.MultiElectrode = hdsort.file.MultiElectrode(S.MultiElectrode);
+            
+            %% 
             N = numel(S.Units);
             self.Units = hdsort.results.Unit.empty(0, N);
             for ii = 1:N
                 S.Units(ii).parentPopulation = self;
                 self.Units(ii) = hdsort.results.Unit(S.Units(ii));
+            end
+            
+            if ~isfield(S, 'splitmerge')
+                S.splitmerge = {};
             end
             
             nSM = size(S.splitmerge,1);
@@ -121,15 +136,24 @@ classdef Population < handle
                 self.splitmerge = {};
             end
             
-            self.name = S.name;
-            self.sortingInfo = S.sortingInfo;
-            self.noiseStd = S.noiseStd;
-            self.MultiElectrode = hdsort.file.MultiElectrode(S.MultiElectrode);
-            self.info = S.info;
-            try
-                self.fileLocation = hdsort.util.convertPathToOS(S.fileLocation);
-            catch
-                self.fileLocation = S.fileLocation;
+            if isfield(S, 'name')
+                self.name = S.name;
+            end
+            if isfield(S, 'sortingInfo')
+                self.sortingInfo = S.sortingInfo;
+            end
+            if isfield(S, 'noiseStd')
+                self.noiseStd = S.noiseStd;
+            end
+            if isfield(S, 'info')
+                self.info = S.info;
+            end
+            if isfield(S, 'fileLocation')
+                try
+                    self.fileLocation = hdsort.util.convertPathToOS(S.fileLocation);
+                catch
+                    self.fileLocation = S.fileLocation;
+                end
             end
             if isfield(S, 'samplingRate')
                 self.samplingRate =  S.samplingRate;
