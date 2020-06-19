@@ -199,7 +199,7 @@ classdef Population < handle
         %------------------------------------------------------------------
         function save(self, fileName)
             S = self.toStruct();
-            save(fileName, '-struct', 'S')
+            save(fileName, '-struct', 'S', '-v7.3')
         end
         
         % -----------------------------------------------------------------
