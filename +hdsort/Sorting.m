@@ -517,7 +517,7 @@ classdef Sorting < handle
                 
                 try
                     %assert(self.sortingResultFileExists(outputLocation), 'Create file...');
-                    assert( exist(self.files.results) > 0, 'Create results file...')
+                    assert( exist(self.files.results, 'file') > 0, 'Create results file...')
                     disp('Loading SortedPopulation file...')
                     load(self.files.results);
                     disp(['SortedPopulation ' SortedPopulation.name ' file loaded.'])

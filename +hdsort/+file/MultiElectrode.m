@@ -35,8 +35,13 @@ classdef MultiElectrode < handle
         %------------------------------------------------------------------        
         function fromStruct(self, S)
             self.setElectrodePositions(S.electrodePositions, S.electrodeNumbers);
-            self.electrodeLabels = S.electrodeLabels;
-            self.parentElectrodeIndex = S.parentElectrodeIndex;
+            
+            if isfield(S, 'electrodeLabels')
+                self.electrodeLabels = S.electrodeLabels;
+            end
+            if isfield(S, 'parentElectrodeIndex')
+                self.parentElectrodeIndex = S.parentElectrodeIndex;
+            end
         end
         %------------------------------------------------------------------        
         function S = toStruct(self)
