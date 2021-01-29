@@ -237,45 +237,60 @@ classdef Preprocessor < handle
                     repTimesPerLEG = zeros(nLEGs, 3);
                     
                     %% Load data:
-                    t_loadData = tic;
                     [chunkOvp, chunk] = chunker.getNextChunk();
                     bIsLastChunk = ~chunker.hasNextChunk();
+                    
+                    disp('Loading data...')
+                    t_loadData = tic;
                     X = double(ds(chunkOvp(1):chunkOvp(2), :));
                     s1 = chunk(1)-chunkOvp(1)+1;
                     s2 = chunk(2)-chunk(1) + s1;
                     repTimes.loadData = toc(t_loadData);
+                    disp(['Loading data done. Time: ' num2str(repTimes.loadData) 's'])
+                    
+                    %% Filter over each channel
+                    disp('Filtering...')
+                    t_filterData = tic;
+                    if P_.prefilter
+                        X = conv2(X, FIRb, 'same');
+                        % Remove filter artifact at beginning
+                        X(1:P_.fir_filterOrder, :) = 0;
+                        X((end-P_.fir_filterOrder):end, :) = 0;
+                    end
+                    repTimes.filterData = toc(t_filterData);
+                    disp(['Filtering done. Time: ' num2str(repTimes.filterData) 's'])
                     
                     %% Subtract mean of all channels
+                    disp('Subtracting mean over all channels...')
                     t_subtractMeanAll = tic;
                     if P_.subtractMeanOverAllChannels
-                        X = bsxfun(@minus, X, mean(X,2));
+                        % X = bsxfun(@minus, X, mean(X,2));
+                        % Newer method to subtract over all channels:
+                        X_meanremoved = X-repmat(mean(X,1), size(X,1), 1);
+                        M = mean(X_meanremoved,2);
+                        M = M/norm(M);
+                        X = X - M*(M'*X_meanremoved);
                     end
                     repTimes.subtractMeanAll = toc(t_subtractMeanAll);
+                    disp(['Subtracting mean over all channels done. ' num2str(repTimes.subtractMeanAll) 's'])
+                    
                     
                     %% Spike detection:
+                    disp('Detecting spikes...')
                     t_detectSpikes = tic;
                     spikesDetectedDown = cell(nC_, 1);
                     pks_down = cell(nC_, 1);
                     
                     % Avoid passing entire P_ variable to parfor:
-                    parfor_prefilter = P_.prefilter;
-                    parfor_fir_filterOrder = P_.fir_filterOrder;
                     parfor_spikeDetection_minDist = P_.spikeDetection.minDist;
                     parfor_spikeDetection_thr = P_.spikeDetection.thr;
                     parfor_chunkSize = P_.chunkSize;
+                    
                     parfor (c = 1:nC_, NumWorkers)
-                        X_ = X(:,c);
+                        % Cut slice of X for each worker and wrap it into a
+                        % DataMatrix:
+                        M = hdsort.file.DataMatrix(X(:,c));
                         
-                        % Subtract mean of this channel:
-                        X_ = X_ - mean(X_);
-                        if parfor_prefilter
-                            X_ = conv(X_, FIRb, 'same');
-                            % remove filter artifact at beginning
-                            X_(1:parfor_fir_filterOrder, :) = 0;
-                        end
-                        
-                        % Spike detection:
-                        M = hdsort.file.DataMatrix(X_);
                         if bIsFirstChunk
                             % In the first chunk, compute the smad
                             [spikesDetectedDown(c), pks_down(c), ~, global_smad_per_channel(c)] = ...
@@ -293,13 +308,13 @@ classdef Preprocessor < handle
                                 'chunkSize', parfor_chunkSize, ...
                                 'progressDisplay', 'none');
                         end
-                        X(:,c) = X_;
                     end
+                    
+                    % Combine the results from the parfor loop:
                     spikeDetection.spikesDetectedUp = cell(nC_,1);
                     spikeDetection.pks_up = cell(nC_,1);
                     spikeDetection.spikesDetectedDown = spikesDetectedDown;
                     spikeDetection.pks_down = pks_down;
-                    
                     for c = 1:nC_
                         combinedSpikeDetection.spikesDetectedUp{c} = cat(1, combinedSpikeDetection.spikesDetectedUp{c}, spikeDetection.spikesDetectedUp{c});
                         combinedSpikeDetection.pks_up{c} = cat(1, combinedSpikeDetection.pks_up{c}, spikeDetection.pks_up{c});
@@ -314,7 +329,7 @@ classdef Preprocessor < handle
                         end
                     end
                     repTimes.detectSpikes = toc(t_detectSpikes);
-                    
+                    disp(['Detecting spikes done. ' num2str(repTimes.detectSpikes) 's'])
                     
                     %% PREPARE PARFOR LOOP VARIABLES to avoid unnecessary broadcasting
                     t_prepareParfor = tic;
@@ -362,6 +377,7 @@ classdef Preprocessor < handle
                     
                     
                     %% Save X to Mea1kFileSaver:
+                    disp('Saving filtered data...')
                     t_saveData = tic;
                     if ~isempty(P_.saveRawH5FileNameList)
                         X = X';
@@ -369,6 +385,7 @@ classdef Preprocessor < handle
                     end
                     clear X
                     repTimes.saveData = toc(t_saveData);
+                    disp(['Saving filtered data done. Time: ' num2str(repTimes.saveData) 's'])
                     
                     %% Loop over each LEG for noise estimation:
                     t_noise = tic;
@@ -378,7 +395,6 @@ classdef Preprocessor < handle
                         parfor_maxSamples = P_.noiseEstimation.maxSamples;
                         
                         parfor (legi = 1:length(LS), NumWorkers)
-                            %for legi = 1:length(LS)
                             Lpf1 = LS{legi};
                             
                             ts = hdsort.spiketrain.mergeSingleElectrodeDetectedSpikes(Lpf1.allspikes, maxDist);
@@ -408,7 +424,7 @@ classdef Preprocessor < handle
                                 m.noise = noise;
                                 disp('Done.')
                             else
-                                disp('noiseCovFile already computed.')
+                                %disp('noiseCovFile already computed.')
                             end
                             
                             repTimesPerLEG(legi, 2) = toc(t1_leg);
@@ -420,8 +436,8 @@ classdef Preprocessor < handle
                     t_spikeCutting = tic;
                     disp('Cutting spikes an all LEGs...')
                     parfor_debug = P_.debug;
+                    parfor_samplesPerDS = samplesPerDS(1:fi-1);
                     parfor (legi = 1:length(LS), NumWorkers)
-                        %for legi = 1:length(LS)
                         
                         t2_leg = tic;
                         if parfor_debug
@@ -463,7 +479,7 @@ classdef Preprocessor < handle
                             
                             % Express spike times with respect to beginning of
                             % the sorting:
-                            ts_sorting = ts_file + sum([0 samplesPerDS(1:fi-1)]);
+                            ts_sorting = ts_file + sum([0 parfor_samplesPerDS]);
                             
                             gdf = [ts_sorting*0+1, ts_sorting, ts(:,2)];
                             wfsFilepf = hdsort.file.WaveFormFileMat(Lpf2.wfsFileName, 'writable', true);
@@ -477,8 +493,8 @@ classdef Preprocessor < handle
                         end
                         repTimesPerLEG(legi, 3) = toc(t2_leg);
                     end % parfor over LEGs
-                    disp('Done.')
                     repTimes.spikeCutting = toc(t_spikeCutting);
+                    disp(['Spike cutting done. Time: ' num2str(repTimes.spikeCutting) 's'])
                     
                     %%
                     R.runtime.all = [R.runtime.all; repTimes];
