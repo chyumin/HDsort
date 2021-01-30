@@ -270,6 +270,7 @@ classdef Preprocessor < handle
                         M = mean(X_meanremoved,2);
                         M = M/norm(M);
                         X = X - M*(M'*X_meanremoved);
+                        clear X_meanremoved M
                     end
                     repTimes.subtractMeanAll = toc(t_subtractMeanAll);
                     disp(['Subtracting mean over all channels done. ' num2str(repTimes.subtractMeanAll) 's'])
@@ -380,8 +381,9 @@ classdef Preprocessor < handle
                     disp('Saving filtered data...')
                     t_saveData = tic;
                     if ~isempty(P_.saveRawH5FileNameList)
-                        X = X';
-                        MS{fi}.saveChunkTransposed(X(:,s1:s2));
+                        X = X(s1:s2,:)';
+                        MS{fi}.saveChunkTransposed(X);
+                        %MS{fi}.saveChunkTransposed(X(:,s1:s2));
                     end
                     clear X
                     repTimes.saveData = toc(t_saveData);
