@@ -229,7 +229,7 @@ classdef BinaryFileMatrix < handle
             end
             ret = true;
         end
-        ed
+        
         %------------------------------------------------------------------
         function wf = getWaveform_(self, nCut, channelindex, cutLength, t1, t2)
 %             wf = zeros(nCut, length(channelindex)*cutLength);
