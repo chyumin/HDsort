@@ -539,7 +539,9 @@ classdef Sorting < handle
                     
                     %save(self.files.results, 'SortedPopulation', 'SortedPopulation_discarded', '-v7.3');
                     SortedPopulation.save(self.files.results)
-                    SortedPopulation_discarded.save(self.files.results_discarded);
+                    if ismethod(SortedPopulation_discarded,'save')
+                        SortedPopulation_discarded.save(self.files.results_discarded);
+                    end
                     disp('New hdsort.results.Population saved!')
                     
                 end
