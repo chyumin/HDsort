@@ -100,7 +100,7 @@ if P.debug
     scatter(X, Y);
     
     x = min(X):max(X);
-    hdsort.plot.x, out.yFitModel(x), 'r');
+    hdsort.plot(x, out.yFitModel(x), 'r');
 end
 
 end

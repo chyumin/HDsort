@@ -48,9 +48,9 @@ for ii = 1:numel(train)
 end
 
 figure;
-a(1) = subplot.2,1,1)
+a(1) = subplot(2,1,1)
 hist(train_, rate_time)
-a(2) = subplot.2,1,2)
-hdsort.plot.rate_time, rate*1000)
+a(2) = subplot(2,1,2)
+hdsort.plot(rate_time, rate*1000)
 linkaxes(a, 'x')
 

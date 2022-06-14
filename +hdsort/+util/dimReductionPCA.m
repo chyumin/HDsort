@@ -18,8 +18,9 @@ function [fetX, pcs, T, pcs_shift] = dimReductionPCA(X, NDims, Templates, maxima
             warning('Old version of PCA called princomp used!')
             [pcs, fetX] = princomp(X);
         end
-        
-        fetX = fetX(:,1:NDims);
+        if size(fetX, 2) > NDims
+            fetX = fetX(:,1:NDims);
+        end
     else
         if numel(X) <= maximalElements
             try

@@ -1,4 +1,4 @@
-function [rate, edges] = hdsort.spiketrain.2rate(ST, edges, varargin)
+function [rate, edges] = spiketrain2rate(ST, edges, varargin)
 
 P.smoothing = 2.5e-3;
 P = hdsort.util.parseInputs(P, varargin);

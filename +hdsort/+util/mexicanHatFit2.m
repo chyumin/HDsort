@@ -76,10 +76,10 @@ end
         if P.debug
             Amplitude
             %e
-            subplot.2,1,1)
+            subplot(2,1,1)
             %imagesc(reshape(RF_fit(:), size(RF,1), size(RF,2)) )
             imagesc(RF_fit)
-            subplot.2,1,2)
+            subplot(2,1,2)
             %imagesc(reshape(RF(:), size(RF,1), size(RF,2)) )
             imagesc(RF)
             pause(0.1)
@@ -98,8 +98,8 @@ out.RF = RFmodel(xrange, yrange, mu_opt, C_opt, a_opt);
 
 if P.debug
     figure;
-    subplot.2,1,1); imagesc(RF);
-    subplot.2,1,2); imagesc(out.RF)
+    subplot(2,1,1); imagesc(RF);
+    subplot(2,1,2); imagesc(out.RF)
 end
 
 out.mu = mu_opt;

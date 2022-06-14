@@ -30,7 +30,7 @@ T = U(:,1);
 
 if P.debug
     implay(uint8(255*mat2gray(firstRFcomp)));%
-    figure; hdsort.plot.U(:,1))
+    figure; hdsort.plot.U(:,1)
     figure; imagesc(firstRFcomp(:,:,2))
     figure; MG_Analysis.hdsort.plot.ectors(n)
 end

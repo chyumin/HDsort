@@ -38,20 +38,20 @@ for it = 1:length(TT)
     %%
     figure;
     nR = 5; nCol = 3;
-    subplot.nR, nCol,1+nCol*0)
-    hdsort.plot.T); axis tight;
+    subplot(nR, nCol,1+nCol*0)
+    hdsort.plot(T); axis tight;
     title('Template only')
-    subplot.nR, nCol,1+nCol*1)
-    hdsort.plot.Tdown); axis tight;
+    subplot(nR, nCol,1+nCol*1)
+    hdsort.plot(Tdown); axis tight;
     title('Template With Shifts Downsampled')
-    subplot.nR, nCol,1+nCol*2)
-    hdsort.plot.Tdownali); axis tight;
+    subplot(nR, nCol,1+nCol*2)
+    hdsort.plot(Tdownali); axis tight;
     title('Template With Shifts Downsampled and Aligned')
-    subplot.nR, nCol,1+nCol*3)
-    hdsort.plot.TdownaliNoise); axis tight;
+    subplot(nR, nCol,1+nCol*3)
+    hdsort.plot(TdownaliNoise); axis tight;
     title('Template With Shifts Downsampled, added Noise and then Aligned')
-    subplot.nR, nCol,1+nCol*4)
-    hdsort.plot.TdownaliIntNoise); axis tight;
+    subplot(nR, nCol,1+nCol*4)
+    hdsort.plot(TdownaliIntNoise); axis tight;
     title('Template With Shifts Downsampled, added Noise and then Aligned and Int')
     %%
     dim = 2;
@@ -61,16 +61,16 @@ for it = 1:length(TT)
     [XFet1downaliNoise pcs1downaliNoise T1downaliNoise] = hdsort.util.dimReductionPCA(TdownaliNoise', dim, [], [], 1);
     [XFet1downaliIntNoise pcs1downaliIntNoise T1downaliIntNoise] = hdsort.util.dimReductionPCA(TdownaliIntNoise', dim, [], [], 1);
 
-    subplot.nR, nCol,2+nCol*0)
-    hdsort.plot.XFet1(:,1), XFet1(:,2), '.');
-    subplot.nR, nCol,2+nCol*1)
-    hdsort.plot.XFet1down(:,1), XFet1down(:,2), '.');
-    subplot.nR, nCol,2+nCol*2)
-    hdsort.plot.XFet1downali(:,1), XFet1downali(:,2), '.');
-    subplot.nR, nCol,2+nCol*3)
-    hdsort.plot.XFet1downaliNoise(:,1), XFet1downaliNoise(:,2), '.');
-    subplot.nR, nCol,2+nCol*4)
-    hdsort.plot.XFet1downaliIntNoise(:,1), XFet1downaliIntNoise(:,2), '.');
+    subplot(nR, nCol,2+nCol*0)
+    hdsort.plot(XFet1(:,1), XFet1(:,2), '.');
+    subplot(nR, nCol,2+nCol*1)
+    hdsort.plot(XFet1down(:,1), XFet1down(:,2), '.');
+    subplot(nR, nCol,2+nCol*2)
+    hdsort.plot(XFet1downali(:,1), XFet1downali(:,2), '.');
+    subplot(nR, nCol,2+nCol*3)
+    hdsort.plot(XFet1downaliNoise(:,1), XFet1downaliNoise(:,2), '.');
+    subplot(nR, nCol,2+nCol*4)
+    hdsort.plot(XFet1downaliIntNoise(:,1), XFet1downaliIntNoise(:,2), '.');
     
     upsample_factor = 11;
     [XFet3 pcs3 T3] = hdsort.util.dimReductionPCA(T', dim, [], [], upsample_factor);
@@ -79,25 +79,25 @@ for it = 1:length(TT)
     [XFet3downaliNoise pcs3downaliNoise T3downaliNoise T3shiftPCs] = hdsort.util.dimReductionPCA(TdownaliNoise', dim, [], [], upsample_factor);
     [XFet3downaliIntNoise pcs3downaliIntNoise T3downaliIntNoise] = hdsort.util.dimReductionPCA(TdownaliIntNoise', dim, [], [], upsample_factor);
 
-    subplot.nR, nCol,3+nCol*0)
-    hdsort.plot.XFet3(:,1), XFet3(:,2), '.');
-    subplot.nR, nCol,3+nCol*1)
-    hdsort.plot.XFet3down(:,1), XFet3down(:,2), '.');
-    subplot.nR, nCol,3+nCol*2)
-    hdsort.plot.XFet3downali(:,1), XFet3downali(:,2), '.');
-    subplot.nR, nCol,3+nCol*3)
-    hdsort.plot.XFet3downaliNoise(:,1), XFet3downaliNoise(:,2), '.');
-    subplot.nR, nCol,3+nCol*4)
-    hdsort.plot.XFet3downaliIntNoise(:,1), XFet3downaliIntNoise(:,2), '.');    
+    subplot(nR, nCol,3+nCol*0)
+    hdsort.plot(XFet3(:,1), XFet3(:,2), '.');
+    subplot(nR, nCol,3+nCol*1)
+    hdsort.plot(XFet3down(:,1), XFet3down(:,2), '.');
+    subplot(nR, nCol,3+nCol*2)
+    hdsort.plot(XFet3downali(:,1), XFet3downali(:,2), '.');
+    subplot(nR, nCol,3+nCol*3)
+    hdsort.plot(XFet3downaliNoise(:,1), XFet3downaliNoise(:,2), '.');
+    subplot(nR, nCol,3+nCol*4)
+    hdsort.plot(XFet3downaliIntNoise(:,1), XFet3downaliIntNoise(:,2), '.');    
 end
 %%
 figure
-subplot.3,1,1)
-hdsort.plot.pcs1downaliIntNoise(:,1:2));
+subplot(3,1,1)
+hdsort.plot(pcs1downaliIntNoise(:,1:2));
 title('Correct PCs');
-subplot.3,1,2)
-hdsort.plot.pcs3downaliNoise(:,1:2));
+subplot(3,1,2)
+hdsort.plot(pcs3downaliNoise(:,1:2));
 title('Approx PCs');
-subplot.3,1,3)
-hdsort.plot.squeeze(T3shiftPCs(:,1:2,1)));
+subplot(3,1,3)
+hdsort.plot(squeeze(T3shiftPCs(:,1:2,1)));
 title('Shifted Approx PCs');

@@ -117,7 +117,7 @@ if P.debug
     scatter(X, Y);
     
     x = sort(X);
-    hdsort.plot.x, out.yFitModel(x), 'r');
+    hdsort.plot(x, out.yFitModel(x), 'r');
     axis([0 1.1*max(X) 0 1.1*max(Y)])
 end
 
